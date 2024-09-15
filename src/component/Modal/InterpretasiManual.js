@@ -7,7 +7,8 @@ const InterpretasiManual = ({ radiographicId }) => {
     toothNumber: "",
     manualDiagnosis: "",
   });
-
+  
+  const [error, setError] = useState(""); // State untuk menampung pesan error
   const token = sessionStorage.getItem("token");
 
   const handleChange = (e) => {
@@ -16,8 +17,25 @@ const InterpretasiManual = ({ radiographicId }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Parsing data untuk memastikan tipe datanya benar
+    const parsedData = {
+      toothNumber: parseInt(data.toothNumber, 10), // Mengonversi nomor gigi ke number jika perlu
+      manualDiagnosis: data.manualDiagnosis.trim(), // Menghapus spasi ekstra
+    };
+
+    // Cek apakah token valid
+    if (!token) {
+      setError("Token tidak ditemukan. Silakan login ulang.");
+      return;
+    }
+
+    // Logging data yang akan dikirim untuk debugging
+    console.log("Data yang dikirim: ", parsedData);
+
+    // Membuat request ke API
     axios
-      .post(`${baseURL}/diagnoses/${radiographicId}/manual`, data, {
+      .post(`${baseURL}/diagnoses/${radiographicId}/manual`, parsedData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -27,7 +45,21 @@ const InterpretasiManual = ({ radiographicId }) => {
         window.location.reload();
       })
       .catch((err) => {
-        console.log(err);
+        // Menangkap error lebih detail dari respons server
+        if (err.response) {
+          console.log("Response data:", err.response.data);
+          console.log("Response status:", err.response.status);
+          console.log("Response headers:", err.response.headers);
+
+          // Menangkap error jika ada masalah SQL seperti 'syntax error at or near "WHERE"'
+          setError(`Error ${err.response.status}: ${err.response.data.message || 'Gagal mengirim data'}`);
+        } else if (err.request) {
+          console.log("Request:", err.request);
+          setError("Tidak ada respons dari server. Periksa koneksi internet Anda.");
+        } else {
+          console.log("Error message:", err.message);
+          setError("Terjadi kesalahan: " + err.message);
+        }
       });
   };
 
@@ -49,6 +81,9 @@ const InterpretasiManual = ({ radiographicId }) => {
               <p className="ms-2 pt-0 mt-0 mb-0 font-weight-bold text-dark">
                 Interpretasi Manual
               </p>
+
+              {/* Menampilkan pesan error jika ada */}
+              {error && <p className="text-danger">{error}</p>}
 
               <form onSubmit={handleSubmit}>
                 <div className="row mt-2">

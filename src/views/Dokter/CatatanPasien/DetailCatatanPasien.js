@@ -54,11 +54,17 @@ const DetailCatatanPasien = () => {
   }, [id]);
 
   const generatePDF = () => {
+    // Menampilkan elemen #report untuk proses ekspor
+    document.querySelector("#report").style.display = 'block';
+  
     const report = new JsPDF("portrait", "pt", "a4");
     report.html(document.querySelector("#report")).then(() => {
+      // Menyembunyikan elemen #report kembali setelah ekspor
+      document.querySelector("#report").style.display = 'none';
       report.save("report.pdf");
     });
   };
+  
 
   // Create styles
   // const styles = StyleSheet.create({
@@ -388,9 +394,10 @@ const DetailCatatanPasien = () => {
                                             </div>
                                           </div>
                                         </div>
-                                        <div id="report" style={{display: "none"}}>
+                                        <div id="report" style={{ display: 'none' }}>
                                           <Report />
                                         </div>
+
                                       </div>
                                     </div>
                                   </div>

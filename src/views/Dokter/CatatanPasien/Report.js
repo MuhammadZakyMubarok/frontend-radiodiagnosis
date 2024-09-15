@@ -77,141 +77,137 @@ const Report = () => {
           width: "100 px",
         }}
       />
-      <div className="row">
-        <div className="card-body pb-2 pt-0 ms-6">
-          <div className="row">
-            <div className="row mt-2 mb-4">
-              <div className="col-12">
-                <div className="card-body">
-                  <p className="text-sm font-weight-bolder text-dark">
-                    Rekam Medik
-                  </p>
-                  <div className="row">
-                    <div className="col-3">
-                      <p className="text-xs text-secondary font-weight-bold">
-                        Nama Pasien
-                      </p>
-                    </div>
-                    <div className="col-4">
-                      <p className="text-xs text-primary font-weight-bold">
-                        {data.fullname}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-3">
-                      <p className="text-xs text-secondary font-weight-bold">
-                        Tanggal Verifikasi
-                      </p>
-                    </div>
-                    <div className="col-4">
-                      <p className="text-xs text-primary font-weight-bold">
-                        {data.panoramik_check_date !== null
-                          ? moment(data.panoramik_check_date).format(
-                              "DD/MM/YYYY"
-                            )
-                          : "-"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-3">
-                      <p className="text-xs text-secondary font-weight-bold">
-                        Dokter Verifikator
-                      </p>
-                    </div>
-                    <div className="col-4">
-                      <p className="text-xs text-primary font-weight-bold">
-                        {data.doctor_name ?? "-"}
-                      </p>
-                    </div>
-                  </div>
+      <div style={{ display: 'flex', flexDirection: 'column', padding: '0 1.5rem' }}>
+  <div style={{ paddingBottom: '0.5rem', paddingTop: '0', marginLeft: '1.5rem' }}>
+    <div style={{ marginTop: '0.5rem', marginBottom: '1rem' }}>
+      <div style={{ width: '100%' }}>
+        <div style={{ paddingBottom: '0.5rem', paddingTop: '0' }}>
+          {/* Bagian Rekam Medik */}
+          <div style={{ marginBottom: '1rem' }}>
+            <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#000' }}>Rekam Medik</p>
+            <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
+              Gambar Panoramik Gigi
+            </p>
+            <img
+              style={{
+                maxWidth: '50%', /* Membatasi lebar gambar agar tidak melebihi lebar kontainer */
+                height: 'auto',    /* Menjaga rasio aspek gambar */
+                objectFit: 'contain', /* Memastikan gambar di-fit dengan proporsional di dalam kontainer tanpa terpotong */
+                paddingLeft: '0',
+                paddingBottom: '1rem',
+                borderRadius: '0.375rem', /* border-radius-xl untuk gambar */
+                alignContent: "center",
+              }}
+              src={`${baseURL + data.panoramik_picture}`}
+              alt="Panoramik Gigi"
+            />
+          </div>
 
-                  <div className="row mt-4">
-                    <div className="col-12">
-                      <p className="text-xxs text-secondary font-weight-bold">
-                        Radiodiagnosis Sistem
-                      </p>
-                      {data.diagnoses?.map((diagnose) => {
-                        if (diagnose?.system_diagnosis) {
-                          return (
-                            <div className="row">
-                              <div className="col-2">
-                                <ul className="ps-3">
-                                  <li className="text-xs">
-                                    Gigi #{diagnose?.tooth_number}
-                                  </li>
-                                </ul>
-                              </div>
-                              <div className="col-10 ps-0">
-                                <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
-                                  {diagnose?.system_diagnosis}
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        }
-                      })}
-                    </div>
+          {/* Bagian Nama Pasien */}
+          <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center' }}>
+            <div style={{ flex: '0 0 25%' }}>
+              <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
+                Nama Pasien
+              </p>
+            </div>
+            <div style={{ flex: '0 0 33%' }}>
+              <p style={{ fontSize: '0.75rem', color: '#007bff', fontWeight: 'bold' }}>
+                {data.fullname}
+              </p>
+            </div>
+          </div>
+
+          {/* Bagian Tanggal Verifikasi */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ flex: '0 0 25%' }}>
+              <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
+                Tanggal Verifikasi
+              </p>
+            </div>
+            <div style={{ flex: '0 0 33%' }}>
+              <p style={{ fontSize: '0.75rem', color: '#007bff', fontWeight: 'bold' }}>
+                {data.panoramik_check_date
+                  ? moment(data.panoramik_check_date).format("DD/MM/YYYY")
+                  : "-"}
+              </p>
+            </div>
+          </div>
+
+          {/* Bagian Dokter Verifikator */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ flex: '0 0 25%' }}>
+              <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
+                Dokter Verifikator
+              </p>
+            </div>
+            <div style={{ flex: '0 0 33%' }}>
+              <p style={{ fontSize: '0.75rem', color: '#007bff', fontWeight: 'bold' }}>
+                {data.doctor_name ?? "-"}
+              </p>
+            </div>
+          </div>
+
+          {/* Bagian Radiodiagnosis Sistem */}
+          <div style={{ marginTop: '1rem' }}>
+            <p style={{ fontSize: '0.625rem', color: '#6c757d', fontWeight: 'bold' }}>
+              Radiodiagnosis Sistem
+            </p>
+            {data.diagnoses?.map((diagnose) =>
+              diagnose?.system_diagnosis ? (
+                <div style={{ display: 'flex', marginBottom: '0.5rem' }} key={diagnose?.tooth_number}>
+                  <div style={{ flex: '0 0 16.6667%' }}>
+                    <ul style={{ paddingLeft: '1rem' }}>
+                      <li style={{ fontSize: '0.75rem' }}>Gigi #{diagnose?.tooth_number}</li>
+                    </ul>
                   </div>
-                  <div className="row">
-                    <div className="col-12">
-                      <p className="text-xxs text-secondary font-weight-bold">
-                        Radiodiagnosis Verifikator
-                      </p>
-                      {data.diagnoses?.map((diagnose) => {
-                        if (
-                          diagnose?.system_diagnosis ||
-                          diagnose?.manual_diagnosis
-                        ) {
-                          return (
-                            <div className="row">
-                              <div className="col-2">
-                                <ul className="ps-3">
-                                  <li className="text-xs">
-                                    Gigi #{diagnose?.tooth_number}
-                                  </li>
-                                </ul>
-                              </div>
-                              <div className="col-10 ps-0">
-                                {diagnose.verificator_diagnosis ? (
-                                  <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
-                                    {diagnose.verificator_diagnosis ===
-                                    "dan lain-lain"
-                                      ? diagnose.verificator_note +
-                                        (diagnose.manual_diagnosis
-                                          ? ", " + diagnose.manual_diagnosis
-                                          : "")
-                                      : diagnose.verificator_diagnosis
-                                      ? diagnose.verificator_diagnosis +
-                                        (diagnose.manual_diagnosis
-                                          ? ", " + diagnose.manual_diagnosis
-                                          : "")
-                                      : diagnose.manual_diagnosis}
-                                  </p>
-                                ) : (
-                                  <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
-                                    {diagnose.system_diagnosis
-                                      ? diagnose.system_diagnosis +
-                                        (diagnose.manual_diagnosis
-                                          ? ", " + diagnose.manual_diagnosis
-                                          : "")
-                                      : diagnose.manual_diagnosis}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        }
-                      })}
-                    </div>
+                  <div style={{ flex: '0 0 83.3333%', paddingLeft: '0' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#000', fontWeight: 'bold', marginBottom: '0', paddingBottom: '0.5rem' }}>
+                      {diagnose?.system_diagnosis}
+                    </p>
                   </div>
                 </div>
-              </div>
-            </div>
+              ) : null
+            )}
+          </div>
+
+          {/* Bagian Radiodiagnosis Verifikator */}
+          <div style={{ marginTop: '1rem' }}>
+            <p style={{ fontSize: '0.625rem', color: '#6c757d', fontWeight: 'bold' }}>
+              Radiodiagnosis Verifikator
+            </p>
+            {data.diagnoses?.map((diagnose) =>
+              diagnose?.system_diagnosis || diagnose?.manual_diagnosis ? (
+                <div style={{ display: 'flex', marginBottom: '0.5rem' }} key={diagnose?.tooth_number}>
+                  <div style={{ flex: '0 0 16.6667%' }}>
+                    <ul style={{ paddingLeft: '1rem' }}>
+                      <li style={{ fontSize: '0.75rem' }}>Gigi #{diagnose?.tooth_number}</li>
+                    </ul>
+                  </div>
+                  <div style={{ flex: '0 0 83.3333%', paddingLeft: '0' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#000', fontWeight: 'bold', marginBottom: '0', paddingBottom: '0.5rem' }}>
+                      {diagnose.verificator_diagnosis === "dan lain-lain"
+                        ? diagnose.verificator_note +
+                          (diagnose.manual_diagnosis
+                            ? ", " + diagnose.manual_diagnosis
+                            : "")
+                        : diagnose.verificator_diagnosis
+                        ? diagnose.verificator_diagnosis +
+                          (diagnose.manual_diagnosis
+                            ? ", " + diagnose.manual_diagnosis
+                            : "")
+                        : diagnose.manual_diagnosis}
+                    </p>
+                  </div>
+                </div>
+              ) : null
+            )}
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
     </div>
   );
 };

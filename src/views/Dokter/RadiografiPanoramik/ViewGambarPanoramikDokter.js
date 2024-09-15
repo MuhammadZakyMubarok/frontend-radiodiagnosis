@@ -215,12 +215,12 @@ const ViewGambarPanoramikDokter = () => {
                                         }`}
                                       />
 
-                                      <p className="text-xs p-2 mb-0 mt-4">
-                                        Diagram Gigi
-                                      </p>
-
+                                      {/* start Diagram Gigi */}
                                       <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
                                         <div className="card-body">
+                                        <p className="text-xs p-2 mb-0 mt-4">
+                                          Diagram Gigi
+                                        </p>
                                           <div className="row">
                                             <div className="d-flex justify-content-center img-fluid mb-2">
                                               <img src="../assets/img/App/line.png" />
@@ -1075,6 +1075,7 @@ const ViewGambarPanoramikDokter = () => {
                                           </div>
                                         </div>
                                       </div>
+                                      {/* end Diagram Gigi */}
                                       <div className="card shadow-none mt-4 me-2 ms-2 border-0">
                                         <div className="card-body">
                                           <p className="text-xs">
@@ -1126,6 +1127,80 @@ const ViewGambarPanoramikDokter = () => {
                                               );
                                             }
                                           })}
+                                          
+                                          <div className="row">
+                                            <div className="col-12">
+                                              <p className="text-xxs text-secondary font-weight-bold">
+                                                Radiodiagnosis Verifikator
+                                              </p>
+                                              {data.diagnoses?.map(
+                                                (diagnose) => {
+                                                  if (
+                                                    diagnose?.system_diagnosis ||
+                                                    diagnose?.manual_diagnosis
+                                                  ) {
+                                                    return (
+                                                      <div className="row">
+                                                        <div className="col-2">
+                                                          <ul className="ps-3">
+                                                            <li className="text-xs">
+                                                              Gigi #
+                                                              {
+                                                                diagnose?.tooth_number
+                                                              }
+                                                            </li>
+                                                          </ul>
+                                                        </div>
+                                                        <div className="col-10 ps-0">
+                                                          {diagnose.verificator_diagnosis ? (
+                                                            <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
+                                                              {diagnose.verificator_diagnosis ===
+                                                              "dan lain-lain"
+                                                                ? diagnose.verificator_note +
+                                                                  (diagnose.manual_diagnosis
+                                                                    ? ", " +
+                                                                      diagnose.manual_diagnosis
+                                                                    : "")
+                                                                : diagnose.verificator_diagnosis
+                                                                ? diagnose.verificator_diagnosis +
+                                                                  (diagnose.manual_diagnosis
+                                                                    ? ", " +
+                                                                      diagnose.manual_diagnosis
+                                                                    : "")
+                                                                : diagnose.manual_diagnosis}
+                                                            </p>
+                                                          ) : (
+                                                            <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
+                                                              {diagnose.system_diagnosis
+                                                                ? diagnose.system_diagnosis +
+                                                                  (diagnose.manual_diagnosis
+                                                                    ? ", " +
+                                                                      diagnose.manual_diagnosis
+                                                                    : "")
+                                                                : diagnose.manual_diagnosis}
+                                                            </p>
+                                                          )}
+                                                          <hr
+                                                            style={{
+                                                              height: "1px",
+                                                              borderWidth:
+                                                                "0 px",
+                                                              color: "gray",
+                                                              backgroundColor:
+                                                                "gray",
+                                                              marginBottom:
+                                                                "0 px",
+                                                              marginTop: "0 px",
+                                                            }}
+                                                          />
+                                                        </div>
+                                                      </div>
+                                                    );
+                                                  }
+                                                }
+                                              )}
+                                            </div>
+                                          </div>
                                           <hr
                                             style={{
                                               height: "1px",
