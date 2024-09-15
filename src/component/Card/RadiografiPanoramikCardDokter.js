@@ -5,6 +5,7 @@ import Verified from "../Alerts/Verified";
 import { Link } from "react-router-dom";
 
 const RadiografiPanoramikCardDokter = ({ data, baseURL }) => {
+  console.log('Data received in RadiografiPanoramikCardDokter:', data);
   return (
     <div>
       <div className="row p-3 ">
