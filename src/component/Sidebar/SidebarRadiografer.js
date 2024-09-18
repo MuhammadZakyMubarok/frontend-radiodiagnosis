@@ -34,40 +34,53 @@ const SidebarRadiografer = () => {
             <ul className="navbar-nav">
               <li className="nav-item">
                 <NavLink activeClassName="active" className="nav-link" to="/radiografer-data-pasien">
-                  <div className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                    <img src="../assets/img/App/data_pasien.png" />
+                  <div
+                      className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                    <img src="../assets/img/App/data_pasien.png"/>
                   </div>
                   <span className="nav-link-text ms-1">Data Pasien</span>
                 </NavLink>
               </li>
               <li className="nav-item">
                 <NavLink activeClassName="active" className="nav-link" to="/radiografer-radiografi-panoramik">
-                  <div className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                    <img src="../assets/img/App/radiografi_panoramik.png" />
+                  <div
+                      className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                    <img src="../assets/img/App/radiografi_panoramik.png"/>
                   </div>
                   <span className="nav-link-text ms-1">Radiografi Panoramik</span>
                 </NavLink>
               </li>
               <li className="nav-item">
                 <NavLink activeClassName="active" className="nav-link" to="/radiografer-history">
-                  <div className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                    <img src="../assets/img/App/history.png" />
+                  <div
+                      className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                    <img src="../assets/img/App/history.png"/>
                   </div>
                   <span className="nav-link-text ms-1">History</span>
                 </NavLink>
               </li>
               <li className="nav-item">
                 <NavLink activeClassName="active" className="nav-link" to="/radiografer-profil">
-                  <div className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                    <img src="../assets/img/App/profil.png" />
+                  <div
+                      className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                    <img src="../assets/img/App/profil.png"/>
                   </div>
                   <span className="nav-link-text ms-1">Profile</span>
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink activeClassName="active" className="nav-link" to="/satu-sehat-check-patient">
+                  <div
+                      className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                    <img src="../assets/img/App/profil.png"/>
+                  </div>
+                  <span className="nav-link-text ms-1">Satu Sehat</span>
                 </NavLink>
               </li>
             </ul>
           </div>
           <SidebarFooterUser/>
-       
+
         </aside>
         {/* <!-- end sidebar --> */}
       </body>
