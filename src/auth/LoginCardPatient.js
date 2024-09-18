@@ -2,11 +2,11 @@ import axios from "axios";
 import { React, useState } from "react";
 import { baseURL } from "../routes/Config";
 import LoginError from "../component/Alerts/LoginError";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
-const LoginCardUser = () => {
+const LoginCardPatient = () => {
   const navigate = useNavigate();
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null); // Change to null to differentiate between no error and an error
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -18,29 +18,24 @@ const LoginCardUser = () => {
       [e.target.name]: e.target.value,
     });
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     await axios
       .post(`${baseURL}/authentications`, data)
       .then((response) => {
         const { data } = response.data;
-        sessionStorage.setItem("token", data.accessToken);
-        if (data.role === "radiographer") {
-          window.location.href = "/radiografer-data-pasien";
-        } else if (data.role === "doctor") {
-          window.location.href = "/dokter-data-pasien";
+        if (data?.role === "Patient") {
+          sessionStorage.setItem("token", data.accessToken);
+          window.location.href = "/Patient-dashboard";
+        } else {
+          sessionStorage.removeItem("token");
         }
+        setError("Login Gagal");
       })
       .catch((error) => {
         setError(true);
       });
   };
-
-  const handlePatient = () => {
-    navigate('/patient-result-diagnosis');
-  };
-
 
   return (
     <div>
@@ -52,14 +47,14 @@ const LoginCardUser = () => {
                 <div className="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
                   <div className="card card-plain">
                     <div className="card-header pb-0 text-start">
-                      <h4 className="font-weight-bolder">Sign In</h4>
+                      <h4 className="font-weight-bolder">Sign In Patient</h4>
                       <p className="mb-0">
                         Enter your email and password to sign in
                       </p>
                     </div>
                     <div className="card-body">
-                      <div className="mb-3">{error ? <LoginError /> : ""}</div>
-                      <form role="form">
+                      <div className="mb-3">{error && <LoginError message={error} />}</div> {/* Pass error message to LoginError component */}
+                      <form role="form" onSubmit={handleSubmit}>
                         <div className="mb-3">
                           <input
                             type="email"
@@ -86,9 +81,8 @@ const LoginCardUser = () => {
                         </div>
                         <div className="text-center">
                           <button
-                            type="button"
+                            type="submit" // Change type to submit to trigger form submission
                             className="btn btn-lg btn-primary btn-lg w-100 mt-4 mb-0"
-                            onClick={handleSubmit}
                           >
                             Sign in
                           </button>
@@ -97,7 +91,7 @@ const LoginCardUser = () => {
                     </div>
                     <div className="card-footer text-center pt-0 px-lg-2 px-1">
                       <p className="mb-4 text-sm mx-auto">
-                        Account Registered by Admin.
+                        Don't have an account? <a href="/regis-patient">Register here</a>.
                       </p>
                     </div>
                   </div>
@@ -116,18 +110,20 @@ const LoginCardUser = () => {
                       <img
                         src="./assets/img/App/Logo_PENS.png"
                         className="w-20 h-1"
-                      ></img>
+                        alt="Logo PENS"
+                      />
                       <img
                         src="./assets/img/App/Logo Branding UNAIR (biru).png"
                         className="w-20 h-1"
-                      ></img>
+                        alt="Logo UNAIR"
+                      />
                     </div>
                     <span className="mask bg-gradient-primary opacity-5"></span>
                     <h4 className="mt-1 text-white font-weight-bolder position-relative">
                       "PENS - UA Radiodiagnostic Report"
                     </h4>
                     <p className="text-white position-relative">
-                      sistem informasi radiodiagnosis yang terintegrasi dengan
+                      Sistem informasi radiodiagnosis yang terintegrasi dengan
                       sistem deteksi otomatis kelainan gigi dan jaringan
                       penyangga dalam pembacaan skrining radiografi panoramik.
                     </p>
@@ -142,4 +138,4 @@ const LoginCardUser = () => {
   );
 };
 
-export default LoginCardUser;
+export default LoginCardPatient;

@@ -20,58 +20,58 @@ const DataUser = () => {
   const [doctor, setDoctor] = useState(0);
   const [radiographer, setRadiographer] = useState(0);
 
-  const handleChange = event => {
+  const handleChange = (event) => {
     setInputText(event.target.value);
     setStatusSearch(true);
   };
-  
+
   let startIndex = (currentPage - 1) * 10;
   const token = sessionStorage.getItem("token");
   // get data user use axios
   useEffect(() => {
-    if(inputText.length > 0) {
-      axios.get(`${baseURL}/users/all?page=${currentPage}&search=${inputText}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        }
-      })
-      .then((response) => {
-        if (response.data.data) {
-          // setData(response.data.data)
-          setSearchData(response.data.data)
-          setPagination(response.data.meta)
-          setDoctor(response.data.meta.doctor)
-          setRadiographer(response.data.meta.radiographer);
-          console.log(response.data.meta)
-        }
-      })
-      .catch((error) => {
-        console.log(error.response.data)
-      })
-    }
-    else {
+    if (inputText.length > 0) {
+      axios
+        .get(`${baseURL}/users/all?page=${currentPage}&search=${inputText}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          if (response.data.data) {
+            // setData(response.data.data)
+            setSearchData(response.data.data);
+            setPagination(response.data.meta);
+            setDoctor(response.data.meta.doctor);
+            setRadiographer(response.data.meta.radiographer);
+            console.log(response.data.meta);
+          }
+        })
+        .catch((error) => {
+          console.log(error.response.data);
+        });
+    } else {
       setStatusSearch(false);
       setSearchData([]);
       axios
-      .get(`${baseURL}/users/all?page=${currentPage}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        if (response.data.data) {
-          setData(response.data.data);
-          setPagination(response.data.meta);
-          setDoctor(response.data.meta.doctor)
-          setRadiographer(response.data.meta.radiographer);
-          console.log(response.data.meta)
-        }
-      })
-      .catch((error) => {
-        console.log(error.response.data);
-      });
+        .get(`${baseURL}/users/all?page=${currentPage}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          if (response.data.data) {
+            setData(response.data.data);
+            setPagination(response.data.meta);
+            setDoctor(response.data.meta.doctor);
+            setRadiographer(response.data.meta.radiographer);
+            console.log(response.data.meta);
+          }
+        })
+        .catch((error) => {
+          console.log(error.response.data);
+        });
 
       // axios
       // .get(`${baseURL}/users/all}`, {
@@ -196,33 +196,32 @@ const DataUser = () => {
                 <div className="col-12">
                   <div className="card">
                     <div className="card-header pb-0 p-4">
-                      <div className="row">
-                        <div className="col-7 d-flex align-items-center">
+                      <div className="row align-items-center">
+                        <div className="col-md-7 col-12 mb-2 mb-md-0">
                           <h5 className="mb-0 font-weight-bolder">Data User</h5>
                         </div>
-                        <div class="col-3 text-end pe-0">
-                          <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-                            <div class="input-group">
-                              <span class="input-group-text text-body border-radius-xl">
-                                <i class="fas fa-search" aria-hidden="true"></i>
-                              </span>
-                              <input
-                                type="text"
-                                class="form-control border-radius-xl"
-                                size="50"
-                                placeholder="Nama User, NIP..."
-                                style={{height:"80%"}}
-                                onChange={handleChange}
-                                value={inputText}
-                              />
-                            </div>
+
+                        <div className="col-md-3 col-12 text-md-end text-center mb-2 mb-md-0 pe-0">
+                          <div className="input-group">
+                            <span className="input-group-text text-body border-radius-xl">
+                              <i
+                                className="fas fa-search"
+                                aria-hidden="true"
+                              ></i>
+                            </span>
+                            <input
+                              type="text"
+                              className="form-control border-radius-xl"
+                              placeholder="Nama User, NIP..."
+                              onChange={handleChange}
+                              value={inputText}
+                            />
                           </div>
                         </div>
 
-                        <div className="col-2 text-end">
+                        <div className="col-md-2 col-6 text-md-end text-center">
                           <a
-                            className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl"
-                            style={{ height: "95%" }}
+                            className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl w-100"
                             href="/add-data-user"
                           >
                             <i className="fas fa-plus"></i>&nbsp;&nbsp;Tambah
@@ -258,126 +257,125 @@ const DataUser = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {statusSearch == true ?
-                              searchData.map((item, index) => (
-                                <tr key={item.id}>
-                                  <td className="ps-0 align-middle text-center ">
-                                    <span className="text-xs text-secondary mb-0">
-                                      {startIndex + index + 1}
-                                    </span>
-                                  </td>
-                                  <td className="align-middle text-start text-sm ps-2 pe-0">
-                                    <span className="text-xs text-secondary mb-0 ">
-                                      {item.fullname}
-                                    </span>
-                                  </td>
-                                  <td className="align-middle text-start text-sm ps-0">
-                                    <span className="text-xs text-secondary mb-0">
-                                      {item.nip}
-                                    </span>
-                                  </td>
-                                  <td className="align-middle text-start ps-0">
-                                    <span className="text-secondary text-xs font-weight-bold">
-                                      {item.email}
-                                    </span>
-                                  </td>
-                                  <td className="align-middle text-start ps-0">
-                                    <span className="text-secondary text-xs font-weight-bold">
-                                      {item.role}
-                                    </span>
-                                  </td>
-                                  <td className="align-middle text-center text-sm pe-0">
-                                    <span className="text-xs text-secondary mb-0 ">
-                                      <div>
-                                        <Link
-                                          className="btn btn-outline-primary btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-primary"
-                                          to={`/edit-data-user/${item.id}`}
-                                        >
-                                          <i className="fa fa-pencil text-primary"></i>
-                                        </Link>
-                                        <button
-                                          type="button"
-                                          className="btn btn-outline-danger btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-danger"
-                                          data-bs-toggle="modal"
-                                          data-bs-target="#exampleModal"
-                                        >
-                                          <i className="fa fa-trash text-danger"></i>
-                                        </button>
-                                        <Link
-                                          to={`/view-data-user/${item.id}`}
-                                          className="btn btn-outline-secondary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-secondary"
-                                        >
-                                          <i className="fa fa-eye text-secondary"></i>
-                                        </Link>
-                                        <DeleteModal
-                                          userId={item.id}
-                                          handleDelete={handleDelete}
-                                        />
-                                      </div>
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))
-                             : 
-                             data.map((item, index) => (
-                              <tr key={item.id}>
-                                <td className="ps-0 align-middle text-center ">
-                                  <span className="text-xs text-secondary mb-0">
-                                    {startIndex + index + 1}
-                                  </span>
-                                </td>
-                                <td className="align-middle text-start text-sm ps-2 pe-0">
-                                  <span className="text-xs text-secondary mb-0 ">
-                                    {item.fullname}
-                                  </span>
-                                </td>
-                                <td className="align-middle text-start text-sm ps-0">
-                                  <span className="text-xs text-secondary mb-0">
-                                    {item.nip}
-                                  </span>
-                                </td>
-                                <td className="align-middle text-start ps-0">
-                                  <span className="text-secondary text-xs font-weight-bold">
-                                    {item.email}
-                                  </span>
-                                </td>
-                                <td className="align-middle text-start ps-0">
-                                  <span className="text-secondary text-xs font-weight-bold">
-                                    {item.role}
-                                  </span>
-                                </td>
-                                <td className="align-middle text-center text-sm pe-0">
-                                  <span className="text-xs text-secondary mb-0 ">
-                                    <div>
-                                      <Link
-                                        className="btn btn-outline-primary btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-primary"
-                                        to={`/edit-data-user/${item.id}`}
-                                      >
-                                        <i className="fa fa-pencil text-primary"></i>
-                                      </Link>
-                                      <button
-                                        type="button"
-                                        className="btn btn-outline-danger btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-danger"
-                                        data-bs-toggle="modal"
-                                        data-bs-target={`#exampleModal${item.id}`}
-                                      >
-                                        <i className="fa fa-trash text-danger"></i>
-                                      </button>
-                                      <Link
-                                        to={`/view-data-user/${item.id}`}
-                                        className="btn btn-outline-secondary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-secondary"
-                                      >
-                                        <i className="fa fa-eye text-secondary"></i>
-                                      </Link>
-                                      <DeleteModal
-                                        userId={item.id}
-                                        handleDelete={handleDelete}
-                                      />
-                                    </div>
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
+                            {statusSearch == true
+                              ? searchData.map((item, index) => (
+                                  <tr key={item.id}>
+                                    <td className="ps-0 align-middle text-center ">
+                                      <span className="text-xs text-secondary mb-0">
+                                        {startIndex + index + 1}
+                                      </span>
+                                    </td>
+                                    <td className="align-middle text-start text-sm ps-2 pe-0">
+                                      <span className="text-xs text-secondary mb-0 ">
+                                        {item.fullname}
+                                      </span>
+                                    </td>
+                                    <td className="align-middle text-start text-sm ps-0">
+                                      <span className="text-xs text-secondary mb-0">
+                                        {item.nip}
+                                      </span>
+                                    </td>
+                                    <td className="align-middle text-start ps-0">
+                                      <span className="text-secondary text-xs font-weight-bold">
+                                        {item.email}
+                                      </span>
+                                    </td>
+                                    <td className="align-middle text-start ps-0">
+                                      <span className="text-secondary text-xs font-weight-bold">
+                                        {item.role}
+                                      </span>
+                                    </td>
+                                    <td className="align-middle text-center text-sm pe-0">
+                                      <span className="text-xs text-secondary mb-0 ">
+                                        <div>
+                                          <Link
+                                            className="btn btn-outline-primary btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-primary"
+                                            to={`/edit-data-user/${item.id}`}
+                                          >
+                                            <i className="fa fa-pencil text-primary"></i>
+                                          </Link>
+                                          <button
+                                            type="button"
+                                            className="btn btn-outline-danger btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#exampleModal"
+                                          >
+                                            <i className="fa fa-trash text-danger"></i>
+                                          </button>
+                                          <Link
+                                            to={`/view-data-user/${item.id}`}
+                                            className="btn btn-outline-secondary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-secondary"
+                                          >
+                                            <i className="fa fa-eye text-secondary"></i>
+                                          </Link>
+                                          <DeleteModal
+                                            userId={item.id}
+                                            handleDelete={handleDelete}
+                                          />
+                                        </div>
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))
+                              : data.map((item, index) => (
+                                  <tr key={item.id}>
+                                    <td className="ps-0 align-middle text-center ">
+                                      <span className="text-xs text-secondary mb-0">
+                                        {startIndex + index + 1}
+                                      </span>
+                                    </td>
+                                    <td className="align-middle text-start text-sm ps-2 pe-0">
+                                      <span className="text-xs text-secondary mb-0 ">
+                                        {item.fullname}
+                                      </span>
+                                    </td>
+                                    <td className="align-middle text-start text-sm ps-0">
+                                      <span className="text-xs text-secondary mb-0">
+                                        {item.nip}
+                                      </span>
+                                    </td>
+                                    <td className="align-middle text-start ps-0">
+                                      <span className="text-secondary text-xs font-weight-bold">
+                                        {item.email}
+                                      </span>
+                                    </td>
+                                    <td className="align-middle text-start ps-0">
+                                      <span className="text-secondary text-xs font-weight-bold">
+                                        {item.role}
+                                      </span>
+                                    </td>
+                                    <td className="align-middle text-center text-sm pe-0">
+                                      <span className="text-xs text-secondary mb-0 ">
+                                        <div>
+                                          <Link
+                                            className="btn btn-outline-primary btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-primary"
+                                            to={`/edit-data-user/${item.id}`}
+                                          >
+                                            <i className="fa fa-pencil text-primary"></i>
+                                          </Link>
+                                          <button
+                                            type="button"
+                                            className="btn btn-outline-danger btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target={`#exampleModal${item.id}`}
+                                          >
+                                            <i className="fa fa-trash text-danger"></i>
+                                          </button>
+                                          <Link
+                                            to={`/view-data-user/${item.id}`}
+                                            className="btn btn-outline-secondary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-secondary"
+                                          >
+                                            <i className="fa fa-eye text-secondary"></i>
+                                          </Link>
+                                          <DeleteModal
+                                            userId={item.id}
+                                            handleDelete={handleDelete}
+                                          />
+                                        </div>
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
                           </tbody>
                         </table>
                       </div>
