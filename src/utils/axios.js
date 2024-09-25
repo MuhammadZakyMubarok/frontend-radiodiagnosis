@@ -33,11 +33,10 @@ function authRequestInterceptor(config) {
             client_id: client_id,
             client_secret: client_secret
         }).then(response => {
-            console.log(response.data)
-            token = response.data;
+            token = response.data.data;
 
             // Store the new token in cookies
-            Cookies.set('satu_sehat_token', token);
+            Cookies.set('satu_sehat_token', token,{ expires: 1 / 24 });
 
             // Attach the new token to the Authorization header
             config.headers.authorization = `Bearer ${token}`;
@@ -68,13 +67,3 @@ axiosSatuSehat.interceptors.request.use(
         return Promise.reject(error);
     }
 );
-
-// axiosSatuSehat.interceptors.response.use(
-//     (response) => {
-//         return response.data;
-//     },
-//     (error) => {
-//
-//         return Promise.reject(error.response.data);
-//     }
-// );
