@@ -9,11 +9,11 @@ const ViewSatuSehatPatient = () => {
 
     useEffect(() => {
         const fetchPatientData = async () => {
-            const patientService = PatientService();  // Create an instance of the service
+            const patientService = PatientService();
             try {
                 const response = await patientService.searchById('P02478375538');
                 console.log(response)
-                setPatientData(response.data);  // Assuming the data is in response.data
+                setPatientData(response.data);
             } catch (err) {
                 console.log(err)
                 setError('Failed to fetch patient data');
