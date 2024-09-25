@@ -1,28 +1,15 @@
 import axios from "axios";
 import moment from "moment";
 import JsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import { React, useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
-import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
 import PaginationsHistory from "../../../component/Pagination/PaginationsHistory";
 import Report from "./Report";
-import ReactPDF from "@react-pdf/renderer";
-import ReactDOM from "react-dom";
-import { PDFViewer } from "@react-pdf/renderer";
-
-// ReactPDF.renderToStream(<MyDocument />);
-
-// const App = () => (
-//   <PDFViewer>
-//     <MyDocument />
-//   </PDFViewer>
-// );
-
-// ReactDOM.render(<App />, document.getElementById('root'));
 
 const DetailCatatanPasien = () => {
   const auth = WithAuthorization(["doctor"]);
@@ -54,38 +41,25 @@ const DetailCatatanPasien = () => {
   }, [id]);
 
   const generatePDF = () => {
-    const report = new JsPDF("portrait", "pt", "a4");
-    report.html(document.querySelector("#report")).then(() => {
+    const reportElement = document.querySelector("#report");
+
+    // Make sure the report element is visible before capturing it
+    reportElement.style.display = "block";
+
+    html2canvas(reportElement).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const report = new JsPDF("portrait", "pt", "a4");
+
+      const imgWidth = report.internal.pageSize.getWidth();
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+
+      report.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       report.save("report.pdf");
+
+      // Hide the element again after generating the PDF
+      reportElement.style.display = "none";
     });
   };
-
-  // Create styles
-  // const styles = StyleSheet.create({
-  //   page: {
-  //     flexDirection: "row",
-  //     backgroundColor: "#E4E4E4",
-  //   },
-  //   section: {
-  //     margin: 10,
-  //     padding: 10,
-  //     flexGrow: 1,
-  //   },
-  // });
-
-  // Create Document Component
-  // const MyDocument = () => (
-  //   <Document>
-  //     <Page size="A4" style={styles.page}>
-  //       <View style={styles.section}>
-  //         <Text>Section #1</Text>
-  //       </View>
-  //       <View style={styles.section}>
-  //         <Text>Section #2</Text>
-  //       </View>
-  //     </Page>
-  //   </Document>
-  // );
 
   const mappingDiagnoses = (diagnoses) => {
     let systemDiagnosis = [];
@@ -113,8 +87,6 @@ const DetailCatatanPasien = () => {
     setManual(manualDiagnosis);
     setVerificator(verificatorDiagnosis);
   };
-
-  console.log(data);
 
   if (auth) {
     return (
@@ -231,10 +203,10 @@ const DetailCatatanPasien = () => {
                                           </p>
                                           <img
                                             className=" img-fluid ps-0 pb-4 border-radius-xl"
-                                            // style={{borderBottomLeftRadius:"1rem" }}
                                             src={`${
                                               baseURL + data.panoramik_picture
                                             }`}
+                                            alt="Panoramik Gigi"
                                           />
                                           <div className="row">
                                             <div className="col-3">
@@ -388,7 +360,7 @@ const DetailCatatanPasien = () => {
                                             </div>
                                           </div>
                                         </div>
-                                        <div id="report" style={{display: "none"}}>
+                                        <div id="report" style={{ display: "none" }}>
                                           <Report />
                                         </div>
                                       </div>
