@@ -1,21 +1,21 @@
 import axios from "axios";
 import { React, useState, useEffect } from "react";
-import HeaderDataUser from "../../../component/Header/HeaderDataUser";
-import InterpretasiManual from "../../../component/Modal/InterpretasiManual";
-import VerifiedNo from "../../../component/Modal/VerifiedNo";
-import VerifiedYes from "../../../component/Modal/VerifiedYes";
-import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
-import { baseURL } from "../../../routes/Config";
+import HeaderDataUser from "../../component/Header/HeaderDataUser";
+import SidebarPatient from "../../component/Sidebar/SidebarPatient";
+import InterpretasiManual from "../../component/Modal/InterpretasiManual";
+import VerifiedNo from "../../component/Modal/VerifiedNo";
+import VerifiedYes from "../../component/Modal/VerifiedYes";
+import { baseURL } from "../../routes/Config";
 import { useParams } from "react-router-dom";
-import WithAuthorization from "../../../utils/auth";
-import VerifiedResult from "../../../component/Modal/VerifiedResult";
-import ButtonVerified from "../../../component/Button/ButtonVerified";
-import ButtonVerifiedResult from "../../../component/Button/ButtonVerifiedResult";
-import StatusUnverified from "../../../component/Alerts/StatusUnverified";
-import StatusVerified from "../../../component/Alerts/StatusVerified";
+import WithAuthorization from "../../utils/auth";
+import VerifiedResult from "../../component/Modal/VerifiedResult";
+import ButtonVerified from "../../component/Button/ButtonVerified";
+import ButtonVerifiedResult from "../../component/Button/ButtonVerifiedResult";
+import StatusUnverified from "../../component/Alerts/StatusUnverified";
+import StatusVerified from "../../component/Alerts/StatusVerified";
 
-const ViewGambarPanoramikDokter = () => {
-  const auth = WithAuthorization(["doctor"]);
+const DetailResultDataDiagnosis = () => {
+  const auth = WithAuthorization(["Patient"]);
 
   const [data, setData] = useState({});
   const [doctors, setDoctors] = useState([]);
@@ -94,7 +94,7 @@ const ViewGambarPanoramikDokter = () => {
             className="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-0 my-0 fixed-start ms-0"
             id="sidenav-main"
           >
-            <SidebarDokter />
+             <SidebarPatient />
           </aside>
           <main className="main-content position-relative border-radius-lg">
             <HeaderDataUser />
@@ -107,7 +107,7 @@ const ViewGambarPanoramikDokter = () => {
                         <div className="col-8 d-flex align-items-center">
                           <a
                             className="btn btn-outline-secondary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2"
-                            href="/dokter-radiografi-panoramik"
+                            href="/patient-result-diagnosis"
                           >
                             <i
                               className="fa fa-arrow-left"
@@ -124,26 +124,10 @@ const ViewGambarPanoramikDokter = () => {
                           <div className="card-header pb-0 ps-0">
                             <div className="d-flex align-items-center">
                               <h6 className="mb-0 font-weight-bolder">
-                                Verifikasi Gambar Radiografi Panoramik
+                                Hasil Gambar Radiografi Panoramik
                               </h6>
                             </div>
                             <div className="row mt-3">
-                              <div className="col-3">
-                                <p className="text-xs text-secondary mb-1">
-                                  Kode Pasien
-                                </p>
-                                <p className="text-xs font-weight-bolder mb-0">
-                                  {data.medic_number}
-                                </p>
-                              </div>
-                              <div className="col-3">
-                                <p className="text-xs text-secondary mb-1">
-                                  Nama Pasien
-                                </p>
-                                <p className="text-xs font-weight-bolder mb-0">
-                                  {data.fullname}
-                                </p>
-                              </div>
 
                               <div className="col-3">
                                 <p className="text-xs text-secondary mb-1">
@@ -158,30 +142,6 @@ const ViewGambarPanoramikDokter = () => {
                                     Diverifikasi oleh {data.doctor_name}
                                   </p>
                                 )}
-                              </div>
-                              <div className="col-3">
-                                <p className="text-xs text-secondary mb-1">
-                                  Dokter Verifikator
-                                </p>
-
-                                <select
-                                  className="form-select form-select-sm"
-                                  aria-label=".form-select-sm example"
-                                  style={{ width: "70%" }}
-                                  name="doctor_id"
-                                  value={data.doctor_id}
-                                  onChange={(e) =>
-                                    handleSubmit(e, e.target.value)
-                                  }
-                                  required
-                                >
-                                  <option>Pilih Dokter</option>
-                                  {doctors.map((doctor) => (
-                                    <option key={doctor.id} value={doctor.id}>
-                                      {doctor.fullname}
-                                    </option>
-                                  ))}
-                                </select>
                               </div>
                             </div>
                           </div>
@@ -1137,22 +1097,7 @@ const ViewGambarPanoramikDokter = () => {
                                               marginStart: "0px",
                                             }}
                                           />
-                                          <div className="d-grid">
-                                            <button
-                                              className="btn btn-sm btn-primary mt-4 mb-2"
-                                              type="button"
-                                              data-bs-toggle="modal"
-                                              data-bs-target="#exampleModal3"
-                                              disabled={
-                                                data.history_id ? false : true
-                                              }
-                                            >
-                                              Interpretasi Manual
-                                            </button>
-                                            <InterpretasiManual
-                                              radiographicId={data.history_id}
-                                            />
-                                          </div>
+
                                         </div>
                                       </div>
                                     </div>
@@ -1177,4 +1122,4 @@ const ViewGambarPanoramikDokter = () => {
   }
 };
 
-export default ViewGambarPanoramikDokter;
+export default DetailResultDataDiagnosis;

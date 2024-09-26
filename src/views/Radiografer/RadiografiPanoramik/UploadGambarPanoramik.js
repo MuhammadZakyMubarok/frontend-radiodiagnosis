@@ -13,7 +13,7 @@ const UploadGambarPanoramik = () => {
   const [radiographics, setRadiographics] = useState([]);
   const [data, setData] = useState({});
   const [patients, setPatients] = useState([]);
-  const [patientId, setPatientId] = useState("patient-");
+  const [patientId, setPatientId] = useState("Patient-");
   const [patient, setPatient] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
   const [subject, setSubject] = useState(""); // New state for subject (keluhan pasien)

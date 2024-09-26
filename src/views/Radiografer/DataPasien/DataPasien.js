@@ -225,8 +225,7 @@ const DataPasien = () => {
                             style={{ height: "95%" }}
                             href="/radiografer-add-data-pasien"
                           >
-                            <i className="fas fa-plus"></i>&nbsp;&nbsp;Tambah
-                            Data
+                            <i className="fas fa-plus"></i>&nbsp;&nbsp; Tambah Data
                           </a>
                         </div>
                       </div>
