@@ -41,25 +41,21 @@ const DetailCatatanPasien = () => {
   }, [id]);
 
   const generatePDF = () => {
-    const reportElement = document.querySelector("#report");
+    // Menampilkan elemen #report untuk proses ekspor
+    document.querySelector("#report").style.display = 'block';
+  
+    const report = new JsPDF("portrait", "pt", "a4");
+    report.html(document.querySelector("#report")).then(() => {
+      // Menyembunyikan elemen #report kembali setelah ekspor
+      document.querySelector("#report").style.display = 'none';
 
-    // Make sure the report element is visible before capturing it
-    reportElement.style.display = "block";
-
-    html2canvas(reportElement).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const report = new JsPDF("portrait", "pt", "a4");
-
-      const imgWidth = report.internal.pageSize.getWidth();
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-
-      report.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       report.save("report.pdf");
 
       // Hide the element again after generating the PDF
       reportElement.style.display = "none";
     });
   };
+  
 
   const mappingDiagnoses = (diagnoses) => {
     let systemDiagnosis = [];
@@ -360,9 +356,10 @@ const DetailCatatanPasien = () => {
                                             </div>
                                           </div>
                                         </div>
-                                        <div id="report" style={{ display: "none" }}>
+                                        <div id="report" style={{ display: 'none' }}>
                                           <Report />
                                         </div>
+
                                       </div>
                                     </div>
                                   </div>
