@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import WithAuthorization from "../../../utils/auth";
 import Paginations from "../../../component/Pagination/Paginations";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
+import "./responsive-history.css";
 
 const History = () => {
   const auth = WithAuthorization(["radiographer"]);
@@ -72,15 +73,15 @@ const History = () => {
                 <div className="col-12">
                   <div className="card mb-4">
                     <div className="card-header pb-2 p-4">
-                      <div className="row">
-                        <div className="col-9 d-flex align-items-center">
+                      <div className="row align-items-center">
+                        <div className="col-8 d-flex align-items-center">
                           <h5 className="mb-0 font-weight-bolder">
                             History Pasien
                           </h5>
                         </div>
                         <div class="col-3 text-end pe-2">
-                          <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-                            <div class="input-group">
+                          <div class="col-md-4 col-12 text-md-end text-center mb-2 mb-md-0 pe-0">
+                            <div class="input-group" style={{ maxWidth: "100%" }}>
                               <span class="input-group-text text-body border-radius-xl">
                                 <i class="fas fa-search" aria-hidden="true"></i>
                               </span>

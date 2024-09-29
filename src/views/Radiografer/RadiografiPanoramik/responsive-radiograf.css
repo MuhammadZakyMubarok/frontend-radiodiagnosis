@@ -1,0 +1,47 @@
+/* Media query untuk layar sangat kecil (max-width: 576px) */
+@media (max-width: 576px) {
+    .card {
+        margin-left: 20px;
+    }
+
+    .input-group {
+        width: 140%;
+        margin-right: 100px;
+    }
+    #btn-upload{
+        margin-left: 150px;
+    }
+
+
+}
+
+/* Media query untuk layar medium (min-width: 768px) */
+@media (min-width: 577px) {
+    .card {
+        margin-left: 20px;
+    }
+
+    #add-card {
+        margin-left: 20px;
+    }
+
+    .input-group {
+        margin-top: 40px;
+        width: 100%;
+    }
+
+    #btn-upload {
+        max-width: 100%;
+    }
+}
+
+/* Media query untuk layar besar (min-width: 992px) */
+@media (min-width: 771px) {
+    .input-group {
+        max-width: 100%;
+        margin-top: 40px;
+    }
+    #btn-upload {
+        margin-top: 40px;
+    }
+}
