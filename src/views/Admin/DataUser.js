@@ -74,26 +74,6 @@ const DataUser = () => {
         .catch((error) => {
           console.log(error.response.data);
         });
-
-      // axios
-      // .get(`${baseURL}/users/all}`, {
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      // })
-      // .then((response) => {
-      //   if (response.data.data) {
-      //     // setData(response.data.data);
-      //     // setPagination(response.data.meta);
-      //     console.log("banyak data user : " + response.data.length);
-      //   }
-      //   console.log("data user : " + response);
-      //   console.log("data user");
-      // })
-      // .catch((error) => {
-      //   console.log(error)
-      // });
     }
   }, [currentPage, inputText]);
 
@@ -118,6 +98,46 @@ const DataUser = () => {
       .catch((error) => {
         console.log(error.response.data);
       });
+  };
+
+  const exportToExcel = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/users/all`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const allData = response.data.data.map(user => ({
+        Name: user.fullname,
+        Email: user.email,
+        NIP: user.nip,
+        Role: user.role,
+        Phone_Number: user.phone_number,
+        Gender: user.gender,
+        Address: user.address,
+        Province: user.province,
+        City: user.city,
+      }));
+      const worksheet = XLSX.utils.json_to_sheet(allData);
+      const workbook = XLSX.utils.book_new();
+      const columnWidths = [
+        { wpx: 150 },  // FullName
+        { wpx: 200 },  // Email
+        { wpx: 120 },  // NIP
+        { wpx: 100 },  // Role
+        { wpx: 150 },  // PhoneNumber
+        { wpx: 80 },   // Gender
+        { wpx: 250 },  // Address
+        { wpx: 150 },  // Province
+        { wpx: 150 }   // City
+      ];
+      worksheet['!cols'] = columnWidths;
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+      XLSX.writeFile(workbook, "UserData.xlsx");
+    } catch (error) {
+      console.log(error.response?.data || error.message);
+    }
   };
 
   if (auth) {
@@ -222,6 +242,7 @@ const DataUser = () => {
                           </div>
                         </div>
 
+
                         <div className="col-md-2 col-6 text-md-end text-center">
                           <a
                             className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl w-100"
@@ -230,6 +251,17 @@ const DataUser = () => {
                             <i className="fas fa-plus"></i>&nbsp;&nbsp;Tambah
                             Data
                           </a>
+                            </div>
+                            <div className="">
+                              <button
+                                className="btn bg-gradient-primary btn-sm mb-0 mb-md-2 border-radius-xl w-100"
+                                onClick={exportToExcel}
+                              >
+                                <i className="fas fa-file-export"></i>&nbsp;&nbsp;Export
+                              </button>
+                            </div>
+                          </div>
+
                         </div>
                       </div>
                     </div>
