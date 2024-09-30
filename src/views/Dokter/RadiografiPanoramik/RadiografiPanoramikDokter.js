@@ -92,9 +92,9 @@ const RadiografiPanoramikDokter = () => {
                             sementara yang perlu diverifikasi oleh dokter
                           </p>
                         </div>
-                        <div class="col-3 pe-3 pt-3">
+                        <div class="col-md-4 col-12 text-md-end text-center mb-2 md-0 pe-3 ps-3">
                           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-                            <div class="input-group">
+                            <div class="input-group"  style={{ maxWidth: "100%" }}>
                               <span class="input-group-text text-body border-radius-xl">
                                 <i class="fas fa-search" aria-hidden="true"></i>
                               </span>

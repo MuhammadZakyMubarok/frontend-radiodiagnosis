@@ -8,6 +8,8 @@ import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import Paginations from "../../../component/Pagination/Paginations";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
+import "./responsive-datapasien.css";
+
 
 const DataPasien = () => {
   const auth = WithAuthorization(["radiographer"]);
@@ -72,7 +74,7 @@ const DataPasien = () => {
             <div className="container-fluid py-2">
               <div className="row">
                 <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4 ">
-                  <div className="card">
+                  <div className="card" id="card-left">
                     <div className="card-body p-3">
                       <div className="row ">
                         <div className="col-8 ">
@@ -130,7 +132,7 @@ const DataPasien = () => {
                   </div>
                 </div>
                 <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                  <div className="card">
+                  <div className="card" id="card-left">
                     <div className="card-body p-3">
                       <div className="row">
                         <div className="col-8 ">
@@ -188,49 +190,45 @@ const DataPasien = () => {
                   </div>
                 </div>
               </div>
-              <div className="row p-0 mt-4">
+              <div className="row mt-4 mb-2">
                 <div className="col-12">
-                  <div className="card mb-4">
-                    <div className="card-header pb-2 p-4">
-                      <div className="row">
-                        <div className="col-7 d-flex align-items-center">
+                  <div className="card">
+                    <div className="card-header pb-0 p-4">
+                      <div className="row align-items-center">
+                        <div className="col-md-6 col-12 mb-2 mb-md-0">
                           <h5 className="mb-0 font-weight-bolder">
                             Data Pasien
                           </h5>
                         </div>
-                        <div className="col-3 text-end pe-0">
-                          <div className="ms-md-auto pe-md-3 d-flex align-items-center">
-                            <div className="input-group">
-                              <span className="input-group-text text-body border-radius-xl">
-                                <i
-                                  className="fas fa-search"
-                                  aria-hidden="true"
-                                ></i>
-                              </span>
-                              <input
-                                type="text"
-                                className="form-control border-radius-xl"
-                                size="50"
-                                placeholder="Nama Pasien, Kode Pasien..."
-                                style={{ height: "80%" }}
-                                onChange={handleChange}
-                                value={inputText}
-                              />
-                            </div>
+                        <div className="col-md-4 col-12 text-md-end text-center mb-2 mb-md-0 pe-0">
+                          <div className="input-group" style={{ maxWidth: "100%" }}>
+                            <span className="input-group-text text-body border-radius-xl">
+                              <i
+                                className="fas fa-search"
+                                aria-hidden="true"
+                              ></i>
+                            </span>
+                            <input
+                              type="text"
+                              className="form-control border-radius-xl"
+                              size="50"
+                              placeholder="Nama Pasien, Kode Pasien..."
+                              onChange={handleChange}
+                              value={inputText}
+                            />
                           </div>
                         </div>
-                        <div className="col-2 text-end ps-0">
+                        <div className="col-md-2 col-6 text-md-end text-center">
                           <a
-                            className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl"
-                            style={{ height: "95%" }}
-                            href="/radiografer-add-data-pasien"
+                            className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl w-100"
+                            href="/radiografer-add-data-pasien" id="btn-add-data"
                           >
                             <i className="fas fa-plus"></i>&nbsp;&nbsp; Tambah Data
                           </a>
                         </div>
                       </div>
                     </div>
-                    <div className="card-body px-0 pt-0 pb-2 mt-2">
+                    <div className="card-body px-0 pb-2 mt-2">
                       <div className="table-responsive p-0">
                         <table className="table align-items-center mb-0">
                           <thead>

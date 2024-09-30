@@ -7,6 +7,8 @@ import { baseURL } from "../../routes/Config";
 import { Link } from "react-router-dom";
 import WithAuthorization from "../../utils/auth";
 import Paginations from "../../component/Pagination/Paginations";
+import './responsive-admin.css';
+
 
 const DataUser = () => {
   const auth = WithAuthorization(["admin"]);
@@ -154,7 +156,7 @@ const DataUser = () => {
             <div className="container-fluid py-2">
               <div className="row">
                 <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4 ">
-                  <div className="card">
+                  <div className="card" id="card-left">
                     <div className="card-body p-3">
                       <div className="row ">
                         <div className="col-8 ">
@@ -217,12 +219,12 @@ const DataUser = () => {
                   <div className="card">
                     <div className="card-header pb-0 p-4">
                       <div className="row align-items-center">
-                        <div className="col-md-7 col-12 mb-2 mb-md-0">
+                        <div className="col-md-6 col-12 mb-2 mb-md-0">
                           <h5 className="mb-0 font-weight-bolder">Data User</h5>
                         </div>
 
-                        <div className="col-md-3 col-12 text-md-end text-center mb-2 mb-md-0 pe-0">
-                          <div className="input-group">
+                        <div className="col-md-4 col-12 text-md-end text-center mb-2 mb-md-0 pe-0">
+                          <div className="input-group" style={{maxWidth: "100%"}}>
                             <span className="input-group-text text-body border-radius-xl">
                               <i
                                 className="fas fa-search"
@@ -235,20 +237,20 @@ const DataUser = () => {
                               placeholder="Nama User, NIP..."
                               onChange={handleChange}
                               value={inputText}
+                              style={{ flex: "1 1 auto", minWidth: "0" }}
                             />
                           </div>
                         </div>
 
-                        <div className="col-md-2 col-12 d-flex justify-content-md-end justify-content-start">
-                          <div className="d-flex flex-md-column flex-row">
-                            <div>
-                              <a
-                                className="btn bg-gradient-primary btn-sm mb-0 mb-md-2 border-radius-xl w-100"
-                                href="/add-data-user"
-                              >
-                                <i className="fas fa-plus"></i>&nbsp;&nbsp;Tambah
-                                Data
-                              </a>
+
+                        <div className="col-md-2 col-6 text-md-end text-center">
+                          <a
+                            className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl w-100"
+                            href="/add-data-user" id="btn-add-user"
+                          >
+                            <i className="fas fa-plus"></i>&nbsp;&nbsp;Tambah
+                            Data
+                          </a>
                             </div>
                             <div className="">
                               <button
@@ -259,6 +261,7 @@ const DataUser = () => {
                               </button>
                             </div>
                           </div>
+
                         </div>
                       </div>
                     </div>
