@@ -7,7 +7,6 @@ import { baseURL } from "../../routes/Config";
 import { Link } from "react-router-dom";
 import WithAuthorization from "../../utils/auth";
 import Paginations from "../../component/Pagination/Paginations";
-import './responsive-admin.css';
 import * as XLSX from 'xlsx';
 
 const DataUser = () => {
