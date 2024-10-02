@@ -7,6 +7,8 @@ import { baseURL } from "../../routes/Config";
 import { Link } from "react-router-dom";
 import WithAuthorization from "../../utils/auth";
 import Paginations from "../../component/Pagination/Paginations";
+import './responsive-admin.css';
+import * as XLSX from 'xlsx';
 
 const DataUser = () => {
   const auth = WithAuthorization(["admin"]);
@@ -216,8 +218,8 @@ const DataUser = () => {
                 <div className="col-12">
                   <div className="card">
                     <div className="card-header pb-0 p-4">
-                      <div className="row align-items-center">
-                        <div className="col-md-7 col-12 mb-2 mb-md-0">
+                      <div className="row align-items-start">
+                        <div className="col-md-6 col-12 mb-2 mb-md-0">
                           <h5 className="mb-0 font-weight-bolder">Data User</h5>
                         </div>
 
@@ -238,31 +240,29 @@ const DataUser = () => {
                             />
                           </div>
                         </div>
-
-                        <div className="col-md-2 col-12 d-flex justify-content-md-end justify-content-start">
-                          <div className="d-flex flex-md-column flex-row">
-                            <div>
-                              <a
-                                className="btn bg-gradient-primary btn-sm mb-0 mb-md-2 border-radius-xl w-100"
-                                href="/add-data-user"
-                              >
-                                <i className="fas fa-plus"></i>&nbsp;&nbsp;Tambah
-                                Data
-                              </a>
-                            </div>
-                            <div className="">
-                              <button
-                                className="btn bg-gradient-primary btn-sm mb-0 mb-md-2 border-radius-xl w-100"
-                                onClick={exportToExcel}
-                              >
-                                <i className="fas fa-file-export"></i>&nbsp;&nbsp;Export
-                              </button>
-                            </div>
+                        <div className="col-md-2 col-6 d-flex flex-md-column justify-content-center text-center">
+                          <div>
+                            <a
+                              className="btn bg-gradient-primary btn-sm m-0 mb-0 border-radius-xl w-100"
+                              href="/add-data-user"
+                              id="btn-add-user"
+                            >
+                              <i className="fas fa-plus"></i>&nbsp;&nbsp;Tambah Data
+                            </a>
                           </div>
+                          <div className="mt-0 mt-md-2">
+                          <button
+                              className="btn bg-gradient-primary btn-sm m-0 mb-0 border-radius-xl w-100"
+                              onClick={exportToExcel}
+                            >
+                              <i className="fas fa-file-export"></i>&nbsp;&nbsp;Export
+                            </button>
+                          </div>
+
                         </div>
                       </div>
                     </div>
-                    <div className="card-body px-0 pb-2 ">
+                    <div className="card-body px-0 pb-2">
                       <div className="table-responsive p-0">
                         <table className="table align-items-center mb-0 ">
                           <thead className="table-light">
