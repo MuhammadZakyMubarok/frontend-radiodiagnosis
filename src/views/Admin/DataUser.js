@@ -9,7 +9,6 @@ import WithAuthorization from "../../utils/auth";
 import Paginations from "../../component/Pagination/Paginations";
 import './responsive-admin.css';
 
-
 const DataUser = () => {
   const auth = WithAuthorization(["admin"]);
 
@@ -29,6 +28,7 @@ const DataUser = () => {
 
   let startIndex = (currentPage - 1) * 10;
   const token = sessionStorage.getItem("token");
+
   // get data user use axios
   useEffect(() => {
     if (inputText.length > 0) {
@@ -41,12 +41,10 @@ const DataUser = () => {
         })
         .then((response) => {
           if (response.data.data) {
-            // setData(response.data.data)
             setSearchData(response.data.data);
             setPagination(response.data.meta);
             setDoctor(response.data.meta.doctor);
             setRadiographer(response.data.meta.radiographer);
-            console.log(response.data.meta);
           }
         })
         .catch((error) => {
@@ -68,7 +66,6 @@ const DataUser = () => {
             setPagination(response.data.meta);
             setDoctor(response.data.meta.doctor);
             setRadiographer(response.data.meta.radiographer);
-            console.log(response.data.meta);
           }
         })
         .catch((error) => {
@@ -81,8 +78,6 @@ const DataUser = () => {
     setCurrentPage(pageNumber);
   };
 
-  // END COUNT
-
   const handleDelete = async (e, userId) => {
     e.preventDefault();
     await axios
@@ -92,7 +87,7 @@ const DataUser = () => {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => {
+      .then(() => {
         window.location.reload();
       })
       .catch((error) => {
@@ -155,19 +150,19 @@ const DataUser = () => {
             <HeaderAdmin />
             <div className="container-fluid py-2">
               <div className="row">
-                <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4 ">
+                <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
                   <div className="card" id="card-left">
                     <div className="card-body p-3">
-                      <div className="row ">
-                        <div className="col-8 ">
-                          <div className="numbers ">
+                      <div className="row">
+                        <div className="col-8">
+                          <div className="numbers">
                             <p className="text-sm mb-0 text-uppercase font-weight-bold d-flex justify-content-left">
                               User
                             </p>
                             <h2 className="font-weight-bolder d-flex justify-content-left">
                               {doctor}
                             </h2>
-                            <p className="text-sm mb-0  font-weight-bold d-flex justify-content-left">
+                            <p className="text-sm mb-0 font-weight-bold d-flex justify-content-left">
                               Jumlah Dokter Gigi
                             </p>
                           </div>
@@ -188,15 +183,15 @@ const DataUser = () => {
                   <div className="card">
                     <div className="card-body p-3">
                       <div className="row">
-                        <div className="col-8 ">
-                          <div className="numbers ">
+                        <div className="col-8">
+                          <div className="numbers">
                             <p className="text-sm mb-0 text-uppercase font-weight-bold d-flex justify-content-left">
                               User
                             </p>
                             <h2 className="font-weight-bolder d-flex justify-content-left">
                               {radiographer}
                             </h2>
-                            <p className="text-sm mb-0  font-weight-bold d-flex justify-content-left">
+                            <p className="text-sm mb-0 font-weight-bold d-flex justify-content-left">
                               Jumlah Radiografer
                             </p>
                           </div>
@@ -222,14 +217,10 @@ const DataUser = () => {
                         <div className="col-md-6 col-12 mb-2 mb-md-0">
                           <h5 className="mb-0 font-weight-bolder">Data User</h5>
                         </div>
-
                         <div className="col-md-4 col-12 text-md-end text-center mb-2 mb-md-0 pe-0">
-                          <div className="input-group" style={{maxWidth: "100%"}}>
+                          <div className="input-group" style={{ maxWidth: "100%" }}>
                             <span className="input-group-text text-body border-radius-xl">
-                              <i
-                                className="fas fa-search"
-                                aria-hidden="true"
-                              ></i>
+                              <i className="fas fa-search" aria-hidden="true"></i>
                             </span>
                             <input
                               type="text"
@@ -241,33 +232,28 @@ const DataUser = () => {
                             />
                           </div>
                         </div>
-
-
                         <div className="col-md-2 col-6 text-md-end text-center">
                           <a
                             className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl w-100"
-                            href="/add-data-user" id="btn-add-user"
+                            href="/add-data-user"
+                            id="btn-add-user"
                           >
-                            <i className="fas fa-plus"></i>&nbsp;&nbsp;Tambah
-                            Data
+                            <i className="fas fa-plus"></i>&nbsp;&nbsp;Tambah Data
                           </a>
-                            </div>
-                            <div className="">
-                              <button
-                                className="btn bg-gradient-primary btn-sm mb-0 mb-md-2 border-radius-xl w-100"
-                                onClick={exportToExcel}
-                              >
-                                <i className="fas fa-file-export"></i>&nbsp;&nbsp;Export
-                              </button>
-                            </div>
-                          </div>
-
+                        </div>
+                        <div className="">
+                          <button
+                            className="btn bg-gradient-primary btn-sm mb-0 mb-md-2 border-radius-xl w-100"
+                            onClick={exportToExcel}
+                          >
+                            <i className="fas fa-file-export"></i>&nbsp;&nbsp;Export
+                          </button>
                         </div>
                       </div>
                     </div>
-                    <div className="card-body px-0 pb-2 ">
+                    <div className="card-body px-0 pb-2">
                       <div className="table-responsive p-0">
-                        <table className="table align-items-center mb-0 ">
+                        <table className="table align-items-center mb-0">
                           <thead className="table-light">
                             <tr>
                               <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 pe-0">
@@ -279,29 +265,28 @@ const DataUser = () => {
                               <th className="text-uppercase text-secondary text-start text-xxs font-weight-bolder opacity-7 ps-0">
                                 NIP
                               </th>
-
-                              <th className="text-uppercase text-secondary text-start text-xxs font-weight-bolder opacity-7 ps-0 ">
+                              <th className="text-uppercase text-secondary text-start text-xxs font-weight-bolder opacity-7 ps-0">
                                 Email
                               </th>
                               <th className="text-uppercase text-secondary text-start text-xxs font-weight-bolder opacity-7 ps-0">
                                 Profesi
                               </th>
-                              <th className="text-uppercase text-secondary text-center text-xxs font-weight-bolder opacity-7 ps-2 ">
+                              <th className="text-uppercase text-secondary text-center text-xxs font-weight-bolder opacity-7 ps-2">
                                 Aksi
                               </th>
                             </tr>
                           </thead>
                           <tbody>
-                            {statusSearch == true
+                            {statusSearch
                               ? searchData.map((item, index) => (
                                   <tr key={item.id}>
-                                    <td className="ps-0 align-middle text-center ">
+                                    <td className="ps-0 align-middle text-center">
                                       <span className="text-xs text-secondary mb-0">
                                         {startIndex + index + 1}
                                       </span>
                                     </td>
                                     <td className="align-middle text-start text-sm ps-2 pe-0">
-                                      <span className="text-xs text-secondary mb-0 ">
+                                      <span className="text-xs text-secondary mb-0">
                                         {item.fullname}
                                       </span>
                                     </td>
@@ -321,7 +306,7 @@ const DataUser = () => {
                                       </span>
                                     </td>
                                     <td className="align-middle text-center text-sm pe-0">
-                                      <span className="text-xs text-secondary mb-0 ">
+                                      <span className="text-xs text-secondary mb-0">
                                         <div>
                                           <Link
                                             className="btn btn-outline-primary btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-primary"
@@ -333,7 +318,7 @@ const DataUser = () => {
                                             type="button"
                                             className="btn btn-outline-danger btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-danger"
                                             data-bs-toggle="modal"
-                                            data-bs-target="#exampleModal"
+                                            data-bs-target={`#exampleModal${item.id}`}
                                           >
                                             <i className="fa fa-trash text-danger"></i>
                                           </button>
@@ -354,13 +339,13 @@ const DataUser = () => {
                                 ))
                               : data.map((item, index) => (
                                   <tr key={item.id}>
-                                    <td className="ps-0 align-middle text-center ">
+                                    <td className="ps-0 align-middle text-center">
                                       <span className="text-xs text-secondary mb-0">
                                         {startIndex + index + 1}
                                       </span>
                                     </td>
                                     <td className="align-middle text-start text-sm ps-2 pe-0">
-                                      <span className="text-xs text-secondary mb-0 ">
+                                      <span className="text-xs text-secondary mb-0">
                                         {item.fullname}
                                       </span>
                                     </td>
@@ -380,7 +365,7 @@ const DataUser = () => {
                                       </span>
                                     </td>
                                     <td className="align-middle text-center text-sm pe-0">
-                                      <span className="text-xs text-secondary mb-0 ">
+                                      <span className="text-xs text-secondary mb-0">
                                         <div>
                                           <Link
                                             className="btn btn-outline-primary btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-primary"
