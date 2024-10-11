@@ -25,15 +25,33 @@ import Profil from "../views/Radiografer/Profil/Profil";
 import RadiografiPanoramik from "../views/Radiografer/RadiografiPanoramik/RadiografiPanoramik";
 import UploadGambarPanoramik from "../views/Radiografer/RadiografiPanoramik/UploadGambarPanoramik";
 import UploadUlangGambarPanoramik from "../views/Radiografer/RadiografiPanoramik/UploadUlangGambarPanoramik";
-
 import ViewGambarPanoramik from "../views/Radiografer/RadiografiPanoramik/ViewGambarPanoramik";
+
+// Satu Sehat
+import ViewSatuSehatPatient  from "../views/SatuSehat/Patient/ViewSatuSehatPatient";
+
+// Import untuk ProfilePatient dan ResultDataDiagnosis
+import ProfilePatient from "../views/Patient/ProfilePatient";
+import ResultDataDiagnosis from "../views/Patient/ResultDataDiagnosis";
+import HistoryPatient from "../views/Patient/HistoryPatient";
+import DashboardPatient from "../views/Patient/DashboardPatient";
+import DetailResultDataDiagnosis from "../views/Patient/DetailResultDataDiagnosis";
+import LoginPatient from "../auth/LoginPatient";
+import RegisterPatient from "../auth/RegistrationCardPatient";
 
 const RoutesApp = () => {
   return (
     <div>
       <Router>
         <Routes>
+          <Route path="/patient-profile" element={<ProfilePatient />} />
+          <Route path="/patient-result-diagnosis" element={<ResultDataDiagnosis />} />
+          <Route path="/patient-detail-result/:id" element={<DetailResultDataDiagnosis />} />
+          <Route path="/patient-history" element={<HistoryPatient />} />
+          <Route path="/patient-dashboard" element={<DashboardPatient />} />
           <Route path="/" element={<LoginUser />} />
+          <Route path="/login-patient" element={<LoginPatient />} />
+          <Route path="/regis-patient" element={<RegisterPatient />} />
           <Route path="/data-user" element={<DataUser />} />
           <Route path="/add-data-user" element={<AddDataUser />} />
           <Route path="/edit-data-user/:id" element={<EditDataUser />} />
@@ -100,6 +118,10 @@ const RoutesApp = () => {
           <Route
             path="/dokter-edit-catatan-pasien"
             element={<EditCatatanPasien />}
+          />
+          <Route
+           path="/satu-sehat-check-patient"
+           element={<ViewSatuSehatPatient/>}
           />
         </Routes>
       </Router>
