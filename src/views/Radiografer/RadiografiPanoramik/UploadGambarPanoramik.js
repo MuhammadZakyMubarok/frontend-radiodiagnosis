@@ -6,23 +6,20 @@ import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
-import { Autocomplete, TextField } from "@mui/material";
+import { Autocomplete } from "@mui/material";
 
 const UploadGambarPanoramik = () => {
   const auth = WithAuthorization(["radiographer"]);
   const [radiographics, setRadiographics] = useState([]);
-
   const [data, setData] = useState({});
   const [patients, setPatients] = useState([]);
   const [patientId, setPatientId] = useState("Patient-");
   const [patient, setPatient] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
+  const [subject, setSubject] = useState(""); // New state for subject (keluhan pasien)
   const [error, setError] = useState(null);
-
   const history = useNavigate();
-
   const token = sessionStorage.getItem("token");
-
   let option = [];
 
   useEffect(() => {
@@ -77,8 +74,6 @@ const UploadGambarPanoramik = () => {
       ...data,
       [e.target.name]: e.target.value,
     });
-
-    console.log(data);
   };
 
   patients.forEach((element) => {
@@ -94,6 +89,7 @@ const UploadGambarPanoramik = () => {
     const formData = new FormData();
     formData.append("panoramikPicture", selectedFile);
     formData.append("radiographerId", data.radiographic_id);
+    formData.append("subject", subject); // Adding subject to formData
 
     axios
       .post(`${baseURL}/radiographics/patients/${patientId}`, formData, {
@@ -104,7 +100,6 @@ const UploadGambarPanoramik = () => {
       })
       .then((response) => {
         setSelectedFile(null);
-        // redirect and send props
         history("/radiografer-radiografi-panoramik", {
           state: {
             message: "success",
@@ -114,20 +109,6 @@ const UploadGambarPanoramik = () => {
       .catch((error) => {
         setError(true);
       });
-  };
-
-  const onInput = () => {
-    var val = document.getElementById("input-datalist").value;
-    var opts = document.getElementById("list-patients").childNodes;
-    for (var i = 0; i < opts.length; i++) {
-      if (opts[i].value === val) {
-        // An item was selected from the list!
-        // yourCallbackHere()
-        setPatientId(opts[i].value);
-        console.log(patientId);
-        break;
-      }
-    }
   };
 
   if (auth) {
@@ -165,9 +146,7 @@ const UploadGambarPanoramik = () => {
                         </div>
                         <div className="row mt-3">
                           <div className="col-2">
-                            <p className="text-xs text-secondary mb-2">
-                              Kode RM
-                            </p>
+                            <p className="text-xs text-secondary mb-2">Kode RM</p>
                             <Autocomplete
                               disablePortal
                               id="combo-box"
@@ -197,10 +176,7 @@ const UploadGambarPanoramik = () => {
                             />
                           </div>
                           <div className="col-3">
-                            <p className="text-xs text-secondary mb-2">
-                              Nama Pasien
-                            </p>
-
+                            <p className="text-xs text-secondary mb-2">Nama Pasien</p>
                             <p
                               style={{ width: "100%", height: 40 }}
                               className="form-control me-2 text-sm"
@@ -209,9 +185,7 @@ const UploadGambarPanoramik = () => {
                             </p>
                           </div>
                           <div className="col-3">
-                            <p className="text-xs text-secondary mb-2">
-                              Radiografer
-                            </p>
+                            <p className="text-xs text-secondary mb-2">Radiografer</p>
                             <select
                               className="form-select form-select-sm"
                               aria-label=".form-select-sm example"
@@ -234,6 +208,16 @@ const UploadGambarPanoramik = () => {
                               })}
                             </select>
                           </div>
+                          <div className="col-6">
+                            <p className="text-xs text-secondary mb-2">Keluhan Pasien</p>
+                            <textarea
+                              className="form-control"
+                              rows="4"
+                              placeholder="Tuliskan keluhan pasien..."
+                              value={subject}
+                              onChange={(e) => setSubject(e.target.value)}
+                            ></textarea>
+                          </div>
                         </div>
                       </div>
                       <hr
@@ -246,7 +230,6 @@ const UploadGambarPanoramik = () => {
                           marginTop: "0px",
                         }}
                       />
-
                       <div className="card-body px-0 pb-2 pt-0">
                         <div className="row justify-content-center">
                           <div className="col-md-6">
@@ -259,9 +242,7 @@ const UploadGambarPanoramik = () => {
                               </div>
                               <div
                                 className="d-flex justify-content-center"
-                                style={{
-                                  height: "15rem",
-                                }}
+                                style={{ height: "15rem" }}
                               >
                                 <div
                                   className="card shadow-none"
@@ -276,11 +257,6 @@ const UploadGambarPanoramik = () => {
                                     <div>
                                       <img src="../assets/img/App/add_photo.png" />
                                     </div>
-                                    {/* <div className="d-flex flex-column justify-content-center">
-                                    <p className="text-sm text-black mb-0">
-                                      Klik untuk Menambahkan Gambar
-                                    </p>
-                                  </div> */}
                                     <input
                                       className="form-control"
                                       type="file"
@@ -294,14 +270,12 @@ const UploadGambarPanoramik = () => {
                                 </div>
                               </div>
                               <div className="d-flex justify-content-end mb-6">
-                                {/* <a href="/radiografer-upload-gambar-panoramk"> */}
                                 <button
                                   type="submit"
                                   className="btn btn-primary btn-sm"
                                 >
                                   Unggah Gambar
                                 </button>
-                                {/* </a> */}
                               </div>
                               {error ? <UploadGambarError /> : ""}
                             </div>
