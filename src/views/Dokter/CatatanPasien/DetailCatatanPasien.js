@@ -61,36 +61,6 @@ const DetailCatatanPasien = () => {
     });
   };
 
-<<<<<<< HEAD
-
-  // Create styles
-  // const styles = StyleSheet.create({
-  //   page: {
-  //     flexDirection: "row",
-  //     backgroundColor: "#E4E4E4",
-  //   },
-  //   section: {
-  //     margin: 10,
-  //     padding: 10,
-  //     flexGrow: 1,
-  //   },
-  // });
-
-  // Create Document Component
-  // const MyDocument = () => (
-  //   <Document>
-  //     <Page size="A4" style={styles.page}>
-  //       <View style={styles.section}>
-  //         <Text>Section #1</Text>
-  //       </View>
-  //       <View style={styles.section}>
-  //         <Text>Section #2</Text>
-  //       </View>
-  //     </Page>
-  //   </Document>
-  // );
-=======
->>>>>>> 39aeb19b868ab6bb05f785448713df1f6c2b68cf
 
   const mappingDiagnoses = (diagnoses) => {
     let systemDiagnosis = [];
@@ -390,15 +360,11 @@ const DetailCatatanPasien = () => {
                                             </div>
                                           </div>
                                         </div>
-<<<<<<< HEAD
-    <div id="report" style={{ display: 'none' }}>
-=======
                                         <div id="report" style={{ display: "none" }}>
->>>>>>> 39aeb19b868ab6bb05f785448713df1f6c2b68cf
-        <Report />
-      </div>
+                                          <Report />
+                                        </div>
 
-    </div>
+                                      </div>
                                     </div >
                                   </div >
                                 </div >
@@ -417,8 +383,8 @@ const DetailCatatanPasien = () => {
       </div >
     );
   } else {
-  return <div></div>;
-}
+    return <div></div>;
+  }
 };
 
 export default DetailCatatanPasien;
