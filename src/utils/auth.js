@@ -36,6 +36,8 @@ const WithAuthorization = (allowedRoles) => {
         window.location.href = "/dokter-data-pasien";
       } else if (data.role === "radiographer") {
         window.location.href = "/radiografer-data-pasien";
+      } else if (data.role === "Patient") {
+        window.location.href = "/Patient-dashboard";
       } else {
         window.location.href = "/login-user";
       }

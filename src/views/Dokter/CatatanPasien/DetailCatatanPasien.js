@@ -1,28 +1,15 @@
 import axios from "axios";
 import moment from "moment";
 import JsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import { React, useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
-import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
 import PaginationsHistory from "../../../component/Pagination/PaginationsHistory";
 import Report from "./Report";
-import ReactPDF from "@react-pdf/renderer";
-import ReactDOM from "react-dom";
-import { PDFViewer } from "@react-pdf/renderer";
-
-// ReactPDF.renderToStream(<MyDocument />);
-
-// const App = () => (
-//   <PDFViewer>
-//     <MyDocument />
-//   </PDFViewer>
-// );
-
-// ReactDOM.render(<App />, document.getElementById('root'));
 
 const DetailCatatanPasien = () => {
   const auth = WithAuthorization(["doctor"]);
@@ -54,17 +41,27 @@ const DetailCatatanPasien = () => {
   }, [id]);
 
   const generatePDF = () => {
-    // Menampilkan elemen #report untuk proses ekspor
-    document.querySelector("#report").style.display = 'block';
-  
-    const report = new JsPDF("portrait", "pt", "a4");
-    report.html(document.querySelector("#report")).then(() => {
-      // Menyembunyikan elemen #report kembali setelah ekspor
-      document.querySelector("#report").style.display = 'none';
+    const reportElement = document.querySelector("#report");
+
+    // Make sure the report element is visible before capturing it
+    reportElement.style.display = "block";
+
+    html2canvas(reportElement).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const report = new JsPDF("portrait", "pt", "a4");
+
+      const imgWidth = report.internal.pageSize.getWidth();
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+
+      report.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       report.save("report.pdf");
+
+      // Hide the element again after generating the PDF
+      reportElement.style.display = "none";
     });
   };
-  
+
+<<<<<<< HEAD
 
   // Create styles
   // const styles = StyleSheet.create({
@@ -92,6 +89,8 @@ const DetailCatatanPasien = () => {
   //     </Page>
   //   </Document>
   // );
+=======
+>>>>>>> 39aeb19b868ab6bb05f785448713df1f6c2b68cf
 
   const mappingDiagnoses = (diagnoses) => {
     let systemDiagnosis = [];
@@ -119,8 +118,6 @@ const DetailCatatanPasien = () => {
     setManual(manualDiagnosis);
     setVerificator(verificatorDiagnosis);
   };
-
-  console.log(data);
 
   if (auth) {
     return (
@@ -189,8 +186,8 @@ const DetailCatatanPasien = () => {
                                 <p className="text-xs font-weight-bolder mb-0">
                                   {data.panoramik_check_date !== null
                                     ? moment(data.panoramik_check_date).format(
-                                        "DD/MM/YYYY"
-                                      )
+                                      "DD/MM/YYYY"
+                                    )
                                     : "-"}
                                 </p>
                               </div>
@@ -237,10 +234,9 @@ const DetailCatatanPasien = () => {
                                           </p>
                                           <img
                                             className=" img-fluid ps-0 pb-4 border-radius-xl"
-                                            // style={{borderBottomLeftRadius:"1rem" }}
-                                            src={`${
-                                              baseURL + data.panoramik_picture
-                                            }`}
+                                            src={`${baseURL + data.panoramik_picture
+                                              }`}
+                                            alt="Panoramik Gigi"
                                           />
                                           <div className="row">
                                             <div className="col-3">
@@ -251,10 +247,10 @@ const DetailCatatanPasien = () => {
                                             <div className="col-4">
                                               <p className="text-xs text-primary font-weight-bold">
                                                 {data.panoramik_check_date !==
-                                                null
+                                                  null
                                                   ? moment(
-                                                      data.panoramik_check_date
-                                                    ).format("DD/MM/YYYY")
+                                                    data.panoramik_check_date
+                                                  ).format("DD/MM/YYYY")
                                                   : "-"}
                                               </p>
                                             </div>
@@ -347,28 +343,28 @@ const DetailCatatanPasien = () => {
                                                           {diagnose.verificator_diagnosis ? (
                                                             <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
                                                               {diagnose.verificator_diagnosis ===
-                                                              "dan lain-lain"
+                                                                "dan lain-lain"
                                                                 ? diagnose.verificator_note +
-                                                                  (diagnose.manual_diagnosis
-                                                                    ? ", " +
-                                                                      diagnose.manual_diagnosis
-                                                                    : "")
+                                                                (diagnose.manual_diagnosis
+                                                                  ? ", " +
+                                                                  diagnose.manual_diagnosis
+                                                                  : "")
                                                                 : diagnose.verificator_diagnosis
-                                                                ? diagnose.verificator_diagnosis +
+                                                                  ? diagnose.verificator_diagnosis +
                                                                   (diagnose.manual_diagnosis
                                                                     ? ", " +
-                                                                      diagnose.manual_diagnosis
+                                                                    diagnose.manual_diagnosis
                                                                     : "")
-                                                                : diagnose.manual_diagnosis}
+                                                                  : diagnose.manual_diagnosis}
                                                             </p>
                                                           ) : (
                                                             <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
                                                               {diagnose.system_diagnosis
                                                                 ? diagnose.system_diagnosis +
-                                                                  (diagnose.manual_diagnosis
-                                                                    ? ", " +
-                                                                      diagnose.manual_diagnosis
-                                                                    : "")
+                                                                (diagnose.manual_diagnosis
+                                                                  ? ", " +
+                                                                  diagnose.manual_diagnosis
+                                                                  : "")
                                                                 : diagnose.manual_diagnosis}
                                                             </p>
                                                           )}
@@ -394,31 +390,35 @@ const DetailCatatanPasien = () => {
                                             </div>
                                           </div>
                                         </div>
-                                        <div id="report" style={{ display: 'none' }}>
-                                          <Report />
-                                        </div>
-
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </main>
-        </body>
+<<<<<<< HEAD
+    <div id="report" style={{ display: 'none' }}>
+=======
+                                        <div id="report" style={{ display: "none" }}>
+>>>>>>> 39aeb19b868ab6bb05f785448713df1f6c2b68cf
+        <Report />
       </div>
+
+    </div>
+                                    </div >
+                                  </div >
+                                </div >
+                              </div >
+                            </div >
+                          </div >
+                        </div >
+                      </div >
+                    </div >
+                  </div >
+                </div >
+              </div >
+            </div >
+          </main >
+        </body >
+      </div >
     );
   } else {
-    return <div></div>;
-  }
+  return <div></div>;
+}
 };
 
 export default DetailCatatanPasien;
