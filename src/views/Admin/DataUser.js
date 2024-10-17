@@ -7,7 +7,6 @@ import { baseURL } from "../../routes/Config";
 import { Link } from "react-router-dom";
 import WithAuthorization from "../../utils/auth";
 import Paginations from "../../component/Pagination/Paginations";
-import './responsive-admin.css';
 import * as XLSX from 'xlsx';
 
 const DataUser = () => {
@@ -42,10 +41,12 @@ const DataUser = () => {
         })
         .then((response) => {
           if (response.data.data) {
+            // setData(response.data.data)
             setSearchData(response.data.data);
             setPagination(response.data.meta);
             setDoctor(response.data.meta.doctor);
             setRadiographer(response.data.meta.radiographer);
+            console.log(response.data.meta);
           }
         })
         .catch((error) => {
@@ -67,6 +68,7 @@ const DataUser = () => {
             setPagination(response.data.meta);
             setDoctor(response.data.meta.doctor);
             setRadiographer(response.data.meta.radiographer);
+            console.log(response.data.meta);
           }
         })
         .catch((error) => {
@@ -218,10 +220,14 @@ const DataUser = () => {
                         <div className="col-md-6 col-12 mb-2 mb-md-0">
                           <h5 className="mb-0 font-weight-bolder">Data User</h5>
                         </div>
-                        <div className="col-md-4 col-12 text-md-end text-center mb-2 mb-md-0 pe-0">
-                          <div className="input-group" style={{ maxWidth: "100%" }}>
+
+                        <div className="col-md-3 col-12 text-md-end text-center mb-2 mb-md-0 pe-0">
+                          <div className="input-group">
                             <span className="input-group-text text-body border-radius-xl">
-                              <i className="fas fa-search" aria-hidden="true"></i>
+                              <i
+                                className="fas fa-search"
+                                aria-hidden="true"
+                              ></i>
                             </span>
                             <input
                               type="text"
@@ -229,7 +235,6 @@ const DataUser = () => {
                               placeholder="Nama User, NIP..."
                               onChange={handleChange}
                               value={inputText}
-                              style={{ flex: "1 1 auto", minWidth: "0" }}
                             />
                           </div>
                         </div>
@@ -281,16 +286,16 @@ const DataUser = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {statusSearch
+                            {statusSearch == true
                               ? searchData.map((item, index) => (
                                   <tr key={item.id}>
-                                    <td className="ps-0 align-middle text-center">
+                                    <td className="ps-0 align-middle text-center ">
                                       <span className="text-xs text-secondary mb-0">
                                         {startIndex + index + 1}
                                       </span>
                                     </td>
                                     <td className="align-middle text-start text-sm ps-2 pe-0">
-                                      <span className="text-xs text-secondary mb-0">
+                                      <span className="text-xs text-secondary mb-0 ">
                                         {item.fullname}
                                       </span>
                                     </td>
@@ -310,7 +315,7 @@ const DataUser = () => {
                                       </span>
                                     </td>
                                     <td className="align-middle text-center text-sm pe-0">
-                                      <span className="text-xs text-secondary mb-0">
+                                      <span className="text-xs text-secondary mb-0 ">
                                         <div>
                                           <Link
                                             className="btn btn-outline-primary btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-primary"
@@ -322,7 +327,7 @@ const DataUser = () => {
                                             type="button"
                                             className="btn btn-outline-danger btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-danger"
                                             data-bs-toggle="modal"
-                                            data-bs-target={`#exampleModal${item.id}`}
+                                            data-bs-target="#exampleModal"
                                           >
                                             <i className="fa fa-trash text-danger"></i>
                                           </button>
@@ -343,13 +348,13 @@ const DataUser = () => {
                                 ))
                               : data.map((item, index) => (
                                   <tr key={item.id}>
-                                    <td className="ps-0 align-middle text-center">
+                                    <td className="ps-0 align-middle text-center ">
                                       <span className="text-xs text-secondary mb-0">
                                         {startIndex + index + 1}
                                       </span>
                                     </td>
                                     <td className="align-middle text-start text-sm ps-2 pe-0">
-                                      <span className="text-xs text-secondary mb-0">
+                                      <span className="text-xs text-secondary mb-0 ">
                                         {item.fullname}
                                       </span>
                                     </td>
@@ -369,7 +374,7 @@ const DataUser = () => {
                                       </span>
                                     </td>
                                     <td className="align-middle text-center text-sm pe-0">
-                                      <span className="text-xs text-secondary mb-0">
+                                      <span className="text-xs text-secondary mb-0 ">
                                         <div>
                                           <Link
                                             className="btn btn-outline-primary btn-sm mb-0 me-2 pt-1 pb-1 ps-2 pe-2 text-primary"
