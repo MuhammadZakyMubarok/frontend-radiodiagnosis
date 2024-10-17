@@ -30,6 +30,8 @@ const LoginCardUser = () => {
           window.location.href = "/radiografer-data-pasien";
         } else if (data.role === "doctor") {
           window.location.href = "/dokter-data-pasien";
+        } else if (data.role === "patient") {
+          window.location.href = "/patient-dashboard";
         }
       })
       .catch((error) => {

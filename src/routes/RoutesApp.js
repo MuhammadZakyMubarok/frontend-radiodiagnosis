@@ -37,6 +37,7 @@ import HistoryPatient from "../views/Patient/HistoryPatient";
 import DashboardPatient from "../views/Patient/DashboardPatient";
 import DetailResultDataDiagnosis from "../views/Patient/DetailResultDataDiagnosis";
 import LoginPatient from "../auth/LoginPatient";
+import ProcessAccountPatient from "../auth/ProcessAccountPatient";
 import RegisterPatient from "../auth/RegistrationCardPatient";
 
 const RoutesApp = () => {
@@ -51,6 +52,7 @@ const RoutesApp = () => {
           <Route path="/patient-dashboard" element={<DashboardPatient />} />
           <Route path="/" element={<LoginUser />} />
           <Route path="/login-patient" element={<LoginPatient />} />
+          <Route path="/status-account-patient" element={<ProcessAccountPatient />} />
           <Route path="/regis-patient" element={<RegisterPatient />} />
           <Route path="/data-user" element={<DataUser />} />
           <Route path="/add-data-user" element={<AddDataUser />} />

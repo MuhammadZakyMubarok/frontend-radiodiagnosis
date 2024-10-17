@@ -49,6 +49,24 @@ const DataPasien = () => {
       });
   }, [currentPage, inputText]);
 
+  const toggleStatusUser = async (patientId, statusUser) => {
+    try {
+      await axios.put(
+        `${baseURL}/patients/status/${patientId}/${statusUser}`, // Memperbarui URL dengan status_user
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      // Refresh data setelah mengganti status
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+
   console.log(pagination);
 
   const handlePageChange = (pageNumber) => {
@@ -253,6 +271,9 @@ const DataPasien = () => {
                               <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 pe-0 text-center">
                                 Aksi
                               </th>
+                              <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                Acc Akun
+                              </th>
                               {/* <!-- <th className="text-secondary opacity-7"></th> --> */}
                             </tr>
                           </thead>
@@ -303,6 +324,17 @@ const DataPasien = () => {
                                     </span>
                                   </Link>
                                 </td>
+                                <td className="align-middle text-start text-sm pe-0 text-center">
+                                  <span
+                                    onClick={() => toggleStatusUser(item.id, item.status_user)}
+                                    className={`badge cursor-pointer border-radius-xl badge-sm bg-gradient-${
+                                      item.status_user === 0 ? "warning" : "success"
+                                    }`}
+                                  >
+                                    {item.status_user === 0 ? "Acc" : "Selesai"}
+                                  </span>
+                                </td>
+
                               </tr>
                             ))}
                           </tbody>

@@ -24,9 +24,9 @@ const LoginCardPatient = () => {
       .post(`${baseURL}/authentications`, data)
       .then((response) => {
         const { data } = response.data;
-        if (data?.role === "Patient") {
+        if (data?.role === "patient") {
           sessionStorage.setItem("token", data.accessToken);
-          window.location.href = "/Patient-dashboard";
+          window.location.href = "/patient-dashboard";
         } else {
           sessionStorage.removeItem("token");
         }

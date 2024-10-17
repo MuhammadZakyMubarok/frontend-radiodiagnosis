@@ -41,32 +41,7 @@ const dummyPagination = {
 };
 
 const DashboardPatient = () => {
-  const auth = WithAuthorization(["Patient"]);
-  const [data, setData] = useState([]);
-  const [pagination, setPagination] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [inputText, setInputText] = useState("");
-  const [statusSearch, setStatusSearch] = useState(false);
 
-  const handleChange = (event) => {
-    setInputText(event.target.value);
-    setStatusSearch(true);
-  };
-
-  useEffect(() => {
-    // Menggunakan data dummy alih-alih fetching data dari API
-    const filteredData = dummyData.filter((item) =>
-      item.fullname.toLowerCase().includes(inputText.toLowerCase())
-    );
-    setData(filteredData);
-    setPagination(dummyPagination);
-  }, [inputText, currentPage]);
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  if (auth) {
     return (
       <div className="g-sidenav-show bg-gray-100">
         <div className="min-height-300 bg-primary position-absolute w-100"></div>
@@ -182,7 +157,6 @@ const DashboardPatient = () => {
         </body>
       </div>
     );
-  }
 };
 
 export default DashboardPatient;
