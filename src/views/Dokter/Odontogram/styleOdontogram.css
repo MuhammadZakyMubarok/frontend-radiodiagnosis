@@ -1,0 +1,16 @@
+.dropdown-body {
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+    /* Hide overflowing content */
+    max-height: 0;
+    /* Start hidden */
+    opacity: 0;
+    /* Start hidden */
+}
+
+.dropdown-body.show {
+    max-height: 1000px;
+    /* A large value to accommodate content height */
+    opacity: 1;
+    /* Fully visible */
+}
