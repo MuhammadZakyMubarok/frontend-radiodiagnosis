@@ -1218,9 +1218,9 @@ const ViewGambarPanoramikDokter = () => {
                                               type="button"
                                               data-bs-toggle="modal"
                                               data-bs-target="#exampleModal3"
-                                              disabled={
-                                                data.history_id ? false : true
-                                              }
+                                              // disabled={
+                                              //   data.history_id ? false : true
+                                              // }
                                             >
                                               Interpretasi Manual
                                             </button>

@@ -4,6 +4,7 @@ import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
 import { baseURL, apiUrl } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
+import OdontogramModal from "../../../component/Modal/OdontogramModal";
 import "./styleOdontogram.css";
 
 const OdontogramPasien = () => {
@@ -29,6 +30,14 @@ const OdontogramPasien = () => {
   const customOrderDown = [
     48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38,
   ];
+
+  const [selectedTooth, setSelectedTooth] = useState(null);
+
+  const openModal = (toothNumber) => {
+    setSelectedTooth(toothNumber);
+    <OdontogramModal toothNumber={selectedTooth} />
+  };
+
 
   const handleSquareCrop = () => {
     setIsSquare(!isSquare);
@@ -79,6 +88,7 @@ const OdontogramPasien = () => {
     const patient = patients.find((p) => p.medic_number === selectedId);
     setSelectedPatient(patient);
   };
+
 
   //handle submit button
   const handleSubmit = async (e) => {
@@ -287,6 +297,7 @@ const OdontogramPasien = () => {
                                         {/* Gigi Atas - Upper Teeth */}
                                         <div className="text-center mt-2">
                                           <div className="col d-flex justify-content-center">
+
                                             {odontogramUp.length > 0 ? (
                                               odontogramUp.map((item, index) =>
                                                 item.accuracy != null ? (
@@ -296,6 +307,9 @@ const OdontogramPasien = () => {
                                                       className="btn-check"
                                                       id={`btncheck${item.number}`}
                                                       autoComplete="off"
+                                                      data-bs-toggle="modal"
+                                                      data-bs-target="odontogramModal"
+                                                      onClick={() => setSelectedTooth(item.number)}
                                                     />
                                                     <label className="btn btn-outline-secondary text-xs p-2">
                                                       {item.number}
@@ -308,6 +322,9 @@ const OdontogramPasien = () => {
                                                       className="btn-check"
                                                       id={`btncheck${item.number}`}
                                                       autoComplete="off"
+                                                      data-bs-toggle="modal"
+                                                      data-bs-target="odontogramModal"
+                                                      onClick={() => setSelectedTooth(item.number)}
                                                     />
                                                     <label className="btn btn-outline-danger text-xs p-2 flex items-center justify-center">
                                                       {item.number}
@@ -323,6 +340,9 @@ const OdontogramPasien = () => {
                                                     className="btn-check"
                                                     id={`btncheck${item}`}
                                                     autoComplete="off"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="odontogramModal"
+                                                    onClick={() => setSelectedTooth(item.number)}
                                                   />
                                                   <label
                                                     className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
@@ -334,6 +354,7 @@ const OdontogramPasien = () => {
                                               ))
                                             )}
                                           </div>
+                                          {selectedTooth && <OdontogramModal toothNumber={selectedTooth} />}
                                         </div>
 
                                         {/* Gigi Bawah - Lower Teeth */}
@@ -558,7 +579,7 @@ const OdontogramPasien = () => {
             </div>
           </main>
         </body>
-      </div>
+      </div >
     );
   } else {
     return <div></div>;
