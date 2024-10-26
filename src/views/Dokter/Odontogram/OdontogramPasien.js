@@ -1,5 +1,5 @@
 import axios from "axios";
-import { React, useState, useEffect } from "react";
+import { React, useState, useEffect, useRef } from "react";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
 import { baseURL, apiUrl } from "../../../routes/Config";
@@ -31,11 +31,15 @@ const OdontogramPasien = () => {
     48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38,
   ];
 
-  const [selectedTooth, setSelectedTooth] = useState(null);
+  const [activePopover, setActivePopover] = useState(null);
+  const [activeCheckbox, setActiveCheckbox] = useState(null);
+  const containerRef = useRef(null);
 
-  const openModal = (toothNumber) => {
-    setSelectedTooth(toothNumber);
-    <OdontogramModal toothNumber={selectedTooth} />
+  const handleCheckboxClick = (number) => {
+    setActiveCheckbox((prev) => (prev === number ? null : number));
+  };
+  const togglePopover = (itemId) => {
+    setActivePopover((prev) => (prev === itemId ? null : itemId));
   };
 
 
@@ -77,6 +81,18 @@ const OdontogramPasien = () => {
       source.cancel("Component unmounted or refreshed, request canceled.");
     };
   }, [token]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setActiveCheckbox(null);
+        setActivePopover(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
 
   // Handle patient selection change
@@ -301,52 +317,107 @@ const OdontogramPasien = () => {
                                             {odontogramUp.length > 0 ? (
                                               odontogramUp.map((item, index) =>
                                                 item.accuracy != null ? (
-                                                  <div key={item.number} className="inline-block m-1">
+                                                  <div key={item.number} className="popover-container inline-block m-1" ref={containerRef}>
                                                     <input
                                                       type="checkbox"
                                                       className="btn-check"
                                                       id={`btncheck${item.number}`}
                                                       autoComplete="off"
-                                                      data-bs-toggle="modal"
-                                                      data-bs-target="odontogramModal"
-                                                      onClick={() => setSelectedTooth(item.number)}
+                                                      checked={activeCheckbox === item.number}
+                                                      onChange={() => handleCheckboxClick(item.number)}
                                                     />
-                                                    <label className="btn btn-outline-secondary text-xs p-2">
+                                                    <label
+                                                      className="btn btn-outline-secondary text-xs p-2"
+                                                      htmlFor={`btncheck${item.number}`}
+                                                      onClick={() => togglePopover(item.number)}
+                                                    >
                                                       {item.number}
                                                     </label>
+                                                    {activePopover === item.number && activeCheckbox === item.number && (
+                                                      <div className="popover-content">
+                                                        <p>Nomor Gigi: {item.number}</p>
+                                                        {!item.isDuplicate ? (
+                                                          // Render images for non-duplicate teeth
+                                                          Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
+                                                            <div className="carousel slide">
+                                                              <div className="carousel-inner">
+                                                                {item.urlImage.map((img, i) => (
+                                                                  <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                                                    <img
+                                                                      className="bg-white"
+                                                                      width="50"
+                                                                      style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                      src={isSquare ? item.urlImageSquare[i] : img}
+                                                                      alt={`carousel ${i}`}
+                                                                    />
+                                                                  </div>
+                                                                ))}
+                                                              </div>
+                                                            </div>
+                                                          ) : (
+                                                            <img
+                                                              className="bg-white mx-1 responsive-img"
+                                                              width="50"
+                                                              style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                              src={isSquare ? item.urlImageSquare : item.urlImage}
+                                                              alt="Odontogram"
+                                                            />
+                                                          )
+                                                        ) : (
+                                                          // Render image for duplicates using index 1
+                                                          <img
+                                                            className="bg-white mx-1 responsive-img"
+                                                            width="50"
+                                                            style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                            src={isSquare ? item.urlImageSquare[1] : item.urlImage[1]}
+                                                            alt="Duplicate Image"
+                                                          />
+                                                        )}
+                                                      </div>
+                                                    )}
                                                   </div>
                                                 ) : (
-                                                  <div key={index} className="inline-block m-1">
+                                                  <div key={index} className="popover-container inline-block m-1" ref={containerRef}>
                                                     <input
                                                       type="checkbox"
                                                       className="btn-check"
                                                       id={`btncheck${item.number}`}
                                                       autoComplete="off"
-                                                      data-bs-toggle="modal"
-                                                      data-bs-target="odontogramModal"
-                                                      onClick={() => setSelectedTooth(item.number)}
+                                                      checked={activeCheckbox === item.number}
+                                                      onChange={() => handleCheckboxClick(item.number)}
                                                     />
-                                                    <label className="btn btn-outline-danger text-xs p-2 flex items-center justify-center">
+                                                    <label
+                                                      className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
+                                                      htmlFor={`btncheck${item.number}`}
+                                                      onClick={() => togglePopover(item.number)}
+                                                    >
                                                       {item.number}
                                                     </label>
+                                                    {activePopover === item.number && activeCheckbox === item.number && (
+                                                      <div className="popover-content">
+                                                        <p>Nomor Gigi: {item.number}</p>
+                                                        <div className="mx-1">
+                                                          Gigi Hilang
+                                                        </div>
+
+                                                      </div>
+                                                    )}
                                                   </div>
                                                 )
                                               )
                                             ) : (
                                               customOrderUp.map((item, index) => (
-                                                <div key={index} className="inline-block m-1">
+                                                <div key={index} className="popover-container inline-block m-1" ref={containerRef}>
                                                   <input
                                                     type="checkbox"
                                                     className="btn-check"
                                                     id={`btncheck${item}`}
                                                     autoComplete="off"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="odontogramModal"
-                                                    onClick={() => setSelectedTooth(item.number)}
+                                                    checked={activeCheckbox === item.number}
+                                                    onChange={() => handleCheckboxClick(item.number)}
                                                   />
                                                   <label
                                                     className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
-                                                    htmlFor={`btncheck${item}`}
                                                   >
                                                     {item}
                                                   </label>
@@ -354,7 +425,6 @@ const OdontogramPasien = () => {
                                               ))
                                             )}
                                           </div>
-                                          {selectedTooth && <OdontogramModal toothNumber={selectedTooth} />}
                                         </div>
 
                                         {/* Gigi Bawah - Lower Teeth */}
@@ -363,43 +433,104 @@ const OdontogramPasien = () => {
                                             {odontogramDown.length > 0 ? (
                                               odontogramDown.map((item, index) =>
                                                 item.accuracy != null ? (
-                                                  <div key={item.number} className="inline-block m-1">
+                                                  <div key={item.number} className="popover-container inline-block m-1" ref={containerRef}>
                                                     <input
                                                       type="checkbox"
                                                       className="btn-check"
                                                       id={`btncheck${item.number}`}
                                                       autoComplete="off"
+                                                      checked={activeCheckbox === item.number}
+                                                      onChange={() => handleCheckboxClick(item.number)}
                                                     />
-                                                    <label className="btn btn-outline-secondary text-xs p-2">
+                                                    <label className="btn btn-outline-secondary text-xs p-2"
+                                                      htmlFor={`btncheck${item.number}`}
+                                                      onClick={() => togglePopover(item.number)}
+                                                    >
                                                       {item.number}
                                                     </label>
+                                                    {activePopover === item.number && activeCheckbox === item.number && (
+                                                      <div className="popover-content">
+                                                        <p>Nomor Gigi: {item.number}</p>
+                                                        {!item.isDuplicate ? (
+                                                          // Render images for non-duplicate teeth
+                                                          Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
+                                                            <div className="carousel slide">
+                                                              <div className="carousel-inner">
+                                                                {item.urlImage.map((img, i) => (
+                                                                  <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                                                    <img
+                                                                      className="bg-white"
+                                                                      width="50"
+                                                                      style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                      src={isSquare ? item.urlImageSquare[i] : img}
+                                                                      alt={`carousel ${i}`}
+                                                                    />
+                                                                  </div>
+                                                                ))}
+                                                              </div>
+                                                            </div>
+                                                          ) : (
+                                                            <img
+                                                              className="bg-white mx-1 responsive-img"
+                                                              width="50"
+                                                              style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                              src={isSquare ? item.urlImageSquare : item.urlImage}
+                                                              alt="Odontogram"
+                                                            />
+                                                          )
+                                                        ) : (
+                                                          // Render image for duplicates using index 1
+                                                          <img
+                                                            className="bg-white mx-1 responsive-img"
+                                                            width="50"
+                                                            style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                            src={isSquare ? item.urlImageSquare[1] : item.urlImage[1]}
+                                                            alt="Duplicate Image"
+                                                          />
+                                                        )}
+                                                      </div>
+                                                    )}
                                                   </div>
                                                 ) : (
-                                                  <div key={index} className="inline-block m-1">
+                                                  <div key={index} className="popover-container inline-block m-1" ref={containerRef}>
                                                     <input
                                                       type="checkbox"
                                                       className="btn-check"
                                                       id={`btncheck${item.number}`}
                                                       autoComplete="off"
+                                                      checked={activeCheckbox === item.number}
+                                                      onChange={() => handleCheckboxClick(item.number)}
                                                     />
-                                                    <label className="btn btn-outline-danger text-xs p-2 flex items-center justify-center">
+                                                    <label className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
+                                                      htmlFor={`btncheck${item.number}`}
+                                                      onClick={() => togglePopover(item.number)}
+                                                    >
                                                       {item.number}
                                                     </label>
+                                                    {activePopover === item.number && activeCheckbox === item.number && (
+                                                      <div className="popover-content">
+                                                        <p>Nomor Gigi: {item.number}</p>
+                                                        <div className="mx-1" >
+                                                          Gigi Hilang
+                                                        </div>
+                                                      </div>
+                                                    )}
                                                   </div>
                                                 )
                                               )
                                             ) : (
                                               customOrderDown.map((item, index) => (
-                                                <div key={index} className="inline-block m-1">
+                                                <div key={index} className="popover-container inline-block m-1" ref={containerRef} >
                                                   <input
                                                     type="checkbox"
                                                     className="btn-check"
                                                     id={`btncheck${item}`}
                                                     autoComplete="off"
+                                                    checked={activeCheckbox === item.number}
+                                                    onChange={() => handleCheckboxClick(item.number)}
                                                   />
                                                   <label
                                                     className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
-                                                    htmlFor={`btncheck${item}`}
                                                   >
                                                     {item}
                                                   </label>

@@ -14,3 +14,41 @@
     opacity: 1;
     /* Fully visible */
 }
+
+/* Container styling */
+.popover-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Popover styling */
+.popover-content {
+    width: 160px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 4px;
+    padding: 8px;
+    position: absolute;
+    bottom: 125%;
+    /* Position it above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 0.3s;
+    visibility: visible;
+}
+
+/* Arrow styling */
+.popover-content::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    /* Bottom of the popover */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
