@@ -12,15 +12,18 @@ import VerifiedResult from "../../../component/Modal/VerifiedResult";
 import ButtonVerified from "../../../component/Button/ButtonVerified";
 import ButtonVerifiedResult from "../../../component/Button/ButtonVerifiedResult";
 import StatusUnverified from "../../../component/Alerts/StatusUnverified";
+import StatusOngoing from "../../../component/Alerts/StatusOngoing";
 import StatusVerified from "../../../component/Alerts/StatusVerified";
+import FinalisasiData from "../../../component/Modal/FinalisasiData";
 
 const ViewGambarPanoramikDokter = () => {
   const auth = WithAuthorization(["doctor"]);
 
   const [data, setData] = useState({});
-  const [doctors, setDoctors] = useState([]);
+  const [doctor, setDoctor] = useState([]);
   const [teethNumber, setTeethNumber] = useState([]);
   const [verified, setverified] = useState(0);
+  const [catatanPasien, setCatatanPasien] = useState("");
 
   const { id } = useParams();
   const token = sessionStorage.getItem("token");
@@ -40,14 +43,14 @@ const ViewGambarPanoramikDokter = () => {
       });
 
     axios
-      .get(`${baseURL}/doctors/users/all`, {
+      .get(`${baseURL}/users/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((response) => {
         if (response.data.data) {
-          setDoctors(response.data.data);
+          setDoctor(response.data.data);
         }
       })
       .catch((error) => {
@@ -64,26 +67,26 @@ const ViewGambarPanoramikDokter = () => {
     setTeethNumber(numbers);
   }, [data]);
 
-  const handleSubmit = (e, doctorId) => {
-    e.preventDefault();
-    axios
-      .put(
-        `${baseURL}/radiographics/edit/${id}/doctor`,
-        { doctorId, historyId: data.history_id },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      .then((response) => {
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+  // const handleSubmit = (e, doctorId) => {
+  //   e.preventDefault();
+  //   axios
+  //     .put(
+  //       `${baseURL}/radiographics/edit/${id}/doctor`,
+  //       { doctorId, historyId: data.history_id },
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     )
+  //     .then((response) => {
+  //       window.location.reload();
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // };
 
   if (auth) {
     return (
@@ -149,13 +152,17 @@ const ViewGambarPanoramikDokter = () => {
                                 <p className="text-xs text-secondary mb-1">
                                   Status
                                 </p>
-                                {data.panoramik_check_date === null ? (
+                                {data.status === 0 ? (
                                   <p className="text-xs font-weight-bolder mb-0">
                                     <StatusUnverified />
                                   </p>
+                                ) : data.status === 1 ? (
+                                  <p className="text-xs font-weight-bolder mb-0">
+                                    <StatusOngoing />
+                                  </p>
                                 ) : (
-                                  <p className="text-xs font-weight-bolder mb-0 text-success">
-                                    Diverifikasi oleh {data.doctor_name}
+                                  <p className="text-xs font-weight-bolder mb-0">
+                                    <StatusVerified />
                                   </p>
                                 )}
                               </div>
@@ -164,7 +171,11 @@ const ViewGambarPanoramikDokter = () => {
                                   Dokter Verifikator
                                 </p>
 
-                                <select
+                                <p className="text-xs font-weight-bolder mb-0">
+                                  {data.doctor_name ?? "-"}
+                                </p>
+
+                                {/* <select
                                   className="form-select form-select-sm"
                                   aria-label=".form-select-sm example"
                                   style={{ width: "70%" }}
@@ -181,7 +192,7 @@ const ViewGambarPanoramikDokter = () => {
                                       {doctor.fullname}
                                     </option>
                                   ))}
-                                </select>
+                                </select> */}
                               </div>
                             </div>
                           </div>
@@ -210,17 +221,16 @@ const ViewGambarPanoramikDokter = () => {
 
                                       <img
                                         className="img-fluid border-radius-xl p-2"
-                                        src={`${
-                                          baseURL + data.panoramik_picture
-                                        }`}
+                                        src={`${baseURL + data.panoramik_picture
+                                          }`}
                                       />
 
                                       {/* start Diagram Gigi */}
                                       <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
                                         <div className="card-body">
-                                        <p className="text-xs p-2 mb-0 mt-4">
-                                          Diagram Gigi
-                                        </p>
+                                          <p className="text-xs p-2 mb-0 mt-4">
+                                            Diagram Gigi
+                                          </p>
                                           <div className="row">
                                             <div className="d-flex justify-content-center img-fluid mb-2">
                                               <img src="../assets/img/App/line.png" />
@@ -1103,7 +1113,7 @@ const ViewGambarPanoramikDokter = () => {
 
                                                   <div className="col-6 text-end">
                                                     {diagnose?.is_corerct ===
-                                                    null ? (
+                                                      null ? (
                                                       <ButtonVerified
                                                         index={diagnose?.id}
                                                       />
@@ -1127,7 +1137,7 @@ const ViewGambarPanoramikDokter = () => {
                                               );
                                             }
                                           })}
-                                          
+
                                           <div className="row">
                                             <div className="col-12">
                                               <p className="text-xxs text-secondary font-weight-bold">
@@ -1155,28 +1165,28 @@ const ViewGambarPanoramikDokter = () => {
                                                           {diagnose.verificator_diagnosis ? (
                                                             <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
                                                               {diagnose.verificator_diagnosis ===
-                                                              "dan lain-lain"
+                                                                "dan lain-lain"
                                                                 ? diagnose.verificator_note +
-                                                                  (diagnose.manual_diagnosis
-                                                                    ? ", " +
-                                                                      diagnose.manual_diagnosis
-                                                                    : "")
+                                                                (diagnose.manual_diagnosis
+                                                                  ? ", " +
+                                                                  diagnose.manual_diagnosis
+                                                                  : "")
                                                                 : diagnose.verificator_diagnosis
-                                                                ? diagnose.verificator_diagnosis +
+                                                                  ? diagnose.verificator_diagnosis +
                                                                   (diagnose.manual_diagnosis
                                                                     ? ", " +
-                                                                      diagnose.manual_diagnosis
+                                                                    diagnose.manual_diagnosis
                                                                     : "")
-                                                                : diagnose.manual_diagnosis}
+                                                                  : diagnose.manual_diagnosis}
                                                             </p>
                                                           ) : (
                                                             <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
                                                               {diagnose.system_diagnosis
                                                                 ? diagnose.system_diagnosis +
-                                                                  (diagnose.manual_diagnosis
-                                                                    ? ", " +
-                                                                      diagnose.manual_diagnosis
-                                                                    : "")
+                                                                (diagnose.manual_diagnosis
+                                                                  ? ", " +
+                                                                  diagnose.manual_diagnosis
+                                                                  : "")
                                                                 : diagnose.manual_diagnosis}
                                                             </p>
                                                           )}
@@ -1201,6 +1211,24 @@ const ViewGambarPanoramikDokter = () => {
                                               )}
                                             </div>
                                           </div>
+                                          <p className="text-xs">
+                                            Catatan Untuk Pasien
+                                          </p>
+                                          <form>
+                                            <div className="row">
+                                              <div className="col-12">
+                                                <textarea
+                                                  className="form-control text-xs"
+                                                  id="catatanpasien"
+                                                  name="catatanpasien"
+                                                  placeholder="Catatan untuk pasien"
+                                                  rows="5"
+                                                  value={catatanPasien}
+                                                  onChange={(e) => setCatatanPasien(e.target.value)}
+                                                />
+                                              </div>
+                                            </div>
+                                          </form>
                                           <hr
                                             style={{
                                               height: "1px",
@@ -1208,7 +1236,7 @@ const ViewGambarPanoramikDokter = () => {
                                               color: "gray",
                                               backgroundColor: "gray",
                                               marginBottom: "0px",
-                                              marginTop: "0px",
+                                              marginTop: "20px",
                                               marginStart: "0px",
                                             }}
                                           />
@@ -1219,13 +1247,30 @@ const ViewGambarPanoramikDokter = () => {
                                               data-bs-toggle="modal"
                                               data-bs-target="#exampleModal3"
                                               disabled={
-                                                data.history_id ? false : true
+                                                data.status === 2 ? true : false
                                               }
                                             >
                                               Interpretasi Manual
                                             </button>
                                             <InterpretasiManual
                                               radiographicId={data.history_id}
+                                            />
+                                          </div>
+                                          <div className="d-grid">
+                                            <button
+                                              className="btn btn-sm btn-success mt-4 mb-2"
+                                              type="button"
+                                              data-bs-toggle="modal"
+                                              data-bs-target="#finalisasiModal"
+                                              disabled={
+                                                data.status === 2 ? true : false
+                                              }
+                                            >
+                                              Finalisasi Data
+                                            </button>
+                                            <FinalisasiData
+                                              radiographicId={data.history_id}
+                                              catatanPasien={catatanPasien}
                                             />
                                           </div>
                                         </div>
