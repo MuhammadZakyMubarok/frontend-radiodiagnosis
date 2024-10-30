@@ -5,6 +5,7 @@ import SidebarAdmin from "../../component/Sidebar/SidebarAdmin";
 import { baseURL } from "../../routes/Config";
 import WithAuthorization from "../../utils/auth";
 import RegistrasiConfirm from "../../component/Modal/RegistrasiConfirm";
+import './responsive-admin.css';
 
 const AddDataUser = () => {
   const auth = WithAuthorization(["admin"]);
@@ -130,7 +131,7 @@ const AddDataUser = () => {
             <div className="container-fluid py-2">
               <div className="row p-0">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="add-card">
                     <div className="card-header pb-2 p-4">
                       <div className="row">
                         <div className="col-6 d-flex align-items-center">
