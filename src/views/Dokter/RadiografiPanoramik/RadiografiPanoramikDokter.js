@@ -18,6 +18,7 @@ const RadiografiPanoramikDokter = () => {
   const [inputText, setInputText] = useState("");
   const [statusSearch, setStatusSearch] = useState(false);
   const [verified, setVerified] = useState("");
+  const [loggedInDoctor, setLoggedInDoctor] = useState(null);
 
   const handleChange = (event) => {
     setInputText(event.target.value);
@@ -29,6 +30,18 @@ const RadiografiPanoramikDokter = () => {
   };
 
   const token = sessionStorage.getItem("token");
+
+  useEffect(() => {
+    axios.get(`${baseURL}/users/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then(response => {
+      setLoggedInDoctor(response.data.data);
+    }).catch(error => {
+      console.log(error);
+    });
+  }, []);
 
   useEffect(() => {
     let url = `${baseURL}/radiographics/all?page=${currentPage}`;
@@ -151,6 +164,7 @@ const RadiografiPanoramikDokter = () => {
                           <RadiografiPanoramikCardDokter
                             data={item}
                             baseURL={baseURL}
+                            loggedInDoctor={loggedInDoctor}
                           />
                         </div>
                       ))}

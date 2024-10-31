@@ -2,10 +2,56 @@ import moment from "moment";
 import React from "react";
 import Unverified from "../Alerts/Unverified";
 import Verified from "../Alerts/Verified";
+import Ongoing from "../Alerts/Ongoing";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
-const RadiografiPanoramikCardDokter = ({ data, baseURL }) => {
+const RadiografiPanoramikCardDokter = ({ data, baseURL, loggedInDoctor }) => {
   console.log('Data received in RadiografiPanoramikCardDokter:', data);
+
+  const token = sessionStorage.getItem("token");
+
+  const handleDetail = () => {
+    if (data.status === 0) {
+      if (loggedInDoctor) {
+        axios
+          .put(
+            `${baseURL}/radiographics/edit/${data.history_id}/doctor`, {
+            doctorId: loggedInDoctor.id,
+            historyId: data.history_id,
+          }, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+          )
+          .then((res) => {
+            console.log('Doctor set successfully:', res.data);
+          }).catch((err) => {
+            console.error('Error setting doctor:', err);
+          });
+      }
+
+      axios
+        .put(
+          `${baseURL}/radiographics/edit/${data.history_id}/status`,
+          1,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          console.log('Status set successfully:', res.data);
+        }).catch((err) => {
+          console.error('Error setting status:', err);
+        });
+    }
+  }
+
   return (
     <div>
       <div className="row p-3 ">
@@ -66,12 +112,15 @@ const RadiografiPanoramikCardDokter = ({ data, baseURL }) => {
 
             <div className="row mt-4">
               <div className="col-6 pe-0">
-                {data.panoramik_check_date === null ? (
+                {data.status === 0 ? (
                   <Unverified />
+                ) : data.status === 1 ? (
+                  <Ongoing />
                 ) : (
                   <Verified />
                 )}
               </div>
+
 
               <div className="col-6 pe-2 text-end">
                 <Link
@@ -80,6 +129,7 @@ const RadiografiPanoramikCardDokter = ({ data, baseURL }) => {
                   <button
                     type="button"
                     className="text-dark btn btn-outline-secondary btn-sm p-1 px-2 opacity-5 mb-0"
+                    onClick={handleDetail}
                   >
                     Lihat Detail
                   </button>
