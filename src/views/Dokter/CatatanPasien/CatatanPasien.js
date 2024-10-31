@@ -92,7 +92,7 @@ const CatatanPasien = () => {
                       <div className="row">
                         <div className="col-9 d-flex align-items-center">
                           <h5 className="mb-0 font-weight-bolder">
-                            Catatan Pasien
+                            Catatan Pasiennnnnnnnn
                           </h5>
                         </div>
                         <div class="col-3 text-end pe-2">
