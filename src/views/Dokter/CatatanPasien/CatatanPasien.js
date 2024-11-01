@@ -87,15 +87,15 @@ const CatatanPasien = () => {
             <div className="container-fluid py-2">
               <div className="row p-0">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="card-l">
                     <div className="card-header pb-2 p-4">
                       <div className="row">
-                        <div className="col-9 d-flex align-items-center">
+                        <div className="col-md-8 co-12 d-flex align-items-center mb-4">
                           <h5 className="mb-0 font-weight-bolder">
-                            Catatan Pasiennnnnnnnn
+                            Catatan Pasien
                           </h5>
                         </div>
-                        <div class="col-3 text-end pe-2">
+                        <div class="col-md-4 col-12 text-end pe-2">
                           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
                             <div class="input-group">
                               <span class="input-group-text text-body border-radius-xl">

@@ -65,7 +65,7 @@ const ViewDataPasien = () => {
             <div className="container-fluid py-2">
               <div className="row p-0">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="card-l">
                     <div className="card-header pb-2 p-4">
                       <div className="row">
                         <div className="col-8 d-flex align-items-center">
@@ -81,7 +81,7 @@ const ViewDataPasien = () => {
                           </a>
                         </div>
 
-                        <div className="col">
+                        <div className="col" id="btn-dlt-edt">
                           <div className="row">
                             <div className="col-6 d-flex justify-content-end">
                               <button
