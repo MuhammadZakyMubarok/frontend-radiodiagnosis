@@ -1,11 +1,11 @@
 import axios from "axios";
-import { React, useState, useEffect } from "react";
+import { React, useState, useEffect, useRef } from "react";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import InterpretasiManual from "../../../component/Modal/InterpretasiManual";
 import VerifiedNo from "../../../component/Modal/VerifiedNo";
 import VerifiedYes from "../../../component/Modal/VerifiedYes";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
-import { baseURL } from "../../../routes/Config";
+import { baseURL, apiUrl } from "../../../routes/Config";
 import { useParams } from "react-router-dom";
 import WithAuthorization from "../../../utils/auth";
 import VerifiedResult from "../../../component/Modal/VerifiedResult";
@@ -15,6 +15,7 @@ import StatusUnverified from "../../../component/Alerts/StatusUnverified";
 import StatusOngoing from "../../../component/Alerts/StatusOngoing";
 import StatusVerified from "../../../component/Alerts/StatusVerified";
 import FinalisasiData from "../../../component/Modal/FinalisasiData";
+import "./styleOdontogram.css";
 
 const ViewGambarPanoramikDokter = () => {
   const auth = WithAuthorization(["doctor"]);
@@ -27,6 +28,25 @@ const ViewGambarPanoramikDokter = () => {
 
   const { id } = useParams();
   const token = sessionStorage.getItem("token");
+
+  // get data from detection
+  const [odontogramImage, setOdontogramImage] = useState({});
+  const [componentKey, setComponentKey] = useState(0);
+  const [odontogramUp, setOdontogramUp] = useState([]);
+  const [odontogramDown, setOdontogramDown] = useState([]);
+  const [isSquare, setIsSquare] = useState(false);
+  const [overlay, setOverlay] = useState(false);
+  const [showImages, setShowImages] = useState(false); // State to manage visibility
+  const customOrderUp = [
+    18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28,
+  ];
+  const customOrderDown = [
+    48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38,
+  ];
+
+  const [activePopover, setActivePopover] = useState(null);
+  const [activeCheckbox, setActiveCheckbox] = useState(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     axios
@@ -67,26 +87,99 @@ const ViewGambarPanoramikDokter = () => {
     setTeethNumber(numbers);
   }, [data]);
 
-  // const handleSubmit = (e, doctorId) => {
-  //   e.preventDefault();
-  //   axios
-  //     .put(
-  //       `${baseURL}/radiographics/edit/${id}/doctor`,
-  //       { doctorId, historyId: data.history_id },
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     )
-  //     .then((response) => {
-  //       window.location.reload();
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setActiveCheckbox(null);
+        setActivePopover(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    getAll();
+  }, []);
+  
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const fileResponse = await axios.get(
+      `${baseURL + data.panoramik_picture}`,
+      { responseType: "blob" }
+    );
+    let formData = new FormData();
+    formData.append('nama', data.fullname);
+    formData.append('rekam_medik', data.medic_number);
+    formData.append("file_gambar", fileResponse.data, "odontogram.jpg");
+    setOverlay(true);
+
+    try {
+      console.log(`Uploading file to: ${apiUrl}/data`);
+      await axios.delete(`${apiUrl}/data`);
+      const response = await axios.post(`${apiUrl}/data`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      console.log(response.data);
+      console.log("Berhasil Deteksi Panoramik");
+      getAll();
+    } catch (error) {
+      console.error(error);
+    }
+    setOverlay(false);
+    setComponentKey(componentKey + 1);
+  }
+
+  // const deleteData = async () => {
+  //   try {
+  //     await axios.delete(`${apiUrl}/data`);
+  //     getAll();
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  //   // window.location.reload();
   // };
+
+  const getAll = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/data`);
+      const fetchedData = response.data;
+
+      if (fetchedData.predictions?.show_odontogram?.length > 0) {
+        const upperTeeth = fetchedData.predictions.show_odontogram
+          .filter((item) => customOrderUp.includes(item.number))
+          .sort((a, b) => customOrderUp.indexOf(a.number) - customOrderUp.indexOf(b.number));
+
+        const lowerTeeth = fetchedData.predictions.show_odontogram
+          .filter((item) => customOrderDown.includes(item.number))
+          .sort((a, b) => customOrderDown.indexOf(a.number) - customOrderDown.indexOf(b.number));
+
+        setOdontogramUp(upperTeeth);
+        setOdontogramDown(lowerTeeth);
+      }
+      setOdontogramImage(fetchedData);
+    } catch (error) {
+      console.error(error);
+    }
+    setComponentKey(componentKey + 1);
+  };
+
+  const handleCheckboxClick = (number) => {
+    setActiveCheckbox((prev) => (prev === number ? null : number));
+  };
+  const togglePopover = (itemId) => {
+    setActivePopover((prev) => (prev === itemId ? null : itemId));
+  };
+  const handleSquareCrop = () => {
+    setIsSquare(!isSquare);
+    setComponentKey(componentKey + 1);
+  };
+  const toggleImages = () => {
+    setShowImages((prev) => !prev);
+  };
 
   if (auth) {
     return (
@@ -174,25 +267,6 @@ const ViewGambarPanoramikDokter = () => {
                                 <p className="text-xs font-weight-bolder mb-0">
                                   {data.doctor_name ?? "-"}
                                 </p>
-
-                                {/* <select
-                                  className="form-select form-select-sm"
-                                  aria-label=".form-select-sm example"
-                                  style={{ width: "70%" }}
-                                  name="doctor_id"
-                                  value={data.doctor_id}
-                                  onChange={(e) =>
-                                    handleSubmit(e, e.target.value)
-                                  }
-                                  required
-                                >
-                                  <option>Pilih Dokter</option>
-                                  {doctors.map((doctor) => (
-                                    <option key={doctor.id} value={doctor.id}>
-                                      {doctor.fullname}
-                                    </option>
-                                  ))}
-                                </select> */}
                               </div>
                             </div>
                           </div>
@@ -221,9 +295,459 @@ const ViewGambarPanoramikDokter = () => {
 
                                       <img
                                         className="img-fluid border-radius-xl p-2"
-                                        src={`${baseURL + data.panoramik_picture
-                                          }`}
+                                        src={`${baseURL + data.panoramik_picture}`}
                                       />
+                                      <div className="d-flex">
+                                        <button
+                                          type="button"
+                                          className="btn btn-primary btn-sm ms-auto"
+                                          onClick={handleSubmit}
+                                        >
+                                          Deteksi Odontogram
+                                        </button>
+                                      </div>
+
+                                      {overlay && (
+                                        <div className="modal-content">
+                                          <div className="modal-body text-center">
+                                            <div className="spinner-border text-primary">
+                                              <span className="sr-only">Loading...</span>
+                                            </div>
+                                            <h4 className="mt-3">Loading...</h4>
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {odontogramImage.gambar && (
+                                        <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
+                                          <div className="card-body">
+                                            <p className="text-xs p-2 mb-0">
+                                              Gambar Radiografi Panoramik
+                                            </p>
+                                            <div className="text-center mt-4">
+                                              <img
+                                                src={odontogramImage.gambar}
+                                                alt="Gambar Odontogram"
+                                                key={componentKey}
+                                                // className="w-64 h-40 object-cover mx-auto"
+                                                className="img-fluid border-radius-xl p-2"
+                                              // style={{ maxWidth: "75%", maxHeight: "75%", objectFit: "contain" }} // Ensures the image fits within its container
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {odontogramImage.gambar && (
+                                        <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
+                                          <div className="card-body">
+                                            <p className="text-xs p-2 mb-0">
+                                              Diagram Gigi Hilang
+                                            </p>
+                                            <div className="row d-flex">
+                                              {/* Gigi Atas - Upper Teeth */}
+                                              <div className="text-center mt-2">
+                                                <div className="row">
+                                                  <div className="d-flex justify-content-center img-fluid mb-2">
+                                                    <img src="../assets/img/App/line2.png" />
+                                                  </div>
+                                                  <div className="col d-flex justify-content-center">
+                                                    {odontogramUp.length > 0 ? (
+                                                      odontogramUp.map((item, index) =>
+                                                        item.accuracy != null ? (
+                                                          <div key={item.number} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                            <input
+                                                              type="checkbox"
+                                                              className="btn-check"
+                                                              id={`btncheck${item.number}`}
+                                                              autoComplete="off"
+                                                              checked={activeCheckbox === item.number || teethNumber.includes(item.number)}
+                                                              onChange={() => handleCheckboxClick(item.number)}
+                                                            />
+                                                            <label
+                                                              className="btn btn-outline-secondary text-xs p-2"
+                                                              htmlFor={`btncheck${item.number}`}
+                                                              onClick={() => togglePopover(item.number)}
+                                                            >
+                                                              {item.number}
+                                                            </label>
+                                                            {activePopover === item.number && activeCheckbox === item.number && (
+                                                              <div className="popover-content">
+                                                                <p>Nomor Gigi: {item.number}</p>
+                                                                {!item.isDuplicate ? (
+                                                                  // Render images for non-duplicate teeth
+                                                                  Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
+                                                                    <div className="carousel slide">
+                                                                      <div className="carousel-inner">
+                                                                        {item.urlImage.map((img, i) => (
+                                                                          <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                                                            <img
+                                                                              className="bg-white"
+                                                                              width="50"
+                                                                              style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                              src={isSquare ? item.urlImageSquare[i] : img}
+                                                                              alt={`carousel ${i}`}
+                                                                            />
+                                                                          </div>
+                                                                        ))}
+                                                                      </div>
+                                                                    </div>
+                                                                  ) : (
+                                                                    <img
+                                                                      className="bg-white mx-1 responsive-img"
+                                                                      width="50"
+                                                                      style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                      src={isSquare ? item.urlImageSquare : item.urlImage}
+                                                                      alt="Odontogram"
+                                                                    />
+                                                                  )
+                                                                ) : (
+                                                                  // Render image for duplicates using index 1
+                                                                  <img
+                                                                    className="bg-white mx-1 responsive-img"
+                                                                    width="50"
+                                                                    style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                    src={isSquare ? item.urlImageSquare[1] : item.urlImage[1]}
+                                                                    alt="Duplicate Image"
+                                                                  />
+                                                                )}
+                                                              </div>
+                                                            )}
+                                                          </div>
+                                                        ) : (
+                                                          <div key={index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                            <input
+                                                              type="checkbox"
+                                                              className="btn-check"
+                                                              id={`btncheck${item.number}`}
+                                                              autoComplete="off"
+                                                              checked={activeCheckbox === item.number || teethNumber.includes(item.number)}
+                                                              onChange={() => handleCheckboxClick(item.number)}
+                                                            />
+                                                            <label
+                                                              className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
+                                                              htmlFor={`btncheck${item.number}`}
+                                                              onClick={() => togglePopover(item.number)}
+                                                            >
+                                                              {item.number}
+                                                            </label>
+                                                            {activePopover === item.number && activeCheckbox === item.number && (
+                                                              <div className="popover-content">
+                                                                <p>Nomor Gigi: {item.number}</p>
+                                                                <div className="mx-1">
+                                                                  Gigi Hilang
+                                                                </div>
+
+                                                              </div>
+                                                            )}
+                                                          </div>
+                                                        )
+                                                      )
+                                                    ) : (
+                                                      customOrderUp.map((item, index) => (
+                                                        <div key={index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                          <input
+                                                            type="checkbox"
+                                                            className="btn-check"
+                                                            id={`btncheck${item}`}
+                                                            autoComplete="off"
+                                                            checked={activeCheckbox === item.number || teethNumber.includes(item.number)}
+                                                            onChange={() => handleCheckboxClick(item.number)}
+                                                          />
+                                                          <label
+                                                            className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
+                                                          >
+                                                            {item}
+                                                          </label>
+                                                        </div>
+                                                      ))
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              </div>
+
+                                              {/* Gigi Bawah - Lower Teeth */}
+                                              <div className="text-center">
+                                                <div className="row">
+                                                  <div className="col d-flex justify-content-center">
+                                                    {odontogramDown.length > 0 ? (
+                                                      odontogramDown.map((item, index) =>
+                                                        item.accuracy != null ? (
+                                                          <div key={item.number} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                            <input
+                                                              type="checkbox"
+                                                              className="btn-check"
+                                                              id={`btncheck${item.number}`}
+                                                              autoComplete="off"
+                                                              checked={activeCheckbox === item.number || teethNumber.includes(item.number)}
+                                                              onChange={() => handleCheckboxClick(item.number)}
+                                                            />
+                                                            <label className="btn btn-outline-secondary text-xs p-2"
+                                                              htmlFor={`btncheck${item.number}`}
+                                                              onClick={() => togglePopover(item.number)}
+                                                            >
+                                                              {item.number}
+                                                            </label>
+                                                            {activePopover === item.number && activeCheckbox === item.number && (
+                                                              <div className="popover-content">
+                                                                <p>Nomor Gigi: {item.number}</p>
+                                                                {!item.isDuplicate ? (
+                                                                  // Render images for non-duplicate teeth
+                                                                  Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
+                                                                    <div className="carousel slide">
+                                                                      <div className="carousel-inner">
+                                                                        {item.urlImage.map((img, i) => (
+                                                                          <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                                                            <img
+                                                                              className="bg-white"
+                                                                              width="50"
+                                                                              style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                              src={isSquare ? item.urlImageSquare[i] : img}
+                                                                              alt={`carousel ${i}`}
+                                                                            />
+                                                                          </div>
+                                                                        ))}
+                                                                      </div>
+                                                                    </div>
+                                                                  ) : (
+                                                                    <img
+                                                                      className="bg-white mx-1 responsive-img"
+                                                                      width="50"
+                                                                      style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                      src={isSquare ? item.urlImageSquare : item.urlImage}
+                                                                      alt="Odontogram"
+                                                                    />
+                                                                  )
+                                                                ) : (
+                                                                  // Render image for duplicates using index 1
+                                                                  <img
+                                                                    className="bg-white mx-1 responsive-img"
+                                                                    width="50"
+                                                                    style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                    src={isSquare ? item.urlImageSquare[1] : item.urlImage[1]}
+                                                                    alt="Duplicate Image"
+                                                                  />
+                                                                )}
+                                                              </div>
+                                                            )}
+                                                          </div>
+                                                        ) : (
+                                                          <div key={index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                            <input
+                                                              type="checkbox"
+                                                              className="btn-check"
+                                                              id={`btncheck${item.number}`}
+                                                              autoComplete="off"
+                                                              checked={activeCheckbox === item.number || teethNumber.includes(item.number)}
+                                                              onChange={() => handleCheckboxClick(item.number)}
+                                                            />
+                                                            <label className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
+                                                              htmlFor={`btncheck${item.number}`}
+                                                              onClick={() => togglePopover(item.number)}
+                                                            >
+                                                              {item.number}
+                                                            </label>
+                                                            {activePopover === item.number && activeCheckbox === item.number && (
+                                                              <div className="popover-content">
+                                                                <p>Nomor Gigi: {item.number}</p>
+                                                                <div className="mx-1" >
+                                                                  Gigi Hilang
+                                                                </div>
+                                                              </div>
+                                                            )}
+                                                          </div>
+                                                        )
+                                                      )
+                                                    ) : (
+                                                      customOrderDown.map((item, index) => (
+                                                        <div key={index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef} >
+                                                          <input
+                                                            type="checkbox"
+                                                            className="btn-check"
+                                                            id={`btncheck${item}`}
+                                                            autoComplete="off"
+                                                            checked={activeCheckbox === item.number || teethNumber.includes(item.number)}
+                                                            onChange={() => handleCheckboxClick(item.number)}
+                                                          />
+                                                          <label
+                                                            className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
+                                                          >
+                                                            {item}
+                                                          </label>
+                                                        </div>
+                                                      ))
+                                                    )}
+                                                  </div>
+                                                  <div className="d-flex justify-content-center img-fluid mt-2">
+                                                    <img src="../assets/img/App/line2.png" />
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {odontogramImage.gambar && (
+                                        <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
+                                          <div className="card-body">
+                                            <div className="text-center mt-3">
+                                              <div>
+                                                <div className="text-center mt-3 d-flex align-items-center justify-content-center">
+                                                  <div style={{ maxWidth: '1500px' }}>
+                                                    <div className="card">
+                                                      <div
+                                                        className={`card-header ${showImages ? 'center' : ''}`}
+                                                        onClick={toggleImages}
+                                                        style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                                      >
+                                                        <p className="text-xs p-2 mb-0">
+                                                          Gambar Crop Gigi
+                                                        </p>
+                                                        <i className={`mt-3 mb-0 fas fa-chevron-${showImages ? 'up' : 'down'}`} /> {/* Arrow icon */}
+                                                      </div>
+                                                      <div className={`card-body py-2 dropdown-body ${showImages ? 'show' : ''}`}>
+                                                        {/* Odontogram Up */}
+                                                        <div className="container-fluid d-flex mb-6 justify-content-center flex-wrap">
+                                                          <div className="row no-gutters d-flex justify-content-center">
+                                                            {odontogramUp.map((item) => (
+                                                              <div key={item.number} className="col-auto flex-item text-center">
+                                                                <div className="flex-column-container">
+                                                                  {!item.isDuplicate && !item.isMissing ? (
+                                                                    Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
+                                                                      <div className="card mx-1" style={{ elevation: 1, maxWidth: '444px' }}>
+                                                                        <div className="carousel slide">
+                                                                          <div className="carousel-inner">
+                                                                            {item.urlImage.map((img, i) => (
+                                                                              <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                                                                <img
+                                                                                  className="bg-white"
+                                                                                  width="50"
+                                                                                  style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                                  src={isSquare ? item.urlImageSquare[i] : img}
+                                                                                  alt={`carousel ${i}`}
+                                                                                />
+                                                                              </div>
+                                                                            ))}
+                                                                          </div>
+                                                                        </div>
+                                                                      </div>
+                                                                    ) : (
+                                                                      <img
+                                                                        className="bg-white mx-1 responsive-img"
+                                                                        width="50"
+                                                                        style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                        src={isSquare ? item.urlImageSquare : item.urlImage}
+                                                                        alt="Odontogram"
+                                                                      />
+                                                                    )
+                                                                  ) : item.isMissing ? (
+                                                                    <div className="mx-1 missing-text" style={{ width: '50px' }}>
+                                                                      Hilang
+                                                                    </div>
+                                                                  ) : (
+                                                                    Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
+                                                                      <img
+                                                                        className="bg-white mx-1 responsive-img"
+                                                                        width="50"
+                                                                        style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                        src={isSquare ? item.urlImageSquare[1] : item.urlImage[1]}
+                                                                        alt="Duplicate Image"
+                                                                      />
+                                                                    ) : (
+                                                                      <img
+                                                                        className="bg-white mx-1 responsive-img"
+                                                                        width="50"
+                                                                        style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                        src={isSquare ? item.urlImageSquare[0] : item.urlImage[0]}
+                                                                        alt="Duplicate Image"
+                                                                      />
+                                                                    )
+                                                                  )}
+                                                                  <div className="mt-2">{item.number}</div>
+                                                                </div>
+                                                              </div>
+                                                            ))}
+                                                          </div>
+                                                        </div>
+
+                                                        {/* Odontogram Down */}
+                                                        <div className="container-fluid d-flex justify-content-center">
+                                                          <div className="row no-gutters d-flex justify-content-center">
+                                                            {odontogramDown.map((item) => (
+                                                              <div key={item.number} className="col-auto flex-item text-center">
+                                                                <div className="mb-2">{item.number}</div>
+                                                                {!item.isDuplicate && !item.isMissing ? (
+                                                                  Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
+                                                                    <div className="card mx-1" style={{ elevation: 1, maxWidth: '444px' }}>
+                                                                      <div className="carousel slide">
+                                                                        <div className="carousel-inner">
+                                                                          {item.urlImage.map((img, i) => (
+                                                                            <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                                                              <img
+                                                                                className="bg-white"
+                                                                                width="50"
+                                                                                style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                                src={isSquare ? item.urlImageSquare[i] : img}
+                                                                                alt={`carousel ${i}`}
+                                                                              />
+                                                                            </div>
+                                                                          ))}
+                                                                        </div>
+                                                                      </div>
+                                                                    </div>
+                                                                  ) : (
+                                                                    <img
+                                                                      className="bg-white mx-1 responsive-img"
+                                                                      width="50"
+                                                                      style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                      src={isSquare ? item.urlImageSquare : item.urlImage}
+                                                                      alt="Odontogram"
+                                                                    />
+                                                                  )
+                                                                ) : item.isMissing ? (
+                                                                  <div className="mx-1 missing-text" style={{ width: '50px' }}>
+                                                                    Hilang
+                                                                  </div>
+                                                                ) : (
+                                                                  Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
+                                                                    <img
+                                                                      className="bg-white mx-1 responsive-img"
+                                                                      width="50"
+                                                                      style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                      src={isSquare ? item.urlImageSquare[1] : item.urlImage[1]}
+                                                                      alt="Duplicate Image"
+                                                                    />
+                                                                  ) : (
+                                                                    <img
+                                                                      className="bg-white mx-1 responsive-img"
+                                                                      width="50"
+                                                                      style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                      src={isSquare ? item.urlImageSquare[0] : item.urlImage[0]}
+                                                                      alt="Duplicate Image"
+                                                                    />
+                                                                  )
+                                                                )}
+                                                              </div>
+                                                            ))}
+                                                          </div>
+                                                        </div>
+
+                                                        {/* Change crop button */}
+                                                        <div className="d-flex justify-content-end">
+                                                          <button className="btn btn-sm mt-5 btn-outline-secondary" onClick={handleSquareCrop}>
+                                                            Change to {isSquare ? 'Original Crop' : 'Square crop'}
+                                                          </button>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
 
                                       {/* start Diagram Gigi */}
                                       <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
@@ -232,175 +756,11 @@ const ViewGambarPanoramikDokter = () => {
                                             Diagram Gigi
                                           </p>
                                           <div className="row">
-                                            <div className="d-flex justify-content-center img-fluid mb-2">
-                                              <img src="../assets/img/App/line.png" />
-                                            </div>
-                                            <div className="col d-flex justify-content-center mt-1">
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck1"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  55
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck1"
-                                              >
-                                                55
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck2"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  54
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck2"
-                                              >
-                                                54
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck3"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  53
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck3"
-                                              >
-                                                53
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck4"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  52
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck4"
-                                              >
-                                                52
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck5"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  51
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck5"
-                                              >
-                                                51
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck6"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  61
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck6"
-                                              >
-                                                61
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck7"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  62
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck7"
-                                              >
-                                                62
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck8"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  63
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck8"
-                                              >
-                                                63
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck9"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  64
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck9"
-                                              >
-                                                64
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck10"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  65
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck10"
-                                              >
-                                                65
-                                              </label>
-                                            </div>
                                             <div className="col d-flex justify-content-center">
                                               <input
                                                 type="checkbox"
                                                 className="btn-check"
-                                                id="btncheck11"
+                                                id="btncheck18"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
                                                   18
@@ -408,89 +768,9 @@ const ViewGambarPanoramikDokter = () => {
                                               />
                                               <label
                                                 className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck11"
+                                                for="btncheck18"
                                               >
                                                 18
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck12"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  17
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck12"
-                                              >
-                                                17
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck13"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  16
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck13"
-                                              >
-                                                16
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck14"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  15
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck14"
-                                              >
-                                                15
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck15"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  14
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck15"
-                                              >
-                                                14
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck16"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  13
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck16"
-                                              >
-                                                13
                                               </label>
 
                                               <input
@@ -499,12 +779,92 @@ const ViewGambarPanoramikDokter = () => {
                                                 id="btncheck17"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  12
+                                                  17
                                                 )}
                                               />
                                               <label
                                                 className="btn btn-outline-secondary text-xs p-2 mb-0"
                                                 for="btncheck17"
+                                              >
+                                                17
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck16"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  16
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                for="btncheck16"
+                                              >
+                                                16
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck15"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  15
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                for="btncheck15"
+                                              >
+                                                15
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck14"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  14
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                for="btncheck14"
+                                              >
+                                                14
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck13"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  13
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                for="btncheck13"
+                                              >
+                                                13
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck12"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  12
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                for="btncheck12"
                                               >
                                                 12
                                               </label>
@@ -512,7 +872,7 @@ const ViewGambarPanoramikDokter = () => {
                                               <input
                                                 type="checkbox"
                                                 className="btn-check"
-                                                id="btncheck18"
+                                                id="btncheck11"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
                                                   11
@@ -520,41 +880,9 @@ const ViewGambarPanoramikDokter = () => {
                                               />
                                               <label
                                                 className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck18"
+                                                for="btncheck11"
                                               >
                                                 11
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck19"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  21
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck19"
-                                              >
-                                                21
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck20"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  22
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck20"
-                                              >
-                                                22
                                               </label>
 
                                               <input
@@ -563,14 +891,14 @@ const ViewGambarPanoramikDokter = () => {
                                                 id="btncheck21"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  23
+                                                  21
                                                 )}
                                               />
                                               <label
                                                 className="btn btn-outline-secondary text-xs p-2 mb-0"
                                                 for="btncheck21"
                                               >
-                                                23
+                                                21
                                               </label>
 
                                               <input
@@ -579,14 +907,14 @@ const ViewGambarPanoramikDokter = () => {
                                                 id="btncheck22"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  24
+                                                  22
                                                 )}
                                               />
                                               <label
                                                 className="btn btn-outline-secondary text-xs p-2 mb-0"
                                                 for="btncheck22"
                                               >
-                                                24
+                                                22
                                               </label>
 
                                               <input
@@ -595,14 +923,14 @@ const ViewGambarPanoramikDokter = () => {
                                                 id="btncheck23"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  25
+                                                  23
                                                 )}
                                               />
                                               <label
                                                 className="btn btn-outline-secondary text-xs p-2 mb-0"
                                                 for="btncheck23"
                                               >
-                                                25
+                                                23
                                               </label>
 
                                               <input
@@ -611,14 +939,14 @@ const ViewGambarPanoramikDokter = () => {
                                                 id="btncheck24"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  26
+                                                  24
                                                 )}
                                               />
                                               <label
                                                 className="btn btn-outline-secondary text-xs p-2 mb-0"
                                                 for="btncheck24"
                                               >
-                                                26
+                                                24
                                               </label>
 
                                               <input
@@ -627,14 +955,14 @@ const ViewGambarPanoramikDokter = () => {
                                                 id="btncheck25"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  27
+                                                  25
                                                 )}
                                               />
                                               <label
                                                 className="btn btn-outline-secondary text-xs p-2 mb-0"
                                                 for="btncheck25"
                                               >
-                                                27
+                                                25
                                               </label>
 
                                               <input
@@ -643,12 +971,44 @@ const ViewGambarPanoramikDokter = () => {
                                                 id="btncheck26"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  28
+                                                  26
                                                 )}
                                               />
                                               <label
                                                 className="btn btn-outline-secondary text-xs p-2 mb-0"
                                                 for="btncheck26"
+                                              >
+                                                26
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck27"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  27
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                for="btncheck27"
+                                              >
+                                                27
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck28"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  28
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                for="btncheck28"
                                               >
                                                 28
                                               </label>
@@ -664,7 +1024,7 @@ const ViewGambarPanoramikDokter = () => {
                                               <input
                                                 type="checkbox"
                                                 className="btn-check"
-                                                id="btncheck27"
+                                                id="btncheck48"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
                                                   48
@@ -672,315 +1032,9 @@ const ViewGambarPanoramikDokter = () => {
                                               />
                                               <label
                                                 className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck27"
+                                                for="btncheck48"
                                               >
                                                 48
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck28"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  47
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck28"
-                                              >
-                                                47
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck29"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  46
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck29"
-                                              >
-                                                46
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck30"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  45
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck30"
-                                              >
-                                                45
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck31"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  44
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck31"
-                                              >
-                                                44
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck32"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  43
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck32"
-                                              >
-                                                43
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck33"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  42
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck33"
-                                              >
-                                                42
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck34"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  41
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck34"
-                                              >
-                                                41
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck35"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  31
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck35"
-                                              >
-                                                31
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck36"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  32
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck36"
-                                              >
-                                                32
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck37"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  33
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck37"
-                                              >
-                                                33
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck38"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  34
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck38"
-                                              >
-                                                34
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck39"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  35
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck39"
-                                              >
-                                                35
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck40"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  36
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck40"
-                                              >
-                                                36
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck41"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  37
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck41"
-                                              >
-                                                37
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck42"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  38
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck42"
-                                              >
-                                                38
-                                              </label>
-                                            </div>
-
-                                            <div className="col d-flex justify-content-center">
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck43"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  85
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck43"
-                                              >
-                                                85
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck44"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  84
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck44"
-                                              >
-                                                84
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck45"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  83
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck45"
-                                              >
-                                                83
-                                              </label>
-
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck46"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
-                                                  82
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck46"
-                                              >
-                                                82
                                               </label>
 
                                               <input
@@ -989,98 +1043,239 @@ const ViewGambarPanoramikDokter = () => {
                                                 id="btncheck47"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  81
+                                                  47
                                                 )}
                                               />
                                               <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                className="btn btn-outline-secondary text-xs p-2"
                                                 for="btncheck47"
                                               >
-                                                81
+                                                47
                                               </label>
 
                                               <input
                                                 type="checkbox"
                                                 className="btn-check"
-                                                id="btncheck48"
+                                                id="btncheck46"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  71
+                                                  46
                                                 )}
                                               />
                                               <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck48"
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck46"
                                               >
-                                                71
+                                                46
                                               </label>
 
                                               <input
                                                 type="checkbox"
                                                 className="btn-check"
-                                                id="btncheck49"
+                                                id="btncheck45"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  72
+                                                  45
                                                 )}
                                               />
                                               <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck49"
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck45"
                                               >
-                                                72
+                                                45
                                               </label>
 
                                               <input
                                                 type="checkbox"
                                                 className="btn-check"
-                                                id="btncheck50"
+                                                id="btncheck44"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  73
+                                                  44
                                                 )}
                                               />
                                               <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck50"
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck44"
                                               >
-                                                73
+                                                44
                                               </label>
 
                                               <input
                                                 type="checkbox"
                                                 className="btn-check"
-                                                id="btncheck51"
+                                                id="btncheck43"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  74
+                                                  43
                                                 )}
                                               />
                                               <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck51"
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck43"
                                               >
-                                                74
+                                                43
                                               </label>
 
                                               <input
                                                 type="checkbox"
                                                 className="btn-check"
-                                                id="btncheck52"
+                                                id="btncheck42"
                                                 autoComplete="off"
                                                 checked={teethNumber.includes(
-                                                  75
+                                                  42
                                                 )}
                                               />
                                               <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck52"
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck42"
                                               >
-                                                75
+                                                42
                                               </label>
-                                            </div>
-                                            <div className="d-flex justify-content-center img-fluid mt-2 mb-4">
-                                              <img src="../assets/img/App/line.png" />
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck41"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  41
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck41"
+                                              >
+                                                41
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck31"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  31
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck31"
+                                              >
+                                                31
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck32"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  32
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck32"
+                                              >
+                                                32
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck33"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  33
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck33"
+                                              >
+                                                33
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck34"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  34
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck34"
+                                              >
+                                                34
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck35"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  35
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck35"
+                                              >
+                                                35
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck36"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  36
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck36"
+                                              >
+                                                36
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck37"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  37
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck37"
+                                              >
+                                                37
+                                              </label>
+
+                                              <input
+                                                type="checkbox"
+                                                className="btn-check"
+                                                id="btncheck38"
+                                                autoComplete="off"
+                                                checked={teethNumber.includes(
+                                                  38
+                                                )}
+                                              />
+                                              <label
+                                                className="btn btn-outline-secondary text-xs p-2"
+                                                for="btncheck38"
+                                              >
+                                                38
+                                              </label>
                                             </div>
                                           </div>
                                         </div>
