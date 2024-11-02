@@ -91,7 +91,7 @@ const RadiografiPanoramikDokter = () => {
             <div className="container-fluid py-2">
               <div className="row mb-4">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="card-l">
                     <div className="card-header p-1">
                       <div className="row p-2">
                         <div className="col-9 card-header p-4 pt-3">

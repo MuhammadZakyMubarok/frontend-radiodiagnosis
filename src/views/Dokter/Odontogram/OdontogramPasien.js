@@ -192,7 +192,7 @@ const OdontogramPasien = () => {
             <div className="container-fluid py-2">
               <div className="row p-0">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="card-l">
                     <div className="card-body px-0 pb-2 pt-0 pe-3">
                       <div className="row">
                         <div className="col pe-0">
@@ -246,6 +246,7 @@ const OdontogramPasien = () => {
                                     src={`${baseURL + selectedPatient.panoramik_picture}`}
                                     alt={`Foto dari ${selectedPatient.fullname}`}
                                     style={{ width: "300px", height: "150px" }}
+                                    id="odonto-img"
                                   />
                                 ) : (
                                   <p className="text-xs font-weight-bolder">Gambar tidak tersedia</p>

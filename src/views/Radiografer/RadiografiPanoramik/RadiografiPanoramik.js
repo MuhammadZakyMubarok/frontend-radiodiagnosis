@@ -8,7 +8,6 @@ import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import Paginations from "../../../component/Pagination/Paginations";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
-import "./responsive-radiograf.css";
 
 const RadiografiPanoramik = ({ route }) => {
   const auth = WithAuthorization(["radiographer"]);
@@ -101,39 +100,38 @@ const RadiografiPanoramik = ({ route }) => {
             <div className="container-fluid py-2">
               <div className="row mb-4">
                 <div className="col-12">
-                  <div className="card mb-4 p-2">
+                  <div className="card mb-4 p-2" id="card-l">
                     <div className="card-header p-4">
                       <div className="row align-items center">
-                        <div className="col-8 card-header p-4 pt-3">
+                        <div className="col-md-6 col-12 card-header p-4 pt-3">
                           <h5 className="font-weight-bolder">
                             Radiografi Panoramik
                           </h5>
                           <p className="text-xs text-secondary mb-0">
-                            Hasil diagnosa pada tabel di bawah merupakan hasil
-                            diagnosa
+                            Hasil diagnosa pada tabel di bawah merupakan hasil diagnosa
                             <br />
                             sementara yang perlu diverifikasi oleh dokter
                           </p>
                         </div>
-                        <div class="col-3 text-end pt-3 pe-0">
-                          <div class="col-md-2 col-12 text-md-end text-center mb-2 mb-md-0 pe-0">
-                            <div class="input-group" style={{ maxWidth: "100%" }}>
-                              <span class="input-group-text text-body border-radius-xl">
-                                <i class="fas fa-search" aria-hidden="true"></i>
-                              </span>
-                              <input
-                                type="text"
-                                class="form-control border-radius-xl"
-                                style={{ flex: "1 1 auto", minWidth: "0" }}
-                                size="50"
-                                placeholder="Nama Pasien, Kode Pasien..."
-                                onChange={handleChange}
-                                value={inputText}
-                              />
-                            </div>
+                      </div>
+                      <div className="row align-items center">
+                        <div class="col-md-4 col-12 text-md-end text-end mb-2 mb-md-0 pe-0 ms-auto">
+                          <div class="input-group" style={{ maxWidth: "100%" }}>
+                            <span class="input-group-text text-body border-radius-xl">
+                              <i class="fas fa-search" aria-hidden="true"></i>
+                            </span>
+                            <input
+                              type="text"
+                              class="form-control border-radius-xl"
+                              style={{ flex: "1 1 auto", minWidth: "0" }}
+                              size="50"
+                              placeholder="Nama Pasien, Kode Pasien..."
+                              onChange={handleChange}
+                              value={inputText}
+                            />
                           </div>
                         </div>
-                        <div className="col-md-2 col-6 text-md-end text-center" id="btn-upload">
+                        <div className="col-md-2 col-12 text-md-end text-center" id="btn-upload">
                           <a
                             className="btn bg-gradient-primary btn-sm mb-0 pe-0 ps-0  border-radius-xl w-100"
                             href="/radiografer-upload-gambar-panoramik"
@@ -142,6 +140,7 @@ const RadiografiPanoramik = ({ route }) => {
                             Gambar
                           </a>
                         </div>
+
                       </div>
                     </div>
                     <div className="card-body px-0 pt-0 pb-2">
@@ -160,7 +159,7 @@ const RadiografiPanoramik = ({ route }) => {
                             <div>
                               <select
                                 className=" ps-4 text-uppercase text-primary textr-start text-xxs font-weight-bolder"
-                                style={{border: "none"}}
+                                style={{ border: "none" }}
                                 name="month"
                                 onChange={(e) => setMonth(e.target.value)}
                               >

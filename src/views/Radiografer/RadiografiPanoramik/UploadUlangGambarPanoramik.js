@@ -69,7 +69,7 @@ const UploadUlangGambarPanoramik = () => {
             <div className="container-fluid py-2">
               <div className="row mb-4 h-100">
                 <div className="col-12">
-                  <div className="card mb-4 h-100">
+                  <div className="card mb-4 h-100" id="card-l">
                     <div className="card-header pb-2 p-4">
                       <div className="row">
                         <div className="col-6 d-flex align-items-center">
@@ -127,7 +127,7 @@ const UploadUlangGambarPanoramik = () => {
                           <div className="card-header pb-0">
                             <div className="d-flex align-items-center">
                               <h6 className="mb-3 font-weight-bolder">
-                                Uggah Ulang Gambar
+                                Unggah Ulang Gambar
                                 <br />
                                 Radiografi Panoramik.
                               </h6>

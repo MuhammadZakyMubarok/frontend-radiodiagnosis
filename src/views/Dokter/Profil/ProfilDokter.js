@@ -52,7 +52,7 @@ const ProfilDokter = () => {
             <div className="container-fluid py-2">
               <div className="row p-0">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="card-l">
                     <div className="card-header pb-2 p-4 ">
                       <ul
                         className="nav nav-pills mb-3"

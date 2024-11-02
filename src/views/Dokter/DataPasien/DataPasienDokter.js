@@ -67,7 +67,7 @@ const DataPasienDokter = () => {
             <div className="container-fluid py-2">
               <div class="row">
                 <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4 ">
-                  <div class="card">
+                  <div class="card" id="card-l2">
                     <div class="card-body p-3">
                       <div class="row ">
                         <div class="col-8 ">
@@ -96,7 +96,7 @@ const DataPasienDokter = () => {
                   </div>
                 </div>
                 <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                  <div class="card">
+                  <div class="card" id="card-l">
                     <div class="card-body p-3">
                       <div class="row">
                         <div class="col-8 ">
@@ -125,7 +125,7 @@ const DataPasienDokter = () => {
                   </div>
                 </div>
                 <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                  <div class="card">
+                  <div class="card" id="card-l2">
                     <div class="card-body p-3">
                       <div class="row">
                         <div class="col-8 ">
@@ -154,7 +154,7 @@ const DataPasienDokter = () => {
                   </div>
                 </div>
                 <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                  <div class="card">
+                  <div class="card" id="card-l">
                     <div class="card-body p-3">
                       <div class="row">
                         <div class="col-8 ">
@@ -185,7 +185,7 @@ const DataPasienDokter = () => {
               </div>
               <div className="row p-0 mt-4">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="card-l2">
                     <div className="card-header pb-2 p-4">
                       <div className="row">
                         <div className="col-8 d-flex align-items-center">
@@ -193,7 +193,7 @@ const DataPasienDokter = () => {
                             Data Pasien
                           </h5>
                         </div>
-                        <div class="col-md-4 col-12 text-md-end text-center mb-2 mb-md-0 pe-0">
+                        <div class="col-md-4 col-12 text-md-end text-center mb-2 mb-md-0 mt-2 pe-0">
                             <div class="input-group" style={{ maxWidth: "100%" }}>
                               <span class="input-group-text text-body border-radius-xl">
                                 <i class="fas fa-search" aria-hidden="true"></i>
