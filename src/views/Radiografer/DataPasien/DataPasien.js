@@ -8,6 +8,7 @@ import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import Paginations from "../../../component/Pagination/Paginations";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
+import ConfirmModal from "../../../component/Modal/ConfirmModal";
 
 const DataPasien = () => {
   const auth = WithAuthorization(["radiographer"]);
@@ -18,6 +19,9 @@ const DataPasien = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [inputText, setInputText] = useState("");
   const [statusSearch, setStatusSearch] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   const handleChange = (event) => {
     setInputText(event.target.value);
@@ -61,9 +65,25 @@ const DataPasien = () => {
         }
       );
       // Refresh data setelah mengganti status
+      setData((prevData) =>
+        prevData.map((item) =>
+          item.id === patientId ? { ...item, status_user: statusUser === 0 ? 1 : 0 } : item
+        )
+      );
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleSpanClick = (item) => {
+    setSelectedPatient(item);
+    setIsModalOpen(true); // Buka modal
+  };
+    
+  const handleConfirm = (patientId, statusUser) => {
+    toggleStatusUser(patientId, statusUser);
+    setIsModalOpen(false); // Tutup modal setelah konfirmasi
+    setSelectedPatient(null);
   };
   
 
@@ -237,7 +257,7 @@ const DataPasien = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-2 text-end ps-0">
+                        {/* <div className="col-2 text-end ps-0">
                           <a
                             className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl"
                             style={{ height: "95%" }}
@@ -245,7 +265,7 @@ const DataPasien = () => {
                           >
                             <i className="fas fa-plus"></i>&nbsp;&nbsp; Tambah Data
                           </a>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                     <div className="card-body px-0 pt-0 pb-2 mt-2">
@@ -326,19 +346,30 @@ const DataPasien = () => {
                                 </td>
                                 <td className="align-middle text-start text-sm pe-0 text-center">
                                   <span
-                                    onClick={() => toggleStatusUser(item.id, item.status_user)}
-                                    className={`badge cursor-pointer border-radius-xl badge-sm bg-gradient-${
-                                      item.status_user === 0 ? "warning" : "success"
-                                    }`}
+                                    onClick={() => handleSpanClick(item)}
+                                    data-bs-toggle="modal"
+                                    data-bs-target={`#confirmModal${item.id}`}
+                                    className={`badge cursor-pointer border-radius-xl badge-sm bg-gradient-${item.status_user === 0 ? "warning" : "success"
+                                      }`}
                                   >
                                     {item.status_user === 0 ? "Acc" : "Selesai"}
                                   </span>
+
                                 </td>
 
                               </tr>
                             ))}
                           </tbody>
                         </table>
+                        {/* Render ConfirmModal jika selectedPatient ada */}
+                        {isModalOpen && selectedPatient && (
+                          <ConfirmModal
+                            patientId={selectedPatient.id}
+                            statusUser={selectedPatient.status_user}
+                            onConfirm={handleConfirm}
+                            onClose={() => setIsModalOpen(false)}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>

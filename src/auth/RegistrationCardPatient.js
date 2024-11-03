@@ -18,7 +18,8 @@ const RegistrationCardPatient = () => {
         postal_code: "",
         religion: "",
         born_location: "", // Menambahkan born_location
-        born_date: "" // Menambahkan born_date
+        born_date: "", // Menambahkan born_date
+        status_user: 1,
     });
 
     const handleChange = (e) => {
