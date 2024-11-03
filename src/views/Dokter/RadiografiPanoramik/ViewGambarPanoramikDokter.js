@@ -18,7 +18,7 @@ import FinalisasiData from "../../../component/Modal/FinalisasiData";
 import "../../Responsive/responsive.css";
 
 const ViewGambarPanoramikDokter = () => {
-  const auth = WithAuthorization(["doctor"]);
+  const auth = WithAuthorization(["doctors"]);
 
   const [data, setData] = useState({});
   const [doctors, setDoctors] = useState([]);
