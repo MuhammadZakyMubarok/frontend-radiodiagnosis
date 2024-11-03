@@ -51,7 +51,7 @@ const ViewGambarPanoramikDokter = () => {
       })
       .then((response) => {
         if (response.data.data) {
-          setDoctor(response.data.data);
+          setDoctors(response.data.data);
         }
       })
       .catch((error) => {
