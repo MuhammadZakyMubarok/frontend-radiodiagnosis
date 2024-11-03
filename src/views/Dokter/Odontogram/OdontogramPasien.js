@@ -6,6 +6,7 @@ import { baseURL, apiUrl } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import OdontogramModal from "../../../component/Modal/OdontogramModal";
 import "./styleOdontogram.css";
+import "../../Responsive/responsive.css";
 
 const OdontogramPasien = () => {
   const auth = WithAuthorization(["doctor"]);

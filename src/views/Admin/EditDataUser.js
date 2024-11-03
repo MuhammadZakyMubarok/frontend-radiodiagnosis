@@ -5,6 +5,7 @@ import HeaderAdmin from "../../component/Header/HeaderAdmin";
 import SidebarAdmin from "../../component/Sidebar/SidebarAdmin";
 import { baseURL } from "../../routes/Config";
 import WithAuthorization from "../../utils/auth";
+import "../Responsive/responsive.css";
 
 
 export const EditDataUser = () => {

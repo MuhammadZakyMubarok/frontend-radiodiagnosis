@@ -10,6 +10,7 @@ import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import PaginationsHistory from "../../../component/Pagination/PaginationsHistory";
 import Report from "./Report";
+import "../../Responsive/responsive.css";
 
 const DetailCatatanPasien = () => {
   const auth = WithAuthorization(["doctor"]);

@@ -2,6 +2,7 @@ import React from "react";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
 import WithAuthorization from "../../../utils/auth";
+import "../../Responsive/responsive.css";
 
 const EditCatatanPasien = () => {
   const auth = WithAuthorization(["doctor"]);

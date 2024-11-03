@@ -7,6 +7,7 @@ import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import Paginations from "../../../component/Pagination/Paginations";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
+import "../../Responsive/responsive.css";
 
 const DataPasienDokter = () => {
   const auth = WithAuthorization(["doctor"]);

@@ -5,6 +5,7 @@ import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
+import "../../Responsive/responsive.css";
 
 const ViewDataPasienDokter = () => {
   const auth = WithAuthorization(["doctor"]);

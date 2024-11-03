@@ -5,6 +5,7 @@ import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
+import "../../Responsive/responsive.css";
 
 const UploadUlangGambarPanoramik = () => {
   const auth = WithAuthorization(["radiographer"]);

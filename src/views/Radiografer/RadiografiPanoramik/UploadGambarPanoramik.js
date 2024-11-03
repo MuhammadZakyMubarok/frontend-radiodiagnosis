@@ -7,6 +7,7 @@ import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import { Autocomplete } from "@mui/material";
+import "../../Responsive/responsive.css";
 
 const UploadGambarPanoramik = () => {
   const auth = WithAuthorization(["radiographer"]);

@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import WithAuthorization from "../../../utils/auth";
 import Paginations from "../../../component/Pagination/Paginations";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
+import "../../Responsive/responsive.css";
 
 const CatatanPasien = () => {
   const auth = WithAuthorization(["doctor"]);
