@@ -7,6 +7,7 @@ import Kontak from "./Kontak";
 import UbahPassword from "./UbahPassword";
 import ViewProfil from "./ViewProfil";
 import WithAuthorization from "../../../utils/auth";
+import "../../Responsive/responsive.css";
 
 const Profil = () => {
   const auth = WithAuthorization(["radiographer"]);
@@ -52,8 +53,8 @@ const Profil = () => {
             <div className="container-fluid py-2">
               <div className="row p-0">
                 <div className="col-12">
-                  <div className="card mb-4">
-                    <div className="card-header pb-2 p-4 ">
+                  <div className="card mb-2" id="card-l">
+                    <div className="card-header pb-2 p-2 ">
                       <ul
                         className="nav nav-pills mb-3"
                         id="pills-tab"

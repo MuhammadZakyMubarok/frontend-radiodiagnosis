@@ -7,6 +7,7 @@ import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import { Autocomplete } from "@mui/material";
+import "../../Responsive/responsive.css";
 
 const UploadGambarPanoramik = () => {
   const auth = WithAuthorization(["radiographer"]);
@@ -127,7 +128,7 @@ const UploadGambarPanoramik = () => {
             <div className="container-fluid py-2">
               <div className="row mb-4 h-100">
                 <div className="col-12">
-                  <div className="card mb-4 h-100">
+                  <div className="card mb-4 h-100" id="card-l">
                     <form onSubmit={handleUploadImage}>
                       <div className="card-header pb-2 p-4">
                         <div className="row">
@@ -145,7 +146,7 @@ const UploadGambarPanoramik = () => {
                           </div>
                         </div>
                         <div className="row mt-3">
-                          <div className="col-2">
+                          <div className="col-12 col-md-2">
                             <p className="text-xs text-secondary mb-2">Kode RM</p>
                             <Autocomplete
                               disablePortal
@@ -175,7 +176,7 @@ const UploadGambarPanoramik = () => {
                               )}
                             />
                           </div>
-                          <div className="col-3">
+                          <div className="col-12 col-md-3 mt-3 mt-md-0">
                             <p className="text-xs text-secondary mb-2">Nama Pasien</p>
                             <p
                               style={{ width: "100%", height: 40 }}
@@ -184,7 +185,7 @@ const UploadGambarPanoramik = () => {
                               {patient?.fullname}
                             </p>
                           </div>
-                          <div className="col-3">
+                          <div className="col-12 col-md-3 mt-3 mt-md-0">
                             <p className="text-xs text-secondary mb-2">Radiografer</p>
                             <select
                               className="form-select form-select-sm"
@@ -196,19 +197,14 @@ const UploadGambarPanoramik = () => {
                               onChange={handleChange}
                             >
                               <option>Pilih Radiografer</option>
-                              {radiographics.map((radiographic) => {
-                                return (
-                                  <option
-                                    key={radiographic.id}
-                                    value={radiographic.id}
-                                  >
-                                    {radiographic.fullname}
-                                  </option>
-                                );
-                              })}
+                              {radiographics.map((radiographic) => (
+                                <option key={radiographic.id} value={radiographic.id}>
+                                  {radiographic.fullname}
+                                </option>
+                              ))}
                             </select>
                           </div>
-                          <div className="col-6">
+                          <div className="col-12 col-md-6 mt-3 mt-md-0 mb-2">
                             <p className="text-xs text-secondary mb-2">Keluhan Pasien</p>
                             <textarea
                               className="form-control"
@@ -219,6 +215,7 @@ const UploadGambarPanoramik = () => {
                             ></textarea>
                           </div>
                         </div>
+
                       </div>
                       <hr
                         style={{

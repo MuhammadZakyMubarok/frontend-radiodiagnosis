@@ -2,6 +2,7 @@ import axios from "axios";
 import { React, useState } from "react";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
+import "../../Responsive/responsive.css";
 
 const ViewProfil = ({ auth, token }) => {
   const isAuth = WithAuthorization(["radiographer"]);

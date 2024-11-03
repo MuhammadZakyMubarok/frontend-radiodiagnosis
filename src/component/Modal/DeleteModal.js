@@ -13,23 +13,21 @@ const DeleteModal = ({ userId, handleDelete }) => {
       >
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
-            <div className="modal-body text-start">
+            <div className="modal-body text-center">
               <img
                 src="../assets/img/App/delete.png"
-                className="navbar-brand-img h-100"
+                className="navbar-brand-img h-100 mx-auto d-block"
                 alt=""
+                style={{ width: "50px", marginBottom: "15px" }} // Atur ukuran dan margin bawah gambar
               />
-              <p className="ms-5 pt-0 mt-0 mb-0 font-weight-bold">
-                Anda akan menghapus
-                <br />
-                Data ini.
+              <p className="text-danger font-weight-bold mb-1">
+                Hapus Data
               </p>
-
-              <p className="text-secondary text-sm ms-5">
+              <p className="text-secondary text-sm">
                 Apakah anda yakin akan menghapus data ini? <br />
                 Data yang telah dihapus tidak akan dikembalikan lagi.
               </p>
-              <div className="ms-auto text-end">
+              <div className="text-end">
                 <button
                   type="button"
                   className="btn btn-danger btn-sm px-3 mb-0"
@@ -48,6 +46,7 @@ const DeleteModal = ({ userId, handleDelete }) => {
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
