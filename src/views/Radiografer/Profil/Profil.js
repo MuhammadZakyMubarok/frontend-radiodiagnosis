@@ -7,6 +7,7 @@ import Kontak from "./Kontak";
 import UbahPassword from "./UbahPassword";
 import ViewProfil from "./ViewProfil";
 import WithAuthorization from "../../../utils/auth";
+import "../../Responsive/responsive.css";
 
 const Profil = () => {
   const auth = WithAuthorization(["radiographer"]);

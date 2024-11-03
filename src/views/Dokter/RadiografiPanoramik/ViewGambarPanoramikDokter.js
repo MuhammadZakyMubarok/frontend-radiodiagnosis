@@ -15,6 +15,7 @@ import StatusUnverified from "../../../component/Alerts/StatusUnverified";
 import StatusOngoing from "../../../component/Alerts/StatusOngoing";
 import StatusVerified from "../../../component/Alerts/StatusVerified";
 import FinalisasiData from "../../../component/Modal/FinalisasiData";
+import "../../Responsive/responsive.css";
 
 const ViewGambarPanoramikDokter = () => {
   const auth = WithAuthorization(["doctor"]);

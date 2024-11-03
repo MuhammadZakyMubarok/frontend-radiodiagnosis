@@ -8,6 +8,7 @@ import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import Paginations from "../../../component/Pagination/Paginations";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
+import "../../Responsive/responsive.css";
 
 const RadiografiPanoramik = ({ route }) => {
   const auth = WithAuthorization(["radiographer"]);

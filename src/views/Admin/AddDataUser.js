@@ -5,6 +5,7 @@ import SidebarAdmin from "../../component/Sidebar/SidebarAdmin";
 import { baseURL } from "../../routes/Config";
 import WithAuthorization from "../../utils/auth";
 import RegistrasiConfirm from "../../component/Modal/RegistrasiConfirm";
+import "../Responsive/responsive.css";
 
 const AddDataUser = () => {
   const auth = WithAuthorization(["admin"]);

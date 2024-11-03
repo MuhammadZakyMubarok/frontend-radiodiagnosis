@@ -8,6 +8,7 @@ import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import StatusUnverified from "../../../component/Alerts/StatusUnverified";
+import "../../Responsive/responsive.css";
 
 const ViewGambarPanoramik = () => {
   const auth = WithAuthorization(["radiographer"]);

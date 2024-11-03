@@ -6,6 +6,7 @@ import DeleteModal from "../../../component/Modal/DeleteModal";
 import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
+import "../../Responsive/responsive.css";
 
 const ViewDataPasien = () => {
   const auth = WithAuthorization(["radiographer"]);

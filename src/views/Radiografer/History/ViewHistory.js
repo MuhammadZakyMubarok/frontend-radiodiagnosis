@@ -7,6 +7,7 @@ import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import PaginationsHistory from "../../../component/Pagination/PaginationsHistory";
+import "../../Responsive/responsive.css";
 
 const ViewHistory = () => {
   const auth = WithAuthorization(["radiographer"]);
