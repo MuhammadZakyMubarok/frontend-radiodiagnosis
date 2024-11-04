@@ -127,21 +127,26 @@ const RadiografiPanoramikDokter = () => {
                     </div>
                     <div className="card-body px-0 pt-0 pb-2">
                       <div className="row">
-                        <di className="col-md-2">
+                        <div className="col-md-2">
                           <p className="btn btn-link m-0 ps-0  text-secondary text-xs font-weight-bold" onClick={() => handleVerified("")}>
                             Semua Hasil
                           </p>
-                        </di>
-                        <di className="col-md-2">
-                          <button className="ps-0 btn btn-link m-0 text-secondary text-xs font-weight-bold" onClick={() => handleVerified("true")}>
-                            Telah Diverifikasi
-                          </button>
-                        </di>
-                        <di className="col-md-2">
+                        </div>
+                        <div className="col-md-2">
                           <button className="btn btn-link m-0 ps-0  text-secondary text-xs font-weight-bold" onClick={() => handleVerified("false")}>
                             Belum Diverifikasi
                           </button>
-                        </di>
+                        </div>
+                        <div className="col-md-2">
+                          <button className="btn btn-link m-0 ps-0  text-secondary text-xs font-weight-bold" onClick={() => handleVerified("ongoing")}>
+                            Sedang Diverifikasi
+                          </button>
+                        </div>
+                        <div className="col-md-2">
+                          <button className="ps-0 btn btn-link m-0 text-secondary text-xs font-weight-bold" onClick={() => handleVerified("true")}>
+                            Telah Diverifikasi
+                          </button>
+                        </div>
                         <hr
                           style={{
                             height: "1px",

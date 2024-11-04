@@ -102,7 +102,7 @@ const ViewGambarPanoramikDokter = () => {
   useEffect(() => {
     getAll();
   }, []);
-  
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1284,7 +1284,7 @@ const ViewGambarPanoramikDokter = () => {
                                       <div className="card shadow-none mt-4 me-2 ms-2 border-0">
                                         <div className="card-body">
                                           <p className="text-xs">
-                                            Radiodiagnosis Sistem
+                                            Diagnosa Penyakit Gigi
                                           </p>
                                           {data.diagnoses?.map((diagnose) => {
                                             if (diagnose?.system_diagnosis) {
@@ -1335,9 +1335,9 @@ const ViewGambarPanoramikDokter = () => {
 
                                           <div className="row">
                                             <div className="col-12">
-                                              <p className="text-xxs text-secondary font-weight-bold">
+                                              {/* <p className="text-xxs text-secondary font-weight-bold">
                                                 Radiodiagnosis Verifikator
-                                              </p>
+                                              </p> */}
                                               {data.diagnoses?.map(
                                                 (diagnose) => {
                                                   if (
@@ -1406,6 +1406,22 @@ const ViewGambarPanoramikDokter = () => {
                                               )}
                                             </div>
                                           </div>
+                                          <div className="d-grid">
+                                            <button
+                                              className="btn btn-sm btn-primary mt-2 mb-4"
+                                              type="button"
+                                              data-bs-toggle="modal"
+                                              data-bs-target="#exampleModal3"
+                                              disabled={
+                                                data.status === 2 ? true : false
+                                              }
+                                            >
+                                              Tambah Diagnosa
+                                            </button>
+                                            <InterpretasiManual
+                                              radiographicId={data.history_id}
+                                            />
+                                          </div>
                                           <p className="text-xs">
                                             Catatan Untuk Pasien
                                           </p>
@@ -1435,22 +1451,6 @@ const ViewGambarPanoramikDokter = () => {
                                               marginStart: "0px",
                                             }}
                                           />
-                                          <div className="d-grid">
-                                            <button
-                                              className="btn btn-sm btn-primary mt-4 mb-2"
-                                              type="button"
-                                              data-bs-toggle="modal"
-                                              data-bs-target="#exampleModal3"
-                                              disabled={
-                                                data.status === 2 ? true : false
-                                              }
-                                            >
-                                              Interpretasi Manual
-                                            </button>
-                                            <InterpretasiManual
-                                              radiographicId={data.history_id}
-                                            />
-                                          </div>
                                           <div className="d-grid">
                                             <button
                                               className="btn btn-sm btn-success mt-4 mb-2"
