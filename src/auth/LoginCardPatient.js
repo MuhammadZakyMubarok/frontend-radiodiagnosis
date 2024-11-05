@@ -20,24 +20,22 @@ const LoginCardPatient = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-        const response = await axios.post(`${baseURL}/authentications`, data);
-        const responseData = response.data; // get the response data
-
-        // Check if data is available and has a role
-        if (responseData?.data?.role === "patient") {
-            console.log(responseData.data.role);
-            console.log(responseData.data.statusUser);
-            sessionStorage.setItem("token", responseData.data.accessToken);
-            window.location.href = "/patient-dashboard";
+    await axios
+      .post(`${baseURL}/authentications`, data)
+      .then((response) => {
+        const { data } = response.data;
+        if (data?.role === "patient") {
+          sessionStorage.setItem("token", data.accessToken);
+          window.location.href = "/patient-dashboard";
         } else {
-            sessionStorage.removeItem("token");
-            setError("Login Gagal"); // Show error if not a patient
+          sessionStorage.removeItem("token");
         }
-    } catch (error) {
-        setError("Login Gagal"); // Handle error
-    }
-};
+        setError("Login Gagal");
+      })
+      .catch((error) => {
+        setError(true);
+      });
+  };
 
   return (
     <div>

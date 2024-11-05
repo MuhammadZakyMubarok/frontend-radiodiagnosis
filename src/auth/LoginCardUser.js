@@ -21,17 +21,27 @@ const LoginCardUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("tes");
     await axios
       .post(`${baseURL}/authentications`, data)
       .then((response) => {
         const { data } = response.data;
         sessionStorage.setItem("token", data.accessToken);
+        
         if (data.role === "radiographer") {
           window.location.href = "/radiografer-data-pasien";
         } else if (data.role === "doctor") {
           window.location.href = "/dokter-data-pasien";
         } else if (data.role === "patient") {
-          window.location.href = "/patient-dashboard";
+          // console.log(data);
+          if(data.statusUser === 1){
+            console.log('Akun suda verif');
+            window.location.href = "/patient-dashboard";
+          }else{
+            
+            console.log('Akun belum verif');
+            sessionStorage.removeItem("token");
+          }
         }
       })
       .catch((error) => {
@@ -99,7 +109,7 @@ const LoginCardUser = () => {
                     </div>
                     <div className="card-footer text-center pt-0 px-lg-2 px-1">
                       <p className="mb-4 text-sm mx-auto">
-                        Account Registered by Admin.
+                        Don't have an account? <a href="/regis-patient">Register here</a>.
                       </p>
                     </div>
                   </div>
