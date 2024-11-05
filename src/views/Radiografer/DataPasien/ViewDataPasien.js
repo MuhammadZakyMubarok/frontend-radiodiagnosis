@@ -69,7 +69,7 @@ const ViewDataPasien = () => {
                   <div className="card mb-4" id="card-l">
                     <div className="card-header pb-2 p-4">
                       <div className="row">
-                        <div className="col-8 d-flex align-items-center">
+                        <div className="col-6 d-flex align-items-center">
                           <a
                             className="btn btn-outline-secondary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2"
                             href="/radiografer-data-pasien"
@@ -81,37 +81,47 @@ const ViewDataPasien = () => {
                             &nbsp;&nbsp;Kembali
                           </a>
                         </div>
-
-                        <div className="col" id="btn-dlt-edt">
-                          <div className="row">
-                            <div className="col-6 d-flex justify-content-end">
-                              <button
-                                type="button"
-                                className="btn btn-outline-success btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
+                      </div>
+                      <div className="row mt-2">
+                        <div className="col-lg-5 col-md-12 ms-auto d-flex justify-content-end" id="btn-dlt-edt-cek">
+                          <div className="col-4">
+                            <button
+                              type="button"
+                              className="btn btn-outline-primary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-primary"
+                              data-bs-toggle="modal"
+                              data-bs-target={``}
+                            >
+                              <i className="fas fa-file-medical text-primary"></i>
+                              &nbsp;&nbsp; Cek Data Satu Sehat
+                            </button>
+                          </div>
+                          <div className="col-4">
+                            <button
+                              type="button"
+                              className="btn btn-outline-success btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
+                            >
+                              <Link
+                                to={`/radiografer-edit-data-pasien/${id}`}
                               >
-                                <Link
-                                  to={`/radiografer-edit-data-pasien/${id}`}
-                                >
-                                  <i className="fa fa-pencil text-success "></i>
-                                  &nbsp;&nbsp; Edit Data Pasien
-                                </Link>
-                              </button>
-                            </div>
-                            <div className="col-6">
-                              <button
-                                type="button"
-                                className="btn btn-outline-danger btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
-                                data-bs-toggle="modal"
-                                data-bs-target={`#exampleModal4{id}`}
-                              >
-                                <i className="fa fa-trash text-danger"></i>
-                                &nbsp;&nbsp; Hapus Data Pasien
-                              </button>
-                              <DeleteModal
-                                userId={id}
-                                handleDelete={handleDelete}
-                              />
-                            </div>
+                                <i className="fa fa-pencil text-success "></i>
+                                &nbsp;&nbsp; Edit Data Pasien
+                              </Link>
+                            </button>
+                          </div>
+                          <div className="col-4">
+                            <button
+                              type="button"
+                              className="btn btn-outline-danger btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
+                              data-bs-toggle="modal"
+                              data-bs-target={`#exampleModal4{id}`}
+                            >
+                              <i className="fa fa-trash text-danger"></i>
+                              &nbsp;&nbsp; Hapus Data Pasien
+                            </button>
+                            <DeleteModal
+                              userId={id}
+                              handleDelete={handleDelete}
+                            />
                           </div>
                         </div>
                       </div>
