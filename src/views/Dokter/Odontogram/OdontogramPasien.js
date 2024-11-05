@@ -4,8 +4,8 @@ import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
 import { baseURL, apiUrl } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
-import OdontogramModal from "../../../component/Modal/OdontogramModal";
-import "./styleOdontogram.css";
+// import OdontogramModal from "../../../component/Modal/OdontogramModal";
+// import "./styleOdontogram.css";
 import "../../Responsive/responsive.css";
 
 const OdontogramPasien = () => {

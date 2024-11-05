@@ -62,7 +62,6 @@ const DetailCatatanPasien = () => {
     });
   };
 
-
   const mappingDiagnoses = (diagnoses) => {
     let systemDiagnosis = [];
     let manualDiagnosis = [];
@@ -447,22 +446,22 @@ const DetailCatatanPasien = () => {
                                         </div>
 
                                       </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </main>
-        </body>
-      </div>
+                                    </div >
+                                  </div >
+                                </div >
+                              </div >
+                            </div >
+                          </div >
+                        </div >
+                      </div >
+                    </div >
+                  </div >
+                </div >
+              </div >
+            </div >
+          </main >
+        </body >
+      </div >
     );
   } else {
     return <div></div>;
