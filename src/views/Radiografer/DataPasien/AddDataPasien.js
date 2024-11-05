@@ -4,6 +4,7 @@ import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
+import "../../Responsive/responsive.css";
 
 const AddDataPasien = () => {
   const auth = WithAuthorization(["radiographer"]);
@@ -83,7 +84,7 @@ const AddDataPasien = () => {
             <div class="container-fluid py-2">
               <div class="row p-0">
                 <div class="col-12">
-                  <div class="card mb-4">
+                  <div class="card mb-4" id="card-l">
                     <div class="card-header pb-2 p-4">
                       <div class="row">
                         <div class="col-6 d-flex align-items-center">

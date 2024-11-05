@@ -16,6 +16,7 @@ import StatusOngoing from "../../../component/Alerts/StatusOngoing";
 import StatusVerified from "../../../component/Alerts/StatusVerified";
 import FinalisasiData from "../../../component/Modal/FinalisasiData";
 import "./styleOdontogram.css";
+import "../../Responsive/responsive.css";
 
 const ViewGambarPanoramikDokter = () => {
   const auth = WithAuthorization(["doctor"]);
@@ -197,7 +198,7 @@ const ViewGambarPanoramikDokter = () => {
             <div className="container-fluid py-2">
               <div className="row p-0">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="card-l">
                     <div className="card-header pb-2 p-4">
                       <div className="row">
                         <div className="col-8 d-flex align-items-center">
@@ -267,6 +268,25 @@ const ViewGambarPanoramikDokter = () => {
                                 <p className="text-xs font-weight-bolder mb-0">
                                   {data.doctor_name ?? "-"}
                                 </p>
+
+                                {/* <select
+                                  className="form-select form-select-sm"
+                                  aria-label=".form-select-sm example"
+                                  style={{ width: "70%" }}
+                                  name="doctor_id"
+                                  value={data.doctor_id}
+                                  onChange={(e) =>
+                                    handleSubmit(e, e.target.value)
+                                  }
+                                  required
+                                >
+                                  <option>Pilih Dokter</option>
+                                  {doctors.map((doctor) => (
+                                    <option key={doctor.id} value={doctor.id}>
+                                      {doctor.fullname}
+                                    </option>
+                                  ))}
+                                </select> */}
                               </div>
                             </div>
                           </div>

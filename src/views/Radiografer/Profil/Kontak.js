@@ -1,5 +1,6 @@
 import { React, useState } from "react";
 import ContactAlert from "../../../component/Alerts/ContactAlert";
+import "../../Responsive/responsive.css";
 
 const Kontak = ({ auth }) => {
   return (

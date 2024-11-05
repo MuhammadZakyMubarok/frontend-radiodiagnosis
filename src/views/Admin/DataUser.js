@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import WithAuthorization from "../../utils/auth";
 import Paginations from "../../component/Pagination/Paginations";
 import * as XLSX from 'xlsx';
+import "../Responsive/responsive.css";
 
 const DataUser = () => {
   const auth = WithAuthorization(["admin"]);
@@ -154,7 +155,7 @@ const DataUser = () => {
             <div className="container-fluid py-2">
               <div className="row">
                 <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                  <div className="card" id="card-left">
+                  <div className="card" id="card-l2">
                     <div className="card-body p-3">
                       <div className="row">
                         <div className="col-8">
@@ -173,7 +174,7 @@ const DataUser = () => {
                         <div className="col-4 text-end">
                           <div className="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
                             <i
-                              className="ni ni-money-coins text-lg opacity-10"
+                              className="fas fa-tooth text-lg opacity-10"
                               aria-hidden="true"
                             ></i>
                           </div>
@@ -183,7 +184,7 @@ const DataUser = () => {
                   </div>
                 </div>
                 <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                  <div className="card">
+                  <div className="card" id="card-l">
                     <div className="card-body p-3">
                       <div className="row">
                         <div className="col-8">
@@ -202,7 +203,7 @@ const DataUser = () => {
                         <div className="col-4 text-end">
                           <div className="icon icon-shape bg-gradient-danger shadow-danger text-center rounded-circle">
                             <i
-                              className="ni ni-world text-lg opacity-10"
+                              className="fas fa-user text-lg opacity-10"
                               aria-hidden="true"
                             ></i>
                           </div>
@@ -214,15 +215,15 @@ const DataUser = () => {
               </div>
               <div className="row mt-4 mb-2">
                 <div className="col-12">
-                  <div className="card">
+                  <div className="card" id="card-l2">
                     <div className="card-header pb-0 p-4">
                       <div className="row align-items-start">
-                        <div className="col-md-6 col-12 mb-2 mb-md-0">
+                        <div className="col-md-5 col-12 mb-2 mb-md-0">
                           <h5 className="mb-0 font-weight-bolder">Data User</h5>
                         </div>
 
                         <div className="col-md-3 col-12 text-md-end text-center mb-2 mb-md-0 pe-0">
-                          <div className="input-group">
+                          <div className="input-group" id="src-adm">
                             <span className="input-group-text text-body border-radius-xl">
                               <i
                                 className="fas fa-search"
@@ -238,20 +239,23 @@ const DataUser = () => {
                             />
                           </div>
                         </div>
-                        <div className="col-md-2 col-6 d-flex flex-md-column justify-content-center text-center">
-                          <div>
+                        <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center">
+                          <div className="w-100" >
                             <a
-                              className="btn bg-gradient-primary btn-sm m-0 mb-0 border-radius-xl w-100"
-                              href="/add-data-user"
-                              id="btn-add-user"
+                              className="btn bg-gradient-primary btn-sm mb-2 border-radius-xl w-100"
+                              href="/add-data-user" id="btn-add"
+                              
                             >
-                              <i className="fas fa-plus"></i>&nbsp;&nbsp;Tambah Data
+                              <i className="fas fa-plus"></i>&nbsp; Tambah&nbsp; Data
                             </a>
                           </div>
-                          <div className="mt-0 mt-md-2">
+                        </div>
+
+                        <div className="col-md-2 col-12 d-flex flex-md-column justify-content-center text-center">
+                          <div className="w-100">
                           <button
-                              className="btn bg-gradient-primary btn-sm m-0 mb-0 border-radius-xl w-100"
-                              onClick={exportToExcel}
+                              className="btn btn-sm border border-primary border-radius-xl w-100"
+                              onClick={exportToExcel} id="btn-exp"
                             >
                               <i className="fas fa-file-export"></i>&nbsp;&nbsp;Export
                             </button>

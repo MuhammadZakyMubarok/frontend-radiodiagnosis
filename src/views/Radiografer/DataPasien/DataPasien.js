@@ -8,7 +8,8 @@ import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import Paginations from "../../../component/Pagination/Paginations";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
-import "./responsive-datapasien.css";
+import "../../Responsive/responsive.css";
+
 
 
 const DataPasien = () => {
@@ -74,7 +75,7 @@ const DataPasien = () => {
             <div className="container-fluid py-2">
               <div className="row">
                 <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4 ">
-                  <div className="card" id="card-left">
+                  <div className="card" id="card-l2">
                     <div className="card-body p-3">
                       <div className="row ">
                         <div className="col-8 ">
@@ -103,7 +104,7 @@ const DataPasien = () => {
                   </div>
                 </div>
                 <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                  <div className="card">
+                  <div className="card" id="card-l">
                     <div className="card-body p-3">
                       <div className="row">
                         <div className="col-8 ">
@@ -132,7 +133,7 @@ const DataPasien = () => {
                   </div>
                 </div>
                 <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                  <div className="card" id="card-left">
+                  <div className="card" id="card-l2">
                     <div className="card-body p-3">
                       <div className="row">
                         <div className="col-8 ">
@@ -161,7 +162,7 @@ const DataPasien = () => {
                   </div>
                 </div>
                 <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                  <div className="card">
+                  <div className="card" id="card-l">
                     <div className="card-body p-3">
                       <div className="row">
                         <div className="col-8 ">
@@ -192,7 +193,7 @@ const DataPasien = () => {
               </div>
               <div className="row mt-4 mb-2">
                 <div className="col-12">
-                  <div className="card">
+                  <div className="card" id="card-l2">
                     <div className="card-header pb-0 p-4">
                       <div className="row align-items-center">
                         <div className="col-md-6 col-12 mb-2 mb-md-0">
@@ -218,10 +219,10 @@ const DataPasien = () => {
                             />
                           </div>
                         </div>
-                        <div className="col-md-2 col-6 text-md-end text-center">
+                        <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center">
                           <a
                             className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl w-100"
-                            href="/radiografer-add-data-pasien" id="btn-add-data"
+                            href="/radiografer-add-data-pasien" id="btn-add"
                           >
                             <i className="fas fa-plus"></i>&nbsp;&nbsp; Tambah Data
                           </a>

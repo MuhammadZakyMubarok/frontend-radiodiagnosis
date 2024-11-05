@@ -5,6 +5,7 @@ import HeaderAdmin from "../../component/Header/HeaderAdmin";
 import SidebarAdmin from "../../component/Sidebar/SidebarAdmin";
 import { baseURL } from "../../routes/Config";
 import WithAuthorization from "../../utils/auth";
+import "../Responsive/responsive.css";
 
 
 export const EditDataUser = () => {
@@ -85,7 +86,7 @@ export const EditDataUser = () => {
             <div className="container-fluid py-2">
               <div className="row p-0">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="card-l">
                     <div className="card-header pb-2 p-4">
                       <div className="row">
                         <div className="col-6 d-flex align-items-center">

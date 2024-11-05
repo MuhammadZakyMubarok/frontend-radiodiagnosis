@@ -7,6 +7,11 @@ const HeaderDataUser = () => {
 
   const token = sessionStorage.getItem("token");
 
+  const logoutHandler = () => {
+    sessionStorage.removeItem("token");
+    window.location.href = "/";
+  };
+
   useEffect(() => {
     axios
       .get(`${baseURL}/users/profile`, {
@@ -46,7 +51,7 @@ const HeaderDataUser = () => {
                 className="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4"
                 id="navbar"
               >
-                <div className="ms-md-auto pe-md-3 d-flex align-items-center">
+                <div className="ms-auto pe-md-3 d-flex align-items-center">
                   <ul className="navbar-nav justify-content-end">
                     <li className="nav-item d-flex align-items-center">
                       <a
@@ -73,7 +78,7 @@ const HeaderDataUser = () => {
                       </a>
                     </li>
                     <li className="nav-item d-xl-none ps-3 d-flex align-items-center">
-                      <a
+                      {/* <a
                         href="javascript:;"
                         className="nav-link text-white p-0"
                         id="iconNavbarSidenav"
@@ -83,6 +88,13 @@ const HeaderDataUser = () => {
                           <i className="sidenav-toggler-line bg-white"></i>
                           <i className="sidenav-toggler-line bg-white"></i>
                         </div>
+                      </a> */}
+                      <a
+                        onClick={logoutHandler}
+                        className="nav-link text-white p-0"
+                        id="iconNavbarLogout"
+                      >
+                        <i className="fas fa-sign-out-alt text-white" id="size-logout"></i>
                       </a>
                     </li>
                   </ul>
