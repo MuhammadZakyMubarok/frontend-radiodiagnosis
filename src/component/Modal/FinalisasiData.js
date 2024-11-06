@@ -31,8 +31,9 @@ const FinalisasiData = ({ radiographicId, catatanPasien }) => {
             )
             .then((res) => {
                 console.log('Data finalized successfully:', res.data);
-                // navigate('/dokter-radiografi-panoramik');
-            }).catch((err) => {
+                window.location.href = "/dokter-radiografi-panoramik";
+            })
+            .catch((err) => {
                 console.error('Error finalizing data:', err);
                 setError("There was an error finalizing the data.");
             });
@@ -50,12 +51,13 @@ const FinalisasiData = ({ radiographicId, catatanPasien }) => {
             )
             .then((res) => {
                 console.log('Status set successfully:', res.data);
-                window.location.reload();
-                // navigate('/dokter-radiografi-panoramik');
-            }).catch((err) => {
+                window.location.href = "/dokter-radiografi-panoramik";
+            })
+            .catch((err) => {
                 console.error('Error setting status:', err);
                 setError("There was an error setting the status.");
             });
+
     };
 
     return (
