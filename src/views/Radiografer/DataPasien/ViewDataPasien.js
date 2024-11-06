@@ -9,6 +9,41 @@ import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import "../../Responsive/responsive.css";
+import PatientService from "../../../api/satu-sehat/patient.service";
+
+const AlertMessage = ({ message, status, progress }) => {
+  const getAlertClass = () => {
+    switch (status) {
+      case "success":
+        return "alert alert-success fade show";
+      case "loading":
+        return "alert alert-warning fade show";
+      case "error":
+        return "alert alert-danger fade show";
+      default:
+        return "alert alert-secondary fade show";
+    }
+  };
+
+  return (
+      <div className={`${getAlertClass()} py-2 px-3`} role="alert">
+        {status === "loading" && (
+            <div className="progress mt-2" style={{ height: "5px" }}>
+              <div
+                  className="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                  role="progressbar"
+                  style={{ width: `${progress}%` }}
+                  aria-valuenow={progress}
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+              ></div>
+            </div>
+        )}
+        {message}
+      </div>
+  );
+};
+
 
 const ViewDataPasien = () => {
   const auth = WithAuthorization(["radiographer"]);
@@ -17,9 +52,26 @@ const ViewDataPasien = () => {
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
+  // Satu sehat
+  const [satuSehatResponse, setSatuSehatResponse] = useState("");
+  const [satuSehatResponseProgress, setSatuSehatResponseProgress] = useState(0);
+
   const { id } = useParams();
   const navigate = useNavigate();
   const token = sessionStorage.getItem("token");
+
+  // Logic progress bar biar bisa jalan
+  useEffect(() => {
+    let interval;
+    if (satuSehatResponse === "loading") {
+      interval = setInterval(() => {
+        setSatuSehatResponseProgress((prev) => (prev < 90 ? prev + 10 : prev));
+      }, 300);
+    } else {
+      setSatuSehatResponseProgress(0);
+    }
+    return () => clearInterval(interval);
+  }, [satuSehatResponse]);
 
   // get data user use axios
   useEffect(() => {
@@ -102,6 +154,23 @@ const ViewDataPasien = () => {
     setShowApproveModal(false);
   };
 
+  // Fungsi handle satu sehat
+  const handleCheckDataSatuSehat = async () => {
+    setSatuSehatResponse("loading");
+
+    const patientService = PatientService();
+    try {
+      const response = await patientService.searchNIK({ nik: data.id_number });
+      if (response.data) {
+        setSatuSehatResponse("success");
+      } else {
+        setSatuSehatResponse("error");
+      }
+    } catch (err) {
+      setSatuSehatResponse("error");
+    }
+  };
+
   if (auth) {
     return (
       <div>
@@ -142,6 +211,7 @@ const ViewDataPasien = () => {
                               className="btn btn-outline-primary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-primary"
                               data-bs-toggle="modal"
                               data-bs-target={``}
+                              onClick={handleCheckDataSatuSehat}
                             >
                               <i className="fas fa-file-medical text-primary"></i>
                               &nbsp;&nbsp; Cek Data Satu Sehat
@@ -221,20 +291,42 @@ const ViewDataPasien = () => {
 
                                   <div className="form-group">
                                     <label
-                                      htmlFor="example-text-input"
-                                      className="form-control-label"
+                                        htmlFor="example-text-input"
+                                        className="form-control-label"
                                     >
                                       NIK (Nomor Induk Kewarganegaraan)
                                     </label>
                                     <p className="form-control" type="text">
                                       {data.id_number}
                                     </p>
+
+
+                                    {satuSehatResponse === "loading" && (
+                                        <AlertMessage
+                                            message="Proses pengecekan ke satu sehat"
+                                            status="loading"
+                                            progress={satuSehatResponseProgress}
+                                        />
+                                    )}
+                                    {satuSehatResponse === "success" && (
+                                        <AlertMessage
+                                            message="NIK telah terdaftar di satu sehat"
+                                            status="success"
+                                        />
+                                    )}
+                                    {satuSehatResponse === "error" && (
+                                        <AlertMessage
+                                            message="NIK tidak terdaftar di satu sehat"
+                                            status="error"
+                                        />
+                                    )}
+
                                   </div>
 
                                   <div className="row">
                                     <label
-                                      htmlFor="example-text-input"
-                                      className="form-control-label"
+                                        htmlFor="example-text-input"
+                                        className="form-control-label"
                                     >
                                       Jenis Kelamin
                                     </label>
