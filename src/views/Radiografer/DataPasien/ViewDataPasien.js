@@ -1,8 +1,10 @@
 import axios from "axios";
 import { React, useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import DeleteModal from "../../../component/Modal/DeleteModal";
+import ApproveModal from "../../../component/Modal/ApproveModal";
+import CancelModal from "../../../component/Modal/CancelModal";
 import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
@@ -12,8 +14,11 @@ const ViewDataPasien = () => {
   const auth = WithAuthorization(["radiographer"]);
 
   const [data, setData] = useState({});
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const { id } = useParams();
+  const navigate = useNavigate();
   const token = sessionStorage.getItem("token");
 
   // get data user use axios
@@ -48,6 +53,53 @@ const ViewDataPasien = () => {
       .catch((error) => {
         console.log(error.response.data);
       });
+  };
+
+  const handleApprove = (e) => {
+    e.preventDefault();
+    axios
+      .post(`${baseURL}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(() => {
+        navigate("/radiografer-data-pasien"); // Navigasi setelah berhasil disetujui
+      })
+      .catch((error) => {
+        console.log(error.response.data);
+      });
+  };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
+    axios
+      .post(`${baseURL}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(() => {
+        navigate("/radiografer-data-pasien"); // Navigasi setelah berhasil disetujui
+      })
+      .catch((error) => {
+        console.log(error.response.data);
+      });
+  };
+
+  const openCancelModal = () => {
+    setShowCancelModal(true);
+  };
+  const closeCancelModal = () => {
+    setShowCancelModal(false);
+  };
+
+  // Fungsi untuk membuka modal persetujuan
+  const openApproveModal = () => {
+    setShowApproveModal(true);
+  };
+  const closeApproveModal = () => {
+    setShowApproveModal(false);
   };
 
   if (auth) {
@@ -129,13 +181,13 @@ const ViewDataPasien = () => {
 
                     <div className="card-body px-0 pb-2 pt-0">
                       <div className="row justify-content-center">
-                        <div className="col-md-6">
+                        <div className="col-md-6 me-lg-8 me-auto" id="form-detail-rdg">
                           <div className="card shadow-none border-0">
                             <div className="card-header pb-0">
                               <div className="d-flex align-items-center">
-                                <h6 className="mb-0 font-weight-bolder">
+                                <h5 className="mb-0 font-weight-bolder">
                                   Data Pasien
-                                </h6>
+                                </h5>
                               </div>
                             </div>
 
@@ -344,10 +396,50 @@ const ViewDataPasien = () => {
                           </div>
                         </div>
                       </div>
+                      <div className="row justify-content-end ms-auto">
+                        <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center">
+                          <div className="w-100" >
+                            <button
+                              className="btn bg-gradient-primary btn-sm mb-2 border-radius-xl w-100"
+                              onClick={openApproveModal}
+                            >
+                              Setujui
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center">
+                          <div className="w-100">
+                            <button
+                              className="btn btn-sm border border-danger border-radius-xl w-100 text-danger"
+                              onClick={openCancelModal}
+                            >
+                              Batal
+                            </button>
+                          </div>
+
+                        </div>
+                      </div>
+
                     </div>
                   </div>
                 </div>
               </div>
+              {/* Approve Confirmation Modal */}
+              {showApproveModal && (
+                <ApproveModal
+                  userId={id}
+                  handleApprove={handleApprove}
+                  onClose={closeApproveModal}
+                />
+              )}
+              {showCancelModal && (
+                <CancelModal
+                  userId={id}
+                  handleCancel={handleCancel}
+                  onClose={closeCancelModal}
+                />
+              )}
             </div>
           </main>
         </body>
