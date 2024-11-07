@@ -10,6 +10,7 @@ import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import PaginationsHistory from "../../../component/Pagination/PaginationsHistory";
 import Report from "./Report";
+import "../../Responsive/responsive.css";
 
 const DetailCatatanPasien = () => {
   const auth = WithAuthorization(["doctor"]);
@@ -60,7 +61,6 @@ const DetailCatatanPasien = () => {
       reportElement.style.display = "none";
     });
   };
-  
 
   const mappingDiagnoses = (diagnoses) => {
     let systemDiagnosis = [];
@@ -156,8 +156,8 @@ const DetailCatatanPasien = () => {
                                 <p className="text-xs font-weight-bolder mb-0">
                                   {data.panoramik_check_date !== null
                                     ? moment(data.panoramik_check_date).format(
-                                        "DD/MM/YYYY"
-                                      )
+                                      "DD/MM/YYYY"
+                                    )
                                     : "-"}
                                 </p>
                               </div>
@@ -204,9 +204,8 @@ const DetailCatatanPasien = () => {
                                           </p>
                                           <img
                                             className=" img-fluid ps-0 pb-4 border-radius-xl"
-                                            src={`${
-                                              baseURL + data.panoramik_picture
-                                            }`}
+                                            src={`${baseURL + data.panoramik_picture
+                                              }`}
                                             alt="Panoramik Gigi"
                                           />
                                           <div className="row">
@@ -218,10 +217,10 @@ const DetailCatatanPasien = () => {
                                             <div className="col-4">
                                               <p className="text-xs text-primary font-weight-bold">
                                                 {data.panoramik_check_date !==
-                                                null
+                                                  null
                                                   ? moment(
-                                                      data.panoramik_check_date
-                                                    ).format("DD/MM/YYYY")
+                                                    data.panoramik_check_date
+                                                  ).format("DD/MM/YYYY")
                                                   : "-"}
                                               </p>
                                             </div>
@@ -314,28 +313,28 @@ const DetailCatatanPasien = () => {
                                                           {diagnose.verificator_diagnosis ? (
                                                             <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
                                                               {diagnose.verificator_diagnosis ===
-                                                              "dan lain-lain"
+                                                                "dan lain-lain"
                                                                 ? diagnose.verificator_note +
-                                                                  (diagnose.manual_diagnosis
-                                                                    ? ", " +
-                                                                      diagnose.manual_diagnosis
-                                                                    : "")
+                                                                (diagnose.manual_diagnosis
+                                                                  ? ", " +
+                                                                  diagnose.manual_diagnosis
+                                                                  : "")
                                                                 : diagnose.verificator_diagnosis
-                                                                ? diagnose.verificator_diagnosis +
+                                                                  ? diagnose.verificator_diagnosis +
                                                                   (diagnose.manual_diagnosis
                                                                     ? ", " +
-                                                                      diagnose.manual_diagnosis
+                                                                    diagnose.manual_diagnosis
                                                                     : "")
-                                                                : diagnose.manual_diagnosis}
+                                                                  : diagnose.manual_diagnosis}
                                                             </p>
                                                           ) : (
                                                             <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
                                                               {diagnose.system_diagnosis
                                                                 ? diagnose.system_diagnosis +
-                                                                  (diagnose.manual_diagnosis
-                                                                    ? ", " +
-                                                                      diagnose.manual_diagnosis
-                                                                    : "")
+                                                                (diagnose.manual_diagnosis
+                                                                  ? ", " +
+                                                                  diagnose.manual_diagnosis
+                                                                  : "")
                                                                 : diagnose.manual_diagnosis}
                                                             </p>
                                                           )}
@@ -360,28 +359,109 @@ const DetailCatatanPasien = () => {
                                               )}
                                             </div>
                                           </div>
+                                          <div className="row">
+                                            <div className="col-12">
+                                              <p className="text-xxs text-secondary font-weight-bold">
+                                                Catatan Untuk Pasien
+                                              </p>
+                                              <div className="row">
+                                                <div className="col-12">
+                                                  <p className="text-xs text-dark font-weight-bold mb-0 pb-2 px-3">
+                                                    {data.catatan_pasien ?? "-"}
+                                                  </p>
+                                                </div>
+                                              </div>
+                                              {/* <p>{data.catatan_pasien ?? "-"}</p> */}
+                                              {/* {data.diagnoses?.map(
+                                                (diagnose) => {
+                                                  if (
+                                                    diagnose?.system_diagnosis ||
+                                                    diagnose?.manual_diagnosis
+                                                  ) {
+                                                    return (
+                                                      <div className="row">
+                                                        <div className="col-2">
+                                                          <ul className="ps-3">
+                                                            <li className="text-xs">
+                                                              Gigi #
+                                                              {
+                                                                diagnose?.tooth_number
+                                                              }
+                                                            </li>
+                                                          </ul>
+                                                        </div>
+                                                        <div className="col-10 ps-0">
+                                                          {diagnose.verificator_diagnosis ? (
+                                                            <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
+                                                              {diagnose.verificator_diagnosis ===
+                                                                "dan lain-lain"
+                                                                ? diagnose.verificator_note +
+                                                                (diagnose.manual_diagnosis
+                                                                  ? ", " +
+                                                                  diagnose.manual_diagnosis
+                                                                  : "")
+                                                                : diagnose.verificator_diagnosis
+                                                                  ? diagnose.verificator_diagnosis +
+                                                                  (diagnose.manual_diagnosis
+                                                                    ? ", " +
+                                                                    diagnose.manual_diagnosis
+                                                                    : "")
+                                                                  : diagnose.manual_diagnosis}
+                                                            </p>
+                                                          ) : (
+                                                            <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
+                                                              {diagnose.system_diagnosis
+                                                                ? diagnose.system_diagnosis +
+                                                                (diagnose.manual_diagnosis
+                                                                  ? ", " +
+                                                                  diagnose.manual_diagnosis
+                                                                  : "")
+                                                                : diagnose.manual_diagnosis}
+                                                            </p>
+                                                          )}
+                                                          <hr
+                                                            style={{
+                                                              height: "1px",
+                                                              borderWidth:
+                                                                "0 px",
+                                                              color: "gray",
+                                                              backgroundColor:
+                                                                "gray",
+                                                              marginBottom:
+                                                                "0 px",
+                                                              marginTop: "0 px",
+                                                            }}
+                                                          />
+                                                        </div>
+                                                      </div>
+                                                    );
+                                                  }
+                                                }
+                                              )} */}
+                                            </div>
+                                          </div>
                                         </div>
                                         <div id="report" style={{ display: "none" }}>
                                           <Report />
                                         </div>
 
                                       </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </main>
-        </body>
-      </div>
+                                    </div >
+                                  </div >
+                                </div >
+                              </div >
+                            </div >
+                          </div >
+                        </div >
+                      </div >
+                    </div >
+                  </div >
+                </div >
+              </div >
+            </div >
+          </main >
+        </body >
+      </div >
     );
   } else {
     return <div></div>;

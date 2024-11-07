@@ -8,6 +8,7 @@ import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import StatusUnverified from "../../../component/Alerts/StatusUnverified";
+import "../../Responsive/responsive.css";
 
 const ViewGambarPanoramik = () => {
   const auth = WithAuthorization(["radiographer"]);
@@ -74,10 +75,10 @@ const ViewGambarPanoramik = () => {
             <div className="container-fluid py-2">
               <div className="row p-0">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="card-l">
                     <div className="card-header pb-2 p-4">
                       <div className="row">
-                        <div className="col-8 d-flex align-items-center">
+                        <div className="col-8 d-flex align-items-center mb-4">
                           <a
                             className="btn btn-outline-secondary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2"
                             href="/radiografer-radiografi-panoramik"
@@ -89,39 +90,41 @@ const ViewGambarPanoramik = () => {
                             &nbsp;&nbsp;Kembali
                           </a>
                         </div>
-
-                        <div className="col">
-                          <div className="row">
-                            <div className="col-7 d-flex justify-content-end">
-                              <button
-                                type="button"
-                                className="btn btn-outline-primary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
-                              >
-                                <Link
-                                  to={`/radiografer-upload-ulang-gambar-panoramik/${id}`}
-                                >
-                                  <i className="fa fa-cloud-upload text-primary"></i>
-                                  &nbsp;&nbsp; Unggah Ulang Gambar
-                                </Link>
-                              </button>
-                            </div>
-                            <div className="col-5">
-                              <button
-                                type="button"
-                                className="btn btn-outline-danger btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
-                                data-bs-toggle="modal"
-                                data-bs-target={`#exampleModal${data.radiographics_id}`}
-                              >
-                                <i className="fa fa-trash text-danger"></i>
-                                &nbsp;&nbsp; Hapus Gambar
-                              </button>
-                            </div>
-                            <DeleteModal
-                              userId={data.radiographics_id}
-                              handleDelete={handleDelete}
-                            />
-                          </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-md-8 col-12 mb-2 mb-md-0">
+                          <h6 className="mb-0 font-weight-bolder">
+                            Verifikasi Gambar Radiografi Panoramik
+                          </h6>
                         </div>
+                        <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center" id="btn-reupload">
+                          <button
+                            type="button"
+                            className="btn btn-outline-primary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger" 
+                          >
+                            <Link
+                              to={`/radiografer-upload-ulang-gambar-panoramik/${id}`}
+                            >
+                              <i className="fa fa-cloud-upload text-primary"></i>
+                              &nbsp;&nbsp; Unggah Ulang Gambar
+                            </Link>
+                          </button>
+                        </div>
+                        <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center">
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target={`#exampleModal${data.radiographics_id}`}
+                          >
+                            <i className="fa fa-trash text-danger"></i>
+                            &nbsp;&nbsp; Hapus Gambar
+                          </button>
+                        </div>
+                        <DeleteModal
+                          userId={data.radiographics_id}
+                          handleDelete={handleDelete}
+                        />
                       </div>
                     </div>
 
@@ -129,11 +132,6 @@ const ViewGambarPanoramik = () => {
                       <div className="row">
                         <div className="col pe-0">
                           <div className="card-header pb-0 ps-0">
-                            <div className="d-flex align-items-center">
-                              <h6 className="mb-0 font-weight-bolder">
-                                Verifikasi Gambar Radiografi Panoramik
-                              </h6>
-                            </div>
                             <div className="row mt-3">
                               <div className="col-3">
                                 <p className="text-xs text-secondary mb-1">
@@ -204,9 +202,8 @@ const ViewGambarPanoramik = () => {
 
                                       <img
                                         className="img-fluid border-radius-xl p-2"
-                                        src={`${
-                                          baseURL + data.panoramik_picture
-                                        }`}
+                                        src={`${baseURL + data.panoramik_picture
+                                          }`}
                                       />
                                     </div>
                                   </div>

@@ -5,6 +5,7 @@ import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
+import "../../Responsive/responsive.css";
 
 const EditDataPasien = () => {
   const auth = WithAuthorization(["radiographer"]);
@@ -106,7 +107,7 @@ const EditDataPasien = () => {
             <div className="container-fluid py-2">
               <div className="row p-0">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="card-l">
                     <div className="card-header pb-2 p-4">
                       <div className="row">
                         <div className="col-6 d-flex align-items-center">

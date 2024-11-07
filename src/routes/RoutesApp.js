@@ -13,6 +13,7 @@ import ViewCatatanPasien from "../views/Dokter/CatatanPasien/ViewCatatanPasien";
 import DataPasienDokter from "../views/Dokter/DataPasien/DataPasienDokter";
 import ViewDataPasienDokter from "../views/Dokter/DataPasien/ViewDataPasienDokter";
 import ProfilDokter from "../views/Dokter/Profil/ProfilDokter";
+import Odontogram from "../views/Dokter/Odontogram/OdontogramPasien";
 import RadiografiPanoramikDokter from "../views/Dokter/RadiografiPanoramik/RadiografiPanoramikDokter";
 import ViewGambarPanoramikDokter from "../views/Dokter/RadiografiPanoramik/ViewGambarPanoramikDokter";
 import AddDataPasien from "../views/Radiografer/DataPasien/AddDataPasien";
@@ -108,6 +109,7 @@ const RoutesApp = () => {
             element={<ViewGambarPanoramikDokter />}
           />
           <Route path="/dokter-profil" element={<ProfilDokter />} />
+          <Route path="/odontogram" element={<Odontogram />} />
           <Route path="/dokter-catatan-pasien" element={<CatatanPasien />} />
           <Route
             path="/dokter-detail-catatan-pasien/:id"

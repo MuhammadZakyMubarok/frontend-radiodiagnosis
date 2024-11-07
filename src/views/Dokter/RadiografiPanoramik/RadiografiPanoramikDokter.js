@@ -3,10 +3,11 @@ import HeaderUser from "../../../component/Header/HeaderUser";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
 import RadiografiPanoramikCardDokter from "../../../component/Card/RadiografiPanoramikCardDokter";
 import axios from "axios";
-import { baseURL } from "../../../routes/Config";
+import { baseURL, apiUrl } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import Paginations from "../../../component/Pagination/Paginations";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
+import "../../Responsive/responsive.css";
 
 const RadiografiPanoramikDokter = () => {
   const auth = WithAuthorization(["doctor"]);
@@ -18,6 +19,7 @@ const RadiografiPanoramikDokter = () => {
   const [inputText, setInputText] = useState("");
   const [statusSearch, setStatusSearch] = useState(false);
   const [verified, setVerified] = useState("");
+  const [loggedInDoctor, setLoggedInDoctor] = useState(null);
 
   const handleChange = (event) => {
     setInputText(event.target.value);
@@ -29,6 +31,19 @@ const RadiografiPanoramikDokter = () => {
   };
 
   const token = sessionStorage.getItem("token");
+
+  useEffect(() => {
+    deleteData();
+    axios.get(`${baseURL}/users/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then(response => {
+      setLoggedInDoctor(response.data.data);
+    }).catch(error => {
+      console.log(error);
+    });
+  }, []);
 
   useEffect(() => {
     let url = `${baseURL}/radiographics/all?page=${currentPage}`;
@@ -62,6 +77,14 @@ const RadiografiPanoramikDokter = () => {
   };
   console.log(pagination)
 
+  const deleteData = async () => {
+    try {
+      await axios.delete(`${apiUrl}/data`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (auth) {
     return (
       <div>
@@ -78,7 +101,7 @@ const RadiografiPanoramikDokter = () => {
             <div className="container-fluid py-2">
               <div className="row mb-4">
                 <div className="col-12">
-                  <div className="card mb-4">
+                  <div className="card mb-4" id="card-l">
                     <div className="card-header p-1">
                       <div className="row p-2">
                         <div className="col-9 card-header p-4 pt-3">
@@ -92,9 +115,9 @@ const RadiografiPanoramikDokter = () => {
                             sementara yang perlu diverifikasi oleh dokter
                           </p>
                         </div>
-                        <div class="col-3 pe-3 pt-3">
+                        <div class="col-md-4 col-12 text-md-end text-center mb-2 md-0 pe-3 ps-3">
                           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-                            <div class="input-group">
+                            <div class="input-group"  style={{ maxWidth: "100%" }}>
                               <span class="input-group-text text-body border-radius-xl">
                                 <i class="fas fa-search" aria-hidden="true"></i>
                               </span>
@@ -114,21 +137,26 @@ const RadiografiPanoramikDokter = () => {
                     </div>
                     <div className="card-body px-0 pt-0 pb-2">
                       <div className="row">
-                        <di className="col-md-2">
+                        <div className="col-md-2">
                           <p className="btn btn-link m-0 ps-0  text-secondary text-xs font-weight-bold" onClick={() => handleVerified("")}>
                             Semua Hasil
                           </p>
-                        </di>
-                        <di className="col-md-2">
-                          <button className="ps-0 btn btn-link m-0 text-secondary text-xs font-weight-bold" onClick={() => handleVerified("true")}>
-                            Telah Diverifikasi
-                          </button>
-                        </di>
-                        <di className="col-md-2">
+                        </div>
+                        <div className="col-md-2">
                           <button className="btn btn-link m-0 ps-0  text-secondary text-xs font-weight-bold" onClick={() => handleVerified("false")}>
                             Belum Diverifikasi
                           </button>
-                        </di>
+                        </div>
+                        <div className="col-md-2">
+                          <button className="btn btn-link m-0 ps-0  text-secondary text-xs font-weight-bold" onClick={() => handleVerified("ongoing")}>
+                            Sedang Diverifikasi
+                          </button>
+                        </div>
+                        <div className="col-md-2">
+                          <button className="ps-0 btn btn-link m-0 text-secondary text-xs font-weight-bold" onClick={() => handleVerified("true")}>
+                            Telah Diverifikasi
+                          </button>
+                        </div>
                         <hr
                           style={{
                             height: "1px",
@@ -151,6 +179,7 @@ const RadiografiPanoramikDokter = () => {
                           <RadiografiPanoramikCardDokter
                             data={item}
                             baseURL={baseURL}
+                            loggedInDoctor={loggedInDoctor}
                           />
                         </div>
                       ))}

@@ -1,0 +1,67 @@
+/* Pengaturan dasar untuk .card */
+.card {
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Media query untuk layar sangat kecil (max-width: 576px) */
+@media (max-width: 576px) {
+    /* RESPONSIVE CARD */
+    #card-l {
+        margin-left: 20px;
+    }
+
+    .card {
+        padding: 10px; /* Mengurangi padding untuk layar sangat kecil */
+    }
+
+    /* SEARCH-BUTTON-ADMIN */
+    #src-adm {
+        margin-bottom: 20px;
+    }
+
+    #btn-add {
+        font-size: 10px;
+        margin-bottom: 20px;
+    }
+    #btn-dlt-edt{
+        margin-right: 20px;
+    }
+    #btn-dlt-edt-cek{
+        margin-right: 10px;
+    }
+    #btn-reupload{
+        margin-bottom: 10px;
+    }
+    #size-logout{
+        font-size: 24px;
+    }
+}
+
+/* Media query untuk layar kecil hingga medium (max-width: 768px) */
+@media (max-width: 768px) {
+    /* RESPONSIVE CARD */
+    #card-l2 {
+        margin-left: 20px;
+    }
+    #card-l {
+        margin-left: 20px;
+    }
+    #size-logout{
+        font-size: 26px;
+    }
+}
+
+/* Media query untuk layar besar (min-width: 820px) */
+@media (max-width: 1198px) {
+    /* RESPONSIVE CARD */
+    #card-l2 {
+        margin-left: 20px;
+    }
+    #card-l {
+        margin-left: 20px;
+    }
+    #size-logout{
+        font-size: 24px;
+    }
+}
