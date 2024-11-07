@@ -1452,10 +1452,15 @@ const ViewGambarPanoramikDokter = () => {
                                                   className="form-control text-xs"
                                                   id="catatanpasien"
                                                   name="catatanpasien"
-                                                  placeholder="Catatan untuk pasien"
+                                                  placeholder={
+                                                    data.status === 2 && data.catatan_pasien == null ? "Catatan Pasien" : ""
+                                                  }
                                                   rows="5"
-                                                  value={catatanPasien}
+                                                  value={data.catatan_pasien == null ? catatanPasien : data.catatan_pasien}
                                                   onChange={(e) => setCatatanPasien(e.target.value)}
+                                                  disabled={
+                                                    data.status === 2 ? true : false
+                                                  }
                                                 />
                                               </div>
                                             </div>
