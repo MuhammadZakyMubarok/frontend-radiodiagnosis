@@ -2,11 +2,13 @@ import axios from "axios";
 import { React, useState } from "react";
 import { baseURL } from "../routes/Config";
 import LoginError from "../component/Alerts/LoginError";
+import LoginVerif from "../component/Alerts/LoginVerif";
 import { useNavigate } from 'react-router-dom';
 
 const LoginCardUser = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(false);
+  const [verif, setVerif] = useState(false);
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -21,38 +23,36 @@ const LoginCardUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("tes");
-    await axios
-      .post(`${baseURL}/authentications`, data)
-      .then((response) => {
-        const { data } = response.data;
-        sessionStorage.setItem("token", data.accessToken);
-        
-        if (data.role === "radiographer") {
-          window.location.href = "/radiografer-data-pasien";
-        } else if (data.role === "doctor") {
-          window.location.href = "/dokter-data-pasien";
-        } else if (data.role === "patient") {
-          // console.log(data);
-          if(data.statusUser === 1){
-            console.log('Akun suda verif');
-            window.location.href = "/patient-dashboard";
-          }else{
-            
-            console.log('Akun belum verif');
-            sessionStorage.removeItem("token");
-          }
+    console.log("Attempting login...");
+    
+    try {
+      const response = await axios.post(`${baseURL}/authentications`, data);
+      const { data: responseData } = response.data;
+      sessionStorage.setItem("token", responseData.accessToken);
+      
+      if (responseData.role === "radiographer") {
+        window.location.href = "/radiografer-data-pasien";
+      } else if (responseData.role === "doctor") {
+        window.location.href = "/dokter-data-pasien";
+      } else if (responseData.role === "patient") {
+        if (responseData.statusUser === 1) {
+          setVerif(false);
+          window.location.href = "/patient-dashboard";
+        } else {
+          console.log('Akun belum verif');
+          setVerif(true);  // Show the "unverified" alert
+          sessionStorage.removeItem("token");
         }
-      })
-      .catch((error) => {
-        setError(true);
-      });
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(true);
+    }
   };
 
   const handlePatient = () => {
     navigate('/patient-result-diagnosis');
   };
-
 
   return (
     <div>
@@ -70,7 +70,9 @@ const LoginCardUser = () => {
                       </p>
                     </div>
                     <div className="card-body">
-                      <div className="mb-3">{error ? <LoginError /> : ""}</div>
+                      <div className="mb-3">
+                        {verif ? <LoginVerif /> : error ? <LoginError /> : null}
+                      </div>
                       <form role="form">
                         <div className="mb-3">
                           <input
