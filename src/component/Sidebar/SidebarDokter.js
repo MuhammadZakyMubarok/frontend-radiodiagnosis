@@ -1,8 +1,17 @@
-import React from "react";
+import axios from "axios";
+import {React} from "react";
 import SidebarFooterUser from "./SidebarFooterUser";
-import { NavLink } from "react-router-dom";
+import { NavLink} from "react-router-dom";
+import { apiUrl } from "../../routes/Config";
 
 const SidebarDokter = () => {
+  const deleteData = async () => {
+    try {
+      await axios.delete(`${apiUrl}/data`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <div>
       <body className="g-sidenav-show bg-gray-100">
@@ -33,7 +42,7 @@ const SidebarDokter = () => {
           >
             <ul className="navbar-nav">
               <li className="nav-item">
-                <NavLink activeClassName="active" className="nav-link" to="/dokter-data-pasien">
+                <NavLink activeClassName="active" onClick={deleteData} className="nav-link" to="/dokter-data-pasien">
                   <div className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
                     <img src="../assets/img/App/data_pasien.png" />
                   </div>
@@ -41,7 +50,7 @@ const SidebarDokter = () => {
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink activeClassName="active" className="nav-link" to="/dokter-radiografi-panoramik">
+                <NavLink activeClassName="active" onClick={deleteData} className="nav-link" to="/dokter-radiografi-panoramik">
                   <div className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
                     <img src="../assets/img/App/radiografi_panoramik.png" />
                   </div>
@@ -49,7 +58,7 @@ const SidebarDokter = () => {
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink activeClassName="active" className="nav-link" to="/dokter-catatan-pasien">
+                <NavLink activeClassName="active" onClick={deleteData} className="nav-link" to="/dokter-catatan-pasien">
                   <div className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
                     <img src="../assets/img/App/catatan_pasien.png" />
                   </div>
@@ -57,7 +66,7 @@ const SidebarDokter = () => {
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink activeClassName="active" className="nav-link" to="/dokter-profil">
+                <NavLink activeClassName="active" onClick={deleteData} className="nav-link" to="/dokter-profil">
                   <div className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
                     <img src="../assets/img/App/profil.png" />
                   </div>
@@ -65,7 +74,7 @@ const SidebarDokter = () => {
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink activeClassName="active" className="nav-link" to="/odontogram">
+                <NavLink activeClassName="active" onClick={deleteData} className="nav-link" to="/odontogram">
                   <div className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
                     <img src="../assets/img/App/radiografi_panoramik.png" />
                   </div>

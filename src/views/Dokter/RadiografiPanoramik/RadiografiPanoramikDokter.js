@@ -3,7 +3,7 @@ import HeaderUser from "../../../component/Header/HeaderUser";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
 import RadiografiPanoramikCardDokter from "../../../component/Card/RadiografiPanoramikCardDokter";
 import axios from "axios";
-import { baseURL } from "../../../routes/Config";
+import { baseURL, apiUrl } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import Paginations from "../../../component/Pagination/Paginations";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
@@ -33,6 +33,7 @@ const RadiografiPanoramikDokter = () => {
   const token = sessionStorage.getItem("token");
 
   useEffect(() => {
+    deleteData();
     axios.get(`${baseURL}/users/profile`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -75,6 +76,14 @@ const RadiografiPanoramikDokter = () => {
     setCurrentPage(pageNumber);
   };
   console.log(pagination)
+
+  const deleteData = async () => {
+    try {
+      await axios.delete(`${apiUrl}/data`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   if (auth) {
     return (
