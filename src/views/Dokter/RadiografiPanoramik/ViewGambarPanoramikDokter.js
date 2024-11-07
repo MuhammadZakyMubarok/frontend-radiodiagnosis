@@ -35,6 +35,7 @@ const ViewGambarPanoramikDokter = () => {
   const [componentKey, setComponentKey] = useState(0);
   const [odontogramUp, setOdontogramUp] = useState([]);
   const [odontogramDown, setOdontogramDown] = useState([]);
+  const [lubang, setLubang] = useState([]);
   const [isSquare, setIsSquare] = useState(false);
   const [overlay, setOverlay] = useState(false);
   const [showImages, setShowImages] = useState(false); // State to manage visibility
@@ -105,6 +106,7 @@ const ViewGambarPanoramikDokter = () => {
   }, []);
 
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -134,34 +136,40 @@ const ViewGambarPanoramikDokter = () => {
     setComponentKey(componentKey + 1);
   }
 
-  // const deleteData = async () => {
-  //   try {
-  //     await axios.delete(`${apiUrl}/data`);
-  //     getAll();
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  //   // window.location.reload();
-  // };
+  const deleteData = async () => {
+    try {
+      await axios.delete(`${apiUrl}/data`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
   const getAll = async () => {
     try {
       const response = await axios.get(`${apiUrl}/data`);
       const fetchedData = response.data;
+      console.log("isi dari fetchdata: ", fetchedData);
+      if (fetchedData.predictions?.all?.length > 0 || fetchedData.predictions?.all?.length != "") {
+        if (fetchedData.predictions?.show_odontogram?.length > 0) {
+          const upperTeeth = fetchedData.predictions.show_odontogram
+            .filter((item) => customOrderUp.includes(item.number))
+            .sort((a, b) => customOrderUp.indexOf(a.number) - customOrderUp.indexOf(b.number));
 
-      if (fetchedData.predictions?.show_odontogram?.length > 0) {
-        const upperTeeth = fetchedData.predictions.show_odontogram
-          .filter((item) => customOrderUp.includes(item.number))
-          .sort((a, b) => customOrderUp.indexOf(a.number) - customOrderUp.indexOf(b.number));
+          const lowerTeeth = fetchedData.predictions.show_odontogram
+            .filter((item) => customOrderDown.includes(item.number))
+            .sort((a, b) => customOrderDown.indexOf(a.number) - customOrderDown.indexOf(b.number));
 
-        const lowerTeeth = fetchedData.predictions.show_odontogram
-          .filter((item) => customOrderDown.includes(item.number))
-          .sort((a, b) => customOrderDown.indexOf(a.number) - customOrderDown.indexOf(b.number));
-
-        setOdontogramUp(upperTeeth);
-        setOdontogramDown(lowerTeeth);
+          setOdontogramUp(upperTeeth);
+          setOdontogramDown(lowerTeeth);
+        }
+        setOdontogramImage(fetchedData);
+        setLubang(fetchedData.predictions?.missing_teeth);
+      } else {
+        setOdontogramUp([]);
+        setOdontogramDown([]);
+        setOdontogramImage({});
       }
-      setOdontogramImage(fetchedData);
     } catch (error) {
       console.error(error);
     }
@@ -183,6 +191,9 @@ const ViewGambarPanoramikDokter = () => {
   };
 
   if (auth) {
+    console.log("data :", data);
+    console.log("odontogramimage: ", odontogramImage);
+    console.log("lubang: ", lubang);
     return (
       <div>
         <body className="g-sidenav-show bg-gray-100">
@@ -770,541 +781,580 @@ const ViewGambarPanoramikDokter = () => {
                                       )}
 
                                       {/* start Diagram Gigi */}
-                                      <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
-                                        <div className="card-body">
-                                          <p className="text-xs p-2 mb-0 mt-4">
-                                            Diagram Gigi
-                                          </p>
-                                          <div className="row">
-                                            <div className="col d-flex justify-content-center">
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck18"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                      {!odontogramImage.gambar && (
+                                        <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
+                                          <div className="card-body">
+                                            <p className="text-xs p-2 mb-0 mt-4">
+                                              Diagram Gigi
+                                            </p>
+                                            <div className="row">
+                                              <div className="col d-flex justify-content-center">
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck18"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    18
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck18"
+                                                >
                                                   18
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck18"
-                                              >
-                                                18
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck17"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck17"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    17
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck17"
+                                                >
                                                   17
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck17"
-                                              >
-                                                17
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck16"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck16"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    16
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck16"
+                                                >
                                                   16
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck16"
-                                              >
-                                                16
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck15"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck15"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    15
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck15"
+                                                >
                                                   15
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck15"
-                                              >
-                                                15
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck14"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck14"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    14
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck14"
+                                                >
                                                   14
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck14"
-                                              >
-                                                14
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck13"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck13"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    13
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck13"
+                                                >
                                                   13
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck13"
-                                              >
-                                                13
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck12"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck12"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    12
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck12"
+                                                >
                                                   12
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck12"
-                                              >
-                                                12
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck11"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck11"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    11
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck11"
+                                                >
                                                   11
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck11"
-                                              >
-                                                11
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck21"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck21"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    21
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck21"
+                                                >
                                                   21
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck21"
-                                              >
-                                                21
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck22"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck22"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    22
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck22"
+                                                >
                                                   22
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck22"
-                                              >
-                                                22
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck23"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck23"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    23
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck23"
+                                                >
                                                   23
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck23"
-                                              >
-                                                23
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck24"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck24"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    24
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck24"
+                                                >
                                                   24
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck24"
-                                              >
-                                                24
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck25"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck25"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    25
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck25"
+                                                >
                                                   25
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck25"
-                                              >
-                                                25
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck26"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck26"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    26
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck26"
+                                                >
                                                   26
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck26"
-                                              >
-                                                26
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck27"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck27"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    27
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck27"
+                                                >
                                                   27
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck27"
-                                              >
-                                                27
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck28"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck28"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    28
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2 mb-0"
+                                                  for="btncheck28"
+                                                >
                                                   28
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2 mb-0"
-                                                for="btncheck28"
-                                              >
-                                                28
-                                              </label>
-                                            </div>
-                                            <div className="d-flex justify-content-center img-fluid mt-2">
-                                              <img src="../assets/img/App/line2.png" />
-                                            </div>
-                                            <div className="d-flex justify-content-center img-fluid mt-5">
-                                              <img src="../assets/img/App/line2.png" />
-                                            </div>
+                                                </label>
+                                              </div>
+                                              <div className="d-flex justify-content-center img-fluid mt-2">
+                                                <img src="../assets/img/App/line2.png" />
+                                              </div>
+                                              <div className="d-flex justify-content-center img-fluid mt-5">
+                                                <img src="../assets/img/App/line2.png" />
+                                              </div>
 
-                                            <div className="col d-flex justify-content-center mt-1">
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck48"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                              <div className="col d-flex justify-content-center mt-1">
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck48"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    48
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck48"
+                                                >
                                                   48
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck48"
-                                              >
-                                                48
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck47"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck47"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    47
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck47"
+                                                >
                                                   47
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck47"
-                                              >
-                                                47
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck46"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck46"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    46
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck46"
+                                                >
                                                   46
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck46"
-                                              >
-                                                46
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck45"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck45"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    45
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck45"
+                                                >
                                                   45
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck45"
-                                              >
-                                                45
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck44"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck44"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    44
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck44"
+                                                >
                                                   44
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck44"
-                                              >
-                                                44
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck43"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck43"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    43
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck43"
+                                                >
                                                   43
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck43"
-                                              >
-                                                43
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck42"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck42"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    42
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck42"
+                                                >
                                                   42
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck42"
-                                              >
-                                                42
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck41"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck41"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    41
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck41"
+                                                >
                                                   41
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck41"
-                                              >
-                                                41
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck31"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck31"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    31
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck31"
+                                                >
                                                   31
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck31"
-                                              >
-                                                31
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck32"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck32"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    32
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck32"
+                                                >
                                                   32
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck32"
-                                              >
-                                                32
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck33"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck33"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    33
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck33"
+                                                >
                                                   33
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck33"
-                                              >
-                                                33
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck34"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck34"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    34
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck34"
+                                                >
                                                   34
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck34"
-                                              >
-                                                34
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck35"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck35"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    35
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck35"
+                                                >
                                                   35
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck35"
-                                              >
-                                                35
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck36"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck36"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    36
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck36"
+                                                >
                                                   36
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck36"
-                                              >
-                                                36
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck37"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck37"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    37
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck37"
+                                                >
                                                   37
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck37"
-                                              >
-                                                37
-                                              </label>
+                                                </label>
 
-                                              <input
-                                                type="checkbox"
-                                                className="btn-check"
-                                                id="btncheck38"
-                                                autoComplete="off"
-                                                checked={teethNumber.includes(
+                                                <input
+                                                  type="checkbox"
+                                                  className="btn-check"
+                                                  id="btncheck38"
+                                                  autoComplete="off"
+                                                  checked={teethNumber.includes(
+                                                    38
+                                                  )}
+                                                />
+                                                <label
+                                                  className="btn btn-outline-secondary text-xs p-2"
+                                                  for="btncheck38"
+                                                >
                                                   38
-                                                )}
-                                              />
-                                              <label
-                                                className="btn btn-outline-secondary text-xs p-2"
-                                                for="btncheck38"
-                                              >
-                                                38
-                                              </label>
+                                                </label>
+                                              </div>
                                             </div>
                                           </div>
                                         </div>
-                                      </div>
+                                      )}
                                       {/* end Diagram Gigi */}
+
                                       <div className="card shadow-none mt-4 me-2 ms-2 border-0">
+                                        {lubang.length > 0 ? (
+                                          <div className="card-body">
+                                            <p className="text-xs">
+                                              Diagnosa AI Gigi Hilang
+                                            </p>
+                                            {lubang.map((item, index) => (
+                                              <div className="row" key={index}>
+                                                <div className="col-2 pt-2">
+                                                  <ul className="ps-3">
+                                                    <li className="text-xs">
+                                                      Gigi #{item}
+                                                    </li>
+                                                  </ul>
+                                                </div>
+                                                <div className="col-4 ps-0 pt-2">
+                                                  <p className="text-xs text-dark font-weight-bold">
+                                                    Gigi Hilang
+                                                  </p>
+                                                </div>
+                                                <hr
+                                                  style={{
+                                                    height: "1px",
+                                                    borderWidth: "0px",
+                                                    color: "gray",
+                                                    backgroundColor: "gray",
+                                                    marginBottom: "0px",
+                                                    marginTop: "0px",
+                                                  }}
+                                                />
+                                              </div>
+                                            ))}
+                                          </div>
+                                        ) : (
+                                          <div></div>
+                                        )}
+
                                         <div className="card-body">
                                           <p className="text-xs">
-                                            Diagnosa Penyakit Gigi
+                                            Diagnosa Gigi Hilang
                                           </p>
                                           {data.diagnoses?.map((diagnose) => {
                                             if (diagnose?.system_diagnosis) {
