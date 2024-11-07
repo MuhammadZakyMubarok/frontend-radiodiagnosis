@@ -8,6 +8,7 @@ import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import Paginations from "../../../component/Pagination/Paginations";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
+import ConfirmModal from "../../../component/Modal/ConfirmModal";
 import "../../Responsive/responsive.css";
 
 
@@ -21,6 +22,9 @@ const DataPasien = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [inputText, setInputText] = useState("");
   const [statusSearch, setStatusSearch] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   const handleChange = (event) => {
     setInputText(event.target.value);
@@ -51,6 +55,40 @@ const DataPasien = () => {
         console.log(error);
       });
   }, [currentPage, inputText]);
+
+  const toggleStatusUser = async (patientId, statusUser) => {
+    try {
+      await axios.put(
+        `${baseURL}/patients/status/${patientId}/${statusUser}`, // Memperbarui URL dengan status_user
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      // Refresh data setelah mengganti status
+      setData((prevData) =>
+        prevData.map((item) =>
+          item.id === patientId ? { ...item, status_user: statusUser === 0 ? 1 : 0 } : item
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleSpanClick = (item) => {
+    setSelectedPatient(item);
+    setIsModalOpen(true); // Buka modal
+  };
+    
+  const handleConfirm = (patientId, statusUser) => {
+    toggleStatusUser(patientId, statusUser);
+    setIsModalOpen(false); // Tutup modal setelah konfirmasi
+    setSelectedPatient(null);
+  };
+  
 
   console.log(pagination);
 
@@ -226,7 +264,7 @@ const DataPasien = () => {
                           >
                             <i className="fas fa-plus"></i>&nbsp;&nbsp; Tambah Data
                           </a>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                     <div className="card-body px-0 pb-2 mt-2">
@@ -251,6 +289,9 @@ const DataPasien = () => {
                               </th>
                               <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 pe-0 text-center">
                                 Aksi
+                              </th>
+                              <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                Acc Akun
                               </th>
                               {/* <!-- <th className="text-secondary opacity-7"></th> --> */}
                             </tr>
@@ -302,10 +343,32 @@ const DataPasien = () => {
                                     </span>
                                   </Link>
                                 </td>
+                                <td className="align-middle text-start text-sm pe-0 text-center">
+                                  <span
+                                    onClick={() => handleSpanClick(item)}
+                                    data-bs-toggle="modal"
+                                    data-bs-target={`#confirmModal${item.id}`}
+                                    className={`badge cursor-pointer border-radius-xl badge-sm bg-gradient-${item.status_user === 0 ? "warning" : "success"
+                                      }`}
+                                  >
+                                    {item.status_user === 0 ? "Acc" : "Selesai"}
+                                  </span>
+
+                                </td>
+
                               </tr>
                             ))}
                           </tbody>
                         </table>
+                        {/* Render ConfirmModal jika selectedPatient ada */}
+                        {isModalOpen && selectedPatient && (
+                          <ConfirmModal
+                            patientId={selectedPatient.id}
+                            statusUser={selectedPatient.status_user}
+                            onConfirm={handleConfirm}
+                            onClose={() => setIsModalOpen(false)}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
