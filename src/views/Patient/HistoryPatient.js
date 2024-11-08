@@ -40,7 +40,7 @@ const dummyPagination = {
 };
 
 const HistoryPatient = () => {
-  const auth = WithAuthorization(["Patient"]);
+  const auth = WithAuthorization(["patient"]);
 
   const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({});
