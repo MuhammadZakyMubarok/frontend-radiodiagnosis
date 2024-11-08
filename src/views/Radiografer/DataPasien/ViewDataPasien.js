@@ -110,13 +110,14 @@ const ViewDataPasien = () => {
   const handleApprove = (e) => {
     e.preventDefault();
     axios
-      .post(`${baseURL}`, {}, {
+      .post(`${baseURL}/patients/status/${id}/1`, {}, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then(() => {
-        navigate("/radiografer-data-pasien"); // Navigasi setelah berhasil disetujui
+        // navigate("/radiografer-data-pasien"); // Navigasi setelah berhasil disetujui
+        navigate(-1)
       })
       .catch((error) => {
         console.log(error.response.data);
