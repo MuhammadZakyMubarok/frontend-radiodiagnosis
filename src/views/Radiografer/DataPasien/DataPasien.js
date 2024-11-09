@@ -264,7 +264,7 @@ const DataPasien = () => {
                           >
                             <i className="fas fa-plus"></i>&nbsp;&nbsp; Tambah Data
                           </a>
-                        </div> */}
+                        </div>
                       </div>
                     </div>
                     <div className="card-body px-0 pb-2 mt-2">
