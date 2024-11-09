@@ -239,124 +239,53 @@ const DetailCatatanPasien = () => {
                                           </div>
                                           <div className="row mt-4">
                                             <div className="col-12">
-                                              <p className="text-xxs text-secondary font-weight-bold">
-                                                Radiodiagnosis Sistem
-                                              </p>
-                                              {data.diagnoses?.map(
-                                                (diagnose) => {
-                                                  if (
-                                                    diagnose?.system_diagnosis
-                                                  ) {
-                                                    return (
-                                                      <div className="row">
-                                                        <div className="col-2">
-                                                          <ul className="ps-3">
-                                                            <li className="text-xs">
-                                                              Gigi #
-                                                              {
-                                                                diagnose?.tooth_number
-                                                              }
-                                                            </li>
-                                                          </ul>
-                                                        </div>
-                                                        <div className="col-10 ps-0">
+                                              <p className="text-xxs text-secondary font-weight-bold">Hasil Radiodiagnosis</p>
+                                              {data.diagnoses?.map((diagnose) => {
+                                                if (diagnose?.system_diagnosis || diagnose?.verificator_diagnosis || diagnose?.manual_diagnosis) {
+                                                  return (
+                                                    <div className="row" key={diagnose?.tooth_number}>
+                                                      <div className="col-2">
+                                                        <ul className="ps-3">
+                                                          <li className="text-xs">Gigi #{diagnose?.tooth_number}</li>
+                                                        </ul>
+                                                      </div>
+                                                      <div className="col-10 ps-0">
+                                                        {diagnose?.system_diagnosis && (
                                                           <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
-                                                            {
-                                                              diagnose?.system_diagnosis
-                                                            }
+                                                            {diagnose?.system_diagnosis}
                                                           </p>
-                                                          <hr
-                                                            style={{
-                                                              height: "1px",
-                                                              borderWidth:
-                                                                "0 px",
-                                                              color: "gray",
-                                                              backgroundColor:
-                                                                "gray",
-                                                              marginBottom:
-                                                                "0 px",
-                                                              marginTop: "0 px",
-                                                            }}
-                                                          />
-                                                        </div>
+                                                        )}
+                                                        {diagnose?.verificator_diagnosis && (
+                                                          <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
+                                                            {' '}
+                                                            {diagnose.verificator_diagnosis === 'dan lain-lain'
+                                                              ? diagnose.verificator_note +
+                                                              (diagnose.manual_diagnosis ? ', ' + diagnose.manual_diagnosis : '')
+                                                              : diagnose.verificator_diagnosis +
+                                                              (diagnose.manual_diagnosis ? ', ' + diagnose.manual_diagnosis : '')}
+                                                          </p>
+                                                        )}
+                                                        {!diagnose?.system_diagnosis && !diagnose?.verificator_diagnosis && diagnose?.manual_diagnosis && (
+                                                          <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
+                                                            {diagnose?.manual_diagnosis}
+                                                          </p>
+                                                        )}
+                                                        <hr
+                                                          style={{
+                                                            height: '1px',
+                                                            borderWidth: '0 px',
+                                                            color: 'gray',
+                                                            backgroundColor: 'gray',
+                                                            marginBottom: '0 px',
+                                                            marginTop: '0 px',
+                                                          }}
+                                                        />
                                                       </div>
-                                                    );
-                                                  }
+                                                    </div>
+                                                  );
                                                 }
-                                              )}
-                                            </div>
-                                          </div>
-                                          <div className="row">
-                                            <div className="col-12">
-                                              <p className="text-xxs text-secondary font-weight-bold">
-                                                Radiodiagnosis Verifikator
-                                              </p>
-                                              {data.diagnoses?.map(
-                                                (diagnose) => {
-                                                  if (
-                                                    diagnose?.system_diagnosis ||
-                                                    diagnose?.manual_diagnosis
-                                                  ) {
-                                                    return (
-                                                      <div className="row">
-                                                        <div className="col-2">
-                                                          <ul className="ps-3">
-                                                            <li className="text-xs">
-                                                              Gigi #
-                                                              {
-                                                                diagnose?.tooth_number
-                                                              }
-                                                            </li>
-                                                          </ul>
-                                                        </div>
-                                                        <div className="col-10 ps-0">
-                                                          {diagnose.verificator_diagnosis ? (
-                                                            <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
-                                                              {diagnose.verificator_diagnosis ===
-                                                                "dan lain-lain"
-                                                                ? diagnose.verificator_note +
-                                                                (diagnose.manual_diagnosis
-                                                                  ? ", " +
-                                                                  diagnose.manual_diagnosis
-                                                                  : "")
-                                                                : diagnose.verificator_diagnosis
-                                                                  ? diagnose.verificator_diagnosis +
-                                                                  (diagnose.manual_diagnosis
-                                                                    ? ", " +
-                                                                    diagnose.manual_diagnosis
-                                                                    : "")
-                                                                  : diagnose.manual_diagnosis}
-                                                            </p>
-                                                          ) : (
-                                                            <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
-                                                              {diagnose.system_diagnosis
-                                                                ? diagnose.system_diagnosis +
-                                                                (diagnose.manual_diagnosis
-                                                                  ? ", " +
-                                                                  diagnose.manual_diagnosis
-                                                                  : "")
-                                                                : diagnose.manual_diagnosis}
-                                                            </p>
-                                                          )}
-                                                          <hr
-                                                            style={{
-                                                              height: "1px",
-                                                              borderWidth:
-                                                                "0 px",
-                                                              color: "gray",
-                                                              backgroundColor:
-                                                                "gray",
-                                                              marginBottom:
-                                                                "0 px",
-                                                              marginTop: "0 px",
-                                                            }}
-                                                          />
-                                                        </div>
-                                                      </div>
-                                                    );
-                                                  }
-                                                }
-                                              )}
+                                                return null;
+                                              })}
                                             </div>
                                           </div>
                                           <div className="row">

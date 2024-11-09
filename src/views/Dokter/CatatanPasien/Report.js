@@ -78,136 +78,146 @@ const Report = () => {
         }}
       />
       <div style={{ display: 'flex', flexDirection: 'column', padding: '0 1.5rem' }}>
-  <div style={{ paddingBottom: '0.5rem', paddingTop: '0', marginLeft: '1.5rem' }}>
-    <div style={{ marginTop: '0.5rem', marginBottom: '1rem' }}>
-      <div style={{ width: '100%' }}>
-        <div style={{ paddingBottom: '0.5rem', paddingTop: '0' }}>
-          {/* Bagian Rekam Medik */}
-          <div style={{ marginBottom: '1rem' }}>
-            <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#000' }}>Rekam Medik</p>
-            <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
-              Gambar Panoramik Gigi
-            </p>
-            <img
-              style={{
-                maxWidth: '50%', /* Membatasi lebar gambar agar tidak melebihi lebar kontainer */
-                height: 'auto',    /* Menjaga rasio aspek gambar */
-                objectFit: 'contain', /* Memastikan gambar di-fit dengan proporsional di dalam kontainer tanpa terpotong */
-                paddingLeft: '0',
-                paddingBottom: '1rem',
-                borderRadius: '0.375rem', /* border-radius-xl untuk gambar */
-                alignContent: "center",
-              }}
-              src={`${baseURL + data.panoramik_picture}`}
-              alt="Panoramik Gigi"
-            />
-          </div>
+        <div style={{ paddingBottom: '0.5rem', paddingTop: '0', marginLeft: '1.5rem' }}>
+          <div style={{ marginTop: '0.5rem', marginBottom: '1rem' }}>
+            <div style={{ width: '100%' }}>
+              <div style={{ paddingBottom: '0.5rem', paddingTop: '0' }}>
+                {/* Bagian Rekam Medik */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#000' }}>Rekam Medik</p>
+                  <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
+                    Gambar Panoramik Gigi
+                  </p>
+                  <img
+                    style={{
+                      maxWidth: '50%', /* Membatasi lebar gambar agar tidak melebihi lebar kontainer */
+                      height: 'auto',    /* Menjaga rasio aspek gambar */
+                      objectFit: 'contain', /* Memastikan gambar di-fit dengan proporsional di dalam kontainer tanpa terpotong */
+                      paddingLeft: '0',
+                      paddingBottom: '1rem',
+                      borderRadius: '0.375rem', /* border-radius-xl untuk gambar */
+                      alignContent: "center",
+                    }}
+                    src={`${baseURL + data.panoramik_picture}`}
+                    alt="Panoramik Gigi"
+                  />
+                </div>
 
-          {/* Bagian Nama Pasien */}
-          <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center' }}>
-            <div style={{ flex: '0 0 25%' }}>
-              <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
-                Nama Pasien
-              </p>
-            </div>
-            <div style={{ flex: '0 0 33%' }}>
-              <p style={{ fontSize: '0.75rem', color: '#007bff', fontWeight: 'bold' }}>
-                {data.fullname}
-              </p>
-            </div>
-          </div>
-
-          {/* Bagian Tanggal Verifikasi */}
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{ flex: '0 0 25%' }}>
-              <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
-                Tanggal Verifikasi
-              </p>
-            </div>
-            <div style={{ flex: '0 0 33%' }}>
-              <p style={{ fontSize: '0.75rem', color: '#007bff', fontWeight: 'bold' }}>
-                {data.panoramik_check_date
-                  ? moment(data.panoramik_check_date).format("DD/MM/YYYY")
-                  : "-"}
-              </p>
-            </div>
-          </div>
-
-          {/* Bagian Dokter Verifikator */}
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{ flex: '0 0 25%' }}>
-              <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
-                Dokter Verifikator
-              </p>
-            </div>
-            <div style={{ flex: '0 0 33%' }}>
-              <p style={{ fontSize: '0.75rem', color: '#007bff', fontWeight: 'bold' }}>
-                {data.doctor_name ?? "-"}
-              </p>
-            </div>
-          </div>
-
-          {/* Bagian Radiodiagnosis Sistem */}
-          <div style={{ marginTop: '1rem' }}>
-            <p style={{ fontSize: '0.625rem', color: '#6c757d', fontWeight: 'bold' }}>
-              Radiodiagnosis Sistem
-            </p>
-            {data.diagnoses?.map((diagnose) =>
-              diagnose?.system_diagnosis ? (
-                <div style={{ display: 'flex', marginBottom: '0.5rem' }} key={diagnose?.tooth_number}>
-                  <div style={{ flex: '0 0 16.6667%' }}>
-                    <ul style={{ paddingLeft: '1rem' }}>
-                      <li style={{ fontSize: '0.75rem' }}>Gigi #{diagnose?.tooth_number}</li>
-                    </ul>
+                {/* Bagian Nomor Rekam Medis */}
+                <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center' }}>
+                  <div style={{ flex: '0 0 25%' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
+                      No. Rekam Medis
+                    </p>
                   </div>
-                  <div style={{ flex: '0 0 83.3333%', paddingLeft: '0' }}>
-                    <p style={{ fontSize: '0.75rem', color: '#000', fontWeight: 'bold', marginBottom: '0', paddingBottom: '0.5rem' }}>
-                      {diagnose?.system_diagnosis}
+                  <div style={{ flex: '0 0 33%' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#007bff', fontWeight: 'bold' }}>
+                      {data.medic_number}
                     </p>
                   </div>
                 </div>
-              ) : null
-            )}
-          </div>
 
-          {/* Bagian Radiodiagnosis Verifikator */}
-          <div style={{ marginTop: '1rem' }}>
-            <p style={{ fontSize: '0.625rem', color: '#6c757d', fontWeight: 'bold' }}>
-              Radiodiagnosis Verifikator
-            </p>
-            {data.diagnoses?.map((diagnose) =>
-              diagnose?.system_diagnosis || diagnose?.manual_diagnosis ? (
-                <div style={{ display: 'flex', marginBottom: '0.5rem' }} key={diagnose?.tooth_number}>
-                  <div style={{ flex: '0 0 16.6667%' }}>
-                    <ul style={{ paddingLeft: '1rem' }}>
-                      <li style={{ fontSize: '0.75rem' }}>Gigi #{diagnose?.tooth_number}</li>
-                    </ul>
+                {/* Bagian Nama Pasien */}
+                <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center' }}>
+                  <div style={{ flex: '0 0 25%' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
+                      Nama Pasien
+                    </p>
                   </div>
-                  <div style={{ flex: '0 0 83.3333%', paddingLeft: '0' }}>
-                    <p style={{ fontSize: '0.75rem', color: '#000', fontWeight: 'bold', marginBottom: '0', paddingBottom: '0.5rem' }}>
-                      {diagnose.verificator_diagnosis === "dan lain-lain"
-                        ? diagnose.verificator_note +
-                          (diagnose.manual_diagnosis
-                            ? ", " + diagnose.manual_diagnosis
-                            : "")
-                        : diagnose.verificator_diagnosis
-                        ? diagnose.verificator_diagnosis +
-                          (diagnose.manual_diagnosis
-                            ? ", " + diagnose.manual_diagnosis
-                            : "")
-                        : diagnose.manual_diagnosis}
+                  <div style={{ flex: '0 0 33%' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#007bff', fontWeight: 'bold' }}>
+                      {data.fullname}
                     </p>
                   </div>
                 </div>
-              ) : null
-            )}
+
+                {/* Bagian Tanggal Verifikasi */}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ flex: '0 0 25%' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
+                      Tanggal Verifikasi
+                    </p>
+                  </div>
+                  <div style={{ flex: '0 0 33%' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#007bff', fontWeight: 'bold' }}>
+                      {data.panoramik_check_date
+                        ? moment(data.panoramik_check_date).format("DD/MM/YYYY")
+                        : "-"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bagian Dokter Verifikator */}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ flex: '0 0 25%' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
+                      Dokter Verifikator
+                    </p>
+                  </div>
+                  <div style={{ flex: '0 0 33%' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#007bff', fontWeight: 'bold' }}>
+                      {data.doctor_name ?? "-"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bagian Hasil Radiodiagnosis */}
+                <div style={{ marginTop: '1rem' }}>
+                  <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
+                    Hasil Radiodiagnosis
+                  </p>
+                  {data.diagnoses?.map((diagnose) =>
+                    diagnose?.system_diagnosis || diagnose?.verificator_diagnosis || diagnose?.manual_diagnosis ? (
+                      <div style={{ display: 'flex', marginBottom: '0.5rem' }} key={diagnose?.tooth_number}>
+                        <div style={{ flex: '0 0 16.6667%' }}>
+                          <ul style={{ paddingLeft: '1rem' }}>
+                            <li style={{ fontSize: '0.75rem' }}>Gigi #{diagnose?.tooth_number}</li>
+                          </ul>
+                        </div>
+                        <div style={{ flex: '0 0 83.3333%', paddingLeft: '0' }}>
+                          <p style={{ fontSize: '0.75rem', color: '#000', fontWeight: 'bold', marginBottom: '0', paddingBottom: '0.5rem' }}>
+                            {diagnose?.system_diagnosis && (
+                              <span>
+                                {diagnose?.system_diagnosis}
+                              </span>
+                            )}
+                            {diagnose?.verificator_diagnosis && (
+                              <span>
+                                {diagnose?.system_diagnosis && ', '}
+                                {diagnose?.verificator_diagnosis === "dan lain-lain"
+                                  ? diagnose.verificator_note + (diagnose.manual_diagnosis ? ", " + diagnose.manual_diagnosis : "")
+                                  : diagnose.verificator_diagnosis + (diagnose.manual_diagnosis ? ", " + diagnose.manual_diagnosis : "")
+                                }
+                              </span>
+                            )}
+                            {!diagnose?.system_diagnosis && !diagnose?.verificator_diagnosis && diagnose?.manual_diagnosis && (
+                              <span>
+                                {diagnose?.manual_diagnosis}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    ) : null
+                  )}
+                </div>
+
+                {/* Bagian Catatan Pasien */}
+                <div style={{ marginTop: '1rem' }}>
+                  <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
+                    Catatan Lain
+                  </p>
+                  <div style={{ display: 'flex', marginBottom: '0.5rem', paddingLeft: '2rem' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#000', fontWeight: 'bold', marginBottom: '0', paddingBottom: '0.5rem' }}>
+                      {data.catatan_pasien}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
-
     </div>
   );
 };
