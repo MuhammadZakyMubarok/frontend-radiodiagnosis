@@ -6,7 +6,7 @@ import WithAuthorization from "../../utils/auth";
 import { baseURL } from "../../routes/Config";
 
 const ProfilePatient = () => {
-  const isAuth = WithAuthorization(["Patient"]);
+  const isAuth = WithAuthorization(["patient"]);
 
   const [data, setData] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);

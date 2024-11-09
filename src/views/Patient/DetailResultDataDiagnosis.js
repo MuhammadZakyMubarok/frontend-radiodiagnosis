@@ -15,7 +15,7 @@ import StatusUnverified from "../../component/Alerts/StatusUnverified";
 import StatusVerified from "../../component/Alerts/StatusVerified";
 
 const DetailResultDataDiagnosis = () => {
-  const auth = WithAuthorization(["Patient"]);
+  const auth = WithAuthorization(["patient"]);
 
   const [data, setData] = useState({});
   const [doctors, setDoctors] = useState([]);
@@ -94,7 +94,7 @@ const DetailResultDataDiagnosis = () => {
             className="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-0 my-0 fixed-start ms-0"
             id="sidenav-main"
           >
-             <SidebarPatient />
+            <SidebarPatient />
           </aside>
           <main className="main-content position-relative border-radius-lg">
             <HeaderDataUser />
@@ -170,9 +170,8 @@ const DetailResultDataDiagnosis = () => {
 
                                       <img
                                         className="img-fluid border-radius-xl p-2"
-                                        src={`${
-                                          baseURL + data.panoramik_picture
-                                        }`}
+                                        src={`${baseURL + data.panoramik_picture
+                                          }`}
                                       />
 
                                       <p className="text-xs p-2 mb-0 mt-4">
@@ -1062,7 +1061,7 @@ const DetailResultDataDiagnosis = () => {
 
                                                   <div className="col-6 text-end">
                                                     {diagnose?.is_corerct ===
-                                                    null ? (
+                                                      null ? (
                                                       <ButtonVerified
                                                         index={diagnose?.id}
                                                       />
