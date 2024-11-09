@@ -1,0 +1,9 @@
+/* Paginations.css */
+.page-item.active .page-link {
+    background-color: primary; /* Optional: change the background color of active page */
+    color: white; /* Change text color of active page to white */
+  }
+  
+  .page-item.disabled .page-link {
+    color: #6c757d; /* Optional: color for disabled pages */
+  }

@@ -41,6 +41,7 @@ const WithAuthorization = (allowedRoles) => {
           window.location.href = "/patient-dashboard";
         } else {
           window.location.href = "/login-user";
+        }
       }
     }
   }

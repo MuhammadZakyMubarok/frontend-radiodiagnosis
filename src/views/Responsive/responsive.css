@@ -3,7 +3,7 @@
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-
+  
 /* Media query untuk layar sangat kecil (max-width: 576px) */
 @media (max-width: 576px) {
     /* RESPONSIVE CARD */
@@ -36,7 +36,7 @@
     #size-logout{
         font-size: 24px;
     }
-    #mg-btm3{
+    #mg-btn3{
         margin-bottom: 1rem;
     }
 }

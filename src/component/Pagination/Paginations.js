@@ -1,4 +1,5 @@
 import React from "react";
+import './Paginations.css';  // Import the CSS file
 
 const Paginations = ({ currentPage, totalPages, onPageChange }) => {
   const pageNumbers = Array.from(
@@ -32,9 +33,7 @@ const Paginations = ({ currentPage, totalPages, onPageChange }) => {
             </li>
           ))}
           <li
-            className={`page-item ${
-              currentPage === totalPages ? "disabled" : ""
-            }`}
+            className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
           >
             <a
               className="page-link"

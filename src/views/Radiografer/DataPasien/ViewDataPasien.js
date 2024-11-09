@@ -51,6 +51,8 @@ const ViewDataPasien = () => {
   const [data, setData] = useState({});
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [isClicked, setIsClicked] = useState(false); // State untuk efek klik
+  const [selectedId, setSelectedId] = useState(null);
 
   // Satu sehat
   const [satuSehatResponse, setSatuSehatResponse] = useState("");
@@ -91,10 +93,30 @@ const ViewDataPasien = () => {
       });
   }, []);
 
-  const handleDelete = (e) => {
+  // untuk button delete ke hold active
+  useEffect(() => {
+    const modalElement = document.getElementById(`DeleteModal${data.id}`);
+    const handleModalClose = () => setIsClicked(false);
+  
+    modalElement?.addEventListener("hidden.bs.modal", handleModalClose);
+  
+    return () => {
+      modalElement?.removeEventListener("hidden.bs.modal", handleModalClose);
+    };
+  }, [data.id]);
+  
+  const handleClick = (id) => {
+    setSelectedId(id);
+    setIsClicked(true);
+    setTimeout(() => {
+      setIsClicked(false);
+    }, 100); // Ubah ke 100 ms atau waktu sesuai kebutuhan
+  };
+  
+  const handleDelete = (e, userId) => {
     e.preventDefault();
     axios
-      .delete(`${baseURL}/patients/delete/${id}`, {
+      .delete(`${baseURL}/patients/delete/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -207,22 +229,23 @@ const ViewDataPasien = () => {
                       <div className="row mt-4 mb-2">
                         <div className="col-12">
                           <div className="row align-items-end ms-auto">
-                            <div className="col-md-2 col-12 d-flex flex-column ms-auto justify-content-end text-center" id="mg-btm3">
+                            <div className="col-md-2 col-12 d-flex flex-column ms-auto justify-content-end text-center" id="mg-btn3">
                               <button
                                 type="button"
-                                className="btn btn-outline-primary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-primary"
+                                className={`btn btn-outline-primary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-primary ${isClicked ? "active" : ""
+                                  }`}
                                 data-bs-toggle="modal"
-                                data-bs-target={``}
                                 onClick={handleCheckDataSatuSehat}
+                                disabled={satuSehatResponse === "loading"}
                               >
                                 <i className="fas fa-file-medical text-primary"></i>
                                 &nbsp;&nbsp; Cek Data Satu Sehat
                               </button>
                             </div>
-                            <div className="col-md-2 col-12 d-flex flex-column justify-content-end text-center" id="mg-btm3">
+                            <div className="col-md-2 col-12 d-flex flex-column justify-content-end text-center" id="mg-btn3">
                               <button
                                 type="button"
-                                className="btn btn-outline-success btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
+                                className="btn btn-outline-success btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-success"
                               >
                                 <Link
                                   to={`/radiografer-edit-data-pasien/${id}`}
@@ -232,206 +255,210 @@ const ViewDataPasien = () => {
                                 </Link>
                               </button>
                             </div>
-                            <div className="col-md-2 col-12 d-flex flex-column justify-content-end text-center" id="mg-btm3">
+                            <div className="col-md-2 col-12 d-flex flex-column justify-content-end text-center" id="mg-btn3">
                               <button
                                 type="button"
-                                className="btn btn-outline-danger btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
+                                className={`btn btn-outline-danger btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger ${isClicked ? "active" : ""}`}
                                 data-bs-toggle="modal"
-                                data-bs-target={`#exampleModal4{id}`}
+                                data-bs-target={`#DeleteModal${data.id}`}
+                                onClick={() => setSelectedId(data.id)}
+                                style={{ transform: "none", boxShadow: "none" }} // Hapus animasi klik
                               >
-                                <i className="fa fa-trash text-danger"></i>
-                                &nbsp;&nbsp; Hapus Data Pasien
-                              </button>
+                              <i className="fa fa-trash text-danger"></i>
+                              &nbsp;&nbsp; Hapus Data Pasien
+                            </button>
+                            {selectedId && (
                               <DeleteModal
-                                userId={id}
-                                handleDelete={handleDelete}
+                                userId={selectedId} // Kirim ID pasien yang akan dihapus
+                                handleDelete={handleDelete} // Kirim handleDelete sebagai props
                               />
-                            </div>
+                            )}
                           </div>
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    <div className="card-body px-0 pb-2 pt-0">
-                      <div className="row justify-content-center">
-                        <div className="col-md-6 me-lg-8 me-auto" id="form-detail-rdg">
-                          <div className="card shadow-none border-0">
-                            <div className="card-header pb-0">
-                              <div className="d-flex align-items-center">
-                                <h5 className="mb-0 font-weight-bolder">
-                                  Data Pasien
-                                </h5>
-                              </div>
+                  <div className="card-body px-0 pb-2 pt-0">
+                    <div className="row justify-content-center">
+                      <div className="col-md-6 me-lg-8 me-auto" id="form-detail-rdg">
+                        <div className="card shadow-none border-0">
+                          <div className="card-header pb-0">
+                            <div className="d-flex align-items-center">
+                              <h5 className="mb-0 font-weight-bolder">
+                                Data Pasien
+                              </h5>
                             </div>
+                          </div>
 
-                            <div className="card-body pt-3">
-                              <div className="row">
-                                <div className="col">
-                                  <div className="form-group">
-                                    <label
-                                      htmlFor="example-text-input"
-                                      className="form-control-label"
-                                    >
-                                      Nama Lengkap
-                                    </label>
-                                    <p className="form-control" type="text">
-                                      {data.fullname}
-                                    </p>
-                                  </div>
-                                  <div className="row-cols-md-3">
-                                    <div className="form-group">
-                                      <label
-                                        htmlFor="example-text-input"
-                                        className="form-control-label"
-                                      >
-                                        Nomor Rekam Medik
-                                      </label>
-                                      <p className="form-control" type="text">
-                                        {data.medic_number}
-                                      </p>
-                                    </div>
-                                  </div>
-
-                                  <div className="form-group">
-                                    <label
-                                      htmlFor="example-text-input"
-                                      className="form-control-label"
-                                    >
-                                      NIK (Nomor Induk Kewarganegaraan)
-                                    </label>
-                                    <p className="form-control" type="text">
-                                      {data.id_number}
-                                    </p>
-
-
-                                    {satuSehatResponse === "loading" && (
-                                      <AlertMessage
-                                        message="Proses pengecekan ke satu sehat"
-                                        status="loading"
-                                        progress={satuSehatResponseProgress}
-                                      />
-                                    )}
-                                    {satuSehatResponse === "success" && (
-                                      <AlertMessage
-                                        message="NIK telah terdaftar di satu sehat"
-                                        status="success"
-                                      />
-                                    )}
-                                    {satuSehatResponse === "error" && (
-                                      <AlertMessage
-                                        message="NIK tidak terdaftar di satu sehat"
-                                        status="error"
-                                      />
-                                    )}
-
-                                  </div>
-
-                                  <div className="row">
-                                    <label
-                                      htmlFor="example-text-input"
-                                      className="form-control-label"
-                                    >
-                                      Jenis Kelamin
-                                    </label>
-                                  </div>
-
-                                  <input
-                                    type="radio"
-                                    className="btn-check"
-                                    name="options-outlined"
-                                    id="Laki-Laki"
-                                    autocomplete="off"
-                                    checked={data.gender === "Laki-Laki"}
-                                    disabled
-                                  />
-                                  <label
-                                    className="btn btn-outline-primary btn-sm"
-                                    htmlFor="Laki-Laki"
-                                  >
-                                    Laki-Laki
-                                  </label>
-
-                                  <input
-                                    type="radio"
-                                    className="btn-check"
-                                    name="options-outlined"
-                                    id="Perempuan"
-                                    autocomplete="off"
-                                    checked={data.gender === "Perempuan"}
-                                    disabled
-                                  />
-                                  <label
-                                    className="btn btn-outline-secondary btn-sm"
-                                    htmlFor="Perempuan"
-                                  >
-                                    Perempuan
-                                  </label>
-
-                                  <div className="row-cols-md-3">
-                                    <div className="form-group">
-                                      <label
-                                        htmlFor="exampleFormControlSelect1"
-                                        className="form-control-label"
-                                      >
-                                        Agama
-                                      </label>
-                                      <p className="form-control" type="text">
-                                        {data.religion}
-                                      </p>
-                                    </div>
-                                  </div>
-
-                                  <div className="form-group">
-                                    <label
-                                      htmlFor="example-text-input"
-                                      className="form-control-label"
-                                    >
-                                      Alamat
-                                    </label>
-                                    <p className="form-control" type="text">
-                                      {data.address}
-                                    </p>
-                                  </div>
-
+                          <div className="card-body pt-3">
+                            <div className="row">
+                              <div className="col">
+                                <div className="form-group">
                                   <label
                                     htmlFor="example-text-input"
                                     className="form-control-label"
                                   >
-                                    Tempat Tanggal Lahir
+                                    Nama Lengkap
                                   </label>
-
-                                  <div className="row">
-                                    <div className="col-md-6">
-                                      <div className="form-group">
-                                        <p className="form-control" type="text">
-                                          {data.born_location}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    <div className="col-md-6">
-                                      <div className="form-group">
-                                        <p className="form-control" type="text">
-                                          {data.born_date}
-                                        </p>
-                                      </div>
-                                    </div>
+                                  <p className="form-control" type="text">
+                                    {data.fullname}
+                                  </p>
+                                </div>
+                                <div className="row-cols-md-3">
+                                  <div className="form-group">
+                                    <label
+                                      htmlFor="example-text-input"
+                                      className="form-control-label"
+                                    >
+                                      Nomor Rekam Medik
+                                    </label>
+                                    <p className="form-control" type="text">
+                                      {data.medic_number}
+                                    </p>
                                   </div>
+                                </div>
 
+                                <div className="form-group">
                                   <label
                                     htmlFor="example-text-input"
                                     className="form-control-label"
                                   >
-                                    Umur Pasien
+                                    NIK (Nomor Induk Kewarganegaraan)
                                   </label>
-                                  <div className="row">
-                                    <div className="col-md-3">
-                                      <div className="form-group">
-                                        <p className="form-control" type="text">
-                                          {data.age}
-                                        </p>
-                                      </div>
+                                  <p className="form-control" type="text">
+                                    {data.id_number}
+                                  </p>
+
+
+                                  {satuSehatResponse === "loading" && (
+                                    <AlertMessage
+                                      message="Proses pengecekan ke satu sehat"
+                                      status="loading"
+                                      progress={satuSehatResponseProgress}
+                                    />
+                                  )}
+                                  {satuSehatResponse === "success" && (
+                                    <AlertMessage
+                                      message="NIK telah terdaftar di satu sehat"
+                                      status="success"
+                                    />
+                                  )}
+                                  {satuSehatResponse === "error" && (
+                                    <AlertMessage
+                                      message="NIK tidak terdaftar di satu sehat"
+                                      status="error"
+                                    />
+                                  )}
+
+                                </div>
+
+                                <div className="row">
+                                  <label
+                                    htmlFor="example-text-input"
+                                    className="form-control-label"
+                                  >
+                                    Jenis Kelamin
+                                  </label>
+                                </div>
+
+                                <input
+                                  type="radio"
+                                  className="btn-check"
+                                  name="options-outlined"
+                                  id="Laki-Laki"
+                                  autocomplete="off"
+                                  checked={data.gender === "Laki-Laki"}
+                                  disabled
+                                />
+                                <label
+                                  className="btn btn-outline-primary btn-sm"
+                                  htmlFor="Laki-Laki"
+                                >
+                                  Laki-Laki
+                                </label>
+
+                                <input
+                                  type="radio"
+                                  className="btn-check"
+                                  name="options-outlined"
+                                  id="Perempuan"
+                                  autocomplete="off"
+                                  checked={data.gender === "Perempuan"}
+                                  disabled
+                                />
+                                <label
+                                  className="btn btn-outline-secondary btn-sm"
+                                  htmlFor="Perempuan"
+                                >
+                                  Perempuan
+                                </label>
+
+                                <div className="row-cols-md-3">
+                                  <div className="form-group">
+                                    <label
+                                      htmlFor="exampleFormControlSelect1"
+                                      className="form-control-label"
+                                    >
+                                      Agama
+                                    </label>
+                                    <p className="form-control" type="text">
+                                      {data.religion}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="form-group">
+                                  <label
+                                    htmlFor="example-text-input"
+                                    className="form-control-label"
+                                  >
+                                    Alamat
+                                  </label>
+                                  <p className="form-control" type="text">
+                                    {data.address}
+                                  </p>
+                                </div>
+
+                                <label
+                                  htmlFor="example-text-input"
+                                  className="form-control-label"
+                                >
+                                  Tempat Tanggal Lahir
+                                </label>
+
+                                <div className="row">
+                                  <div className="col-md-6">
+                                    <div className="form-group">
+                                      <p className="form-control" type="text">
+                                        {data.born_location}
+                                      </p>
                                     </div>
-                                    {/* <div className="col-md-3">
+                                  </div>
+                                  <div className="col-md-6">
+                                    <div className="form-group">
+                                      <p className="form-control" type="text">
+                                        {data.born_date}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <label
+                                  htmlFor="example-text-input"
+                                  className="form-control-label"
+                                >
+                                  Umur Pasien
+                                </label>
+                                <div className="row">
+                                  <div className="col-md-3">
+                                    <div className="form-group">
+                                      <p className="form-control" type="text">
+                                        {data.age}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  {/* <div className="col-md-3">
                                       <div className="form-group">
                                         <p className="form-control" type="text">
                                           3
@@ -445,104 +472,104 @@ const ViewDataPasien = () => {
                                         </p>
                                       </div>
                                     </div> */}
-                                  </div>
+                                </div>
 
-                                  <div className="form-group">
-                                    <label
-                                      htmlFor="example-text-input"
-                                      className="form-control-label"
-                                    >
-                                      Nomor Telepon
-                                    </label>
-                                    <p className="form-control" type="text">
-                                      {data.phone_number}
-                                    </p>
-                                  </div>
-
-                                  <div className="form-group">
-                                    <label
-                                      htmlFor="exampleFormControlSelect1"
-                                      className="form-control-label"
-                                    >
-                                      Asal Rujukan
-                                    </label>
-                                    <p className="form-control" type="text">
-                                      {data.referral_origin}
-                                    </p>
-                                  </div>
-                                  <hr className="horizontal dark" />
-                                  <p className=" text-sm text-uppercase">
-                                    Data Radiografer
+                                <div className="form-group">
+                                  <label
+                                    htmlFor="example-text-input"
+                                    className="form-control-label"
+                                  >
+                                    Nomor Telepon
+                                  </label>
+                                  <p className="form-control" type="text">
+                                    {data.phone_number}
                                   </p>
-                                  <div className="form-group">
-                                    <label
-                                      htmlFor="exampleFormControlSelect1"
-                                      className="form-control-label"
-                                    >
-                                      Pilih Radiografer
-                                    </label>
-                                    <p className="form-control" type="text">
-                                      {data.radiographer}
-                                    </p>
-                                  </div>
+                                </div>
+
+                                <div className="form-group">
+                                  <label
+                                    htmlFor="exampleFormControlSelect1"
+                                    className="form-control-label"
+                                  >
+                                    Asal Rujukan
+                                  </label>
+                                  <p className="form-control" type="text">
+                                    {data.referral_origin}
+                                  </p>
+                                </div>
+                                <hr className="horizontal dark" />
+                                <p className=" text-sm text-uppercase">
+                                  Data Radiografer
+                                </p>
+                                <div className="form-group">
+                                  <label
+                                    htmlFor="exampleFormControlSelect1"
+                                    className="form-control-label"
+                                  >
+                                    Pilih Radiografer
+                                  </label>
+                                  <p className="form-control" type="text">
+                                    {data.radiographer}
+                                  </p>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                      <div className="row justify-content-end ms-auto">
-                        <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center">
-                          <div className="w-100" >
-                            <button
-                              className="btn bg-gradient-primary btn-sm mb-2 border-radius-xl w-100"
-                              onClick={openApproveModal}
-                            >
-                              Setujui
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center">
-                          <div className="w-100">
-                            <button
-                              className="btn btn-sm border border-danger border-radius-xl w-100 text-danger"
-                              onClick={openCancelModal}
-                            >
-                              Batal
-                            </button>
-                          </div>
-
+                    </div>
+                    <div className="row justify-content-end ms-auto">
+                      <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center">
+                        <div className="w-100" >
+                          <button
+                            className="btn bg-gradient-primary btn-sm mb-2 border-radius-xl w-100"
+                            onClick={openApproveModal}
+                          >
+                            Setujui
+                          </button>
                         </div>
                       </div>
 
+                      <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center">
+                        <div className="w-100">
+                          <button
+                            className="btn btn-sm border border-danger border-radius-xl w-100 text-danger"
+                            onClick={openCancelModal}
+                          >
+                            Batal
+                          </button>
+                        </div>
+
+                      </div>
                     </div>
+
                   </div>
                 </div>
               </div>
-              {/* Approve Confirmation Modal */}
-              {showApproveModal && (
-                <ApproveModal
-                  userId={id}
-                  handleApprove={handleApprove}
-                  onClose={closeApproveModal}
-                />
-              )}
-              {showCancelModal && (
-                <CancelModal
-                  userId={id}
-                  handleCancel={handleCancel}
-                  onClose={closeCancelModal}
-                />
-              )}
             </div>
-          </main>
-        </body>
-      </div>
+            {/* Approve Confirmation Modal */}
+            {showApproveModal && (
+              <ApproveModal
+                userId={id}
+                handleApprove={handleApprove}
+                onClose={closeApproveModal}
+              />
+            )}
+            {showCancelModal && (
+              <CancelModal
+                userId={id}
+                handleCancel={handleCancel}
+                onClose={closeCancelModal}
+              />
+            )}
+          </div>
+        </main>
+      </body>
+      </div >
     );
   } else {
-    return <div></div>;
-  }
+  return <div></div>;
+}
 };
 
 export default ViewDataPasien;
