@@ -213,69 +213,11 @@ const Report = () => {
                     </p>
                   </div>
                 </div>
-
-
-                {/* Bagian Radiodiagnosis Sistem */}
-                {/* <div style={{ marginTop: '1rem' }}>
-            <p style={{ fontSize: '0.625rem', color: '#6c757d', fontWeight: 'bold' }}>
-              Radiodiagnosis Sistem
-            </p>
-            {data.diagnoses?.map((diagnose) =>
-              diagnose?.system_diagnosis ? (
-                <div style={{ display: 'flex', marginBottom: '0.5rem' }} key={diagnose?.tooth_number}>
-                  <div style={{ flex: '0 0 16.6667%' }}>
-                    <ul style={{ paddingLeft: '1rem' }}>
-                      <li style={{ fontSize: '0.75rem' }}>Gigi #{diagnose?.tooth_number}</li>
-                    </ul>
-                  </div>
-                  <div style={{ flex: '0 0 83.3333%', paddingLeft: '0' }}>
-                    <p style={{ fontSize: '0.75rem', color: '#000', fontWeight: 'bold', marginBottom: '0', paddingBottom: '0.5rem' }}>
-                      {diagnose?.system_diagnosis}
-                    </p>
-                  </div>
-                </div>
-              ) : null
-            )}
-          </div> */}
-
-                {/* Bagian Radiodiagnosis Verifikator */}
-                {/* <div style={{ marginTop: '1rem' }}>
-            <p style={{ fontSize: '0.625rem', color: '#6c757d', fontWeight: 'bold' }}>
-              Radiodiagnosis Verifikator
-            </p>
-            {data.diagnoses?.map((diagnose) =>
-              diagnose?.system_diagnosis || diagnose?.manual_diagnosis ? (
-                <div style={{ display: 'flex', marginBottom: '0.5rem' }} key={diagnose?.tooth_number}>
-                  <div style={{ flex: '0 0 16.6667%' }}>
-                    <ul style={{ paddingLeft: '1rem' }}>
-                      <li style={{ fontSize: '0.75rem' }}>Gigi #{diagnose?.tooth_number}</li>
-                    </ul>
-                  </div>
-                  <div style={{ flex: '0 0 83.3333%', paddingLeft: '0' }}>
-                    <p style={{ fontSize: '0.75rem', color: '#000', fontWeight: 'bold', marginBottom: '0', paddingBottom: '0.5rem' }}>
-                      {diagnose.verificator_diagnosis === "dan lain-lain"
-                        ? diagnose.verificator_note +
-                          (diagnose.manual_diagnosis
-                            ? ", " + diagnose.manual_diagnosis
-                            : "")
-                        : diagnose.verificator_diagnosis
-                        ? diagnose.verificator_diagnosis +
-                          (diagnose.manual_diagnosis
-                            ? ", " + diagnose.manual_diagnosis
-                            : "")
-                        : diagnose.manual_diagnosis}
-                    </p>
-                  </div>
-                </div>
-              ) : null
-            )}
-          </div> */}
               </div>
             </div>
           </div>
         </div>
       </div>
-
     </div>
   );
 };
