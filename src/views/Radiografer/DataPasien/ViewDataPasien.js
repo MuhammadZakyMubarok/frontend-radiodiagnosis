@@ -26,21 +26,21 @@ const AlertMessage = ({ message, status, progress }) => {
   };
 
   return (
-      <div className={`${getAlertClass()} py-2 px-3`} role="alert">
-        {status === "loading" && (
-            <div className="progress mt-2" style={{ height: "5px" }}>
-              <div
-                  className="progress-bar progress-bar-striped progress-bar-animated bg-primary"
-                  role="progressbar"
-                  style={{ width: `${progress}%` }}
-                  aria-valuenow={progress}
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-              ></div>
-            </div>
-        )}
-        {message}
-      </div>
+    <div className={`${getAlertClass()} py-2 px-3`} role="alert">
+      {status === "loading" && (
+        <div className="progress mt-2" style={{ height: "5px" }}>
+          <div
+            className="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+            role="progressbar"
+            style={{ width: `${progress}%` }}
+            aria-valuenow={progress}
+            aria-valuemin="0"
+            aria-valuemax="100"
+          ></div>
+        </div>
+      )}
+      {message}
+    </div>
   );
 };
 
@@ -204,47 +204,49 @@ const ViewDataPasien = () => {
                           </a>
                         </div>
                       </div>
-                      <div className="row mt-2">
-                        <div className="col-lg-5 col-md-12 ms-auto d-flex justify-content-end" id="btn-dlt-edt-cek">
-                          <div className="col-4">
-                            <button
-                              type="button"
-                              className="btn btn-outline-primary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-primary"
-                              data-bs-toggle="modal"
-                              data-bs-target={``}
-                              onClick={handleCheckDataSatuSehat}
-                            >
-                              <i className="fas fa-file-medical text-primary"></i>
-                              &nbsp;&nbsp; Cek Data Satu Sehat
-                            </button>
-                          </div>
-                          <div className="col-4">
-                            <button
-                              type="button"
-                              className="btn btn-outline-success btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
-                            >
-                              <Link
-                                to={`/radiografer-edit-data-pasien/${id}`}
+                      <div className="row mt-4 mb-2">
+                        <div className="col-12">
+                          <div className="row align-items-end ms-auto">
+                            <div className="col-md-2 col-12 d-flex flex-column ms-auto justify-content-end text-center" id="mg-btm3">
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target={``}
+                                onClick={handleCheckDataSatuSehat}
                               >
-                                <i className="fa fa-pencil text-success "></i>
-                                &nbsp;&nbsp; Edit Data Pasien
-                              </Link>
-                            </button>
-                          </div>
-                          <div className="col-4">
-                            <button
-                              type="button"
-                              className="btn btn-outline-danger btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
-                              data-bs-toggle="modal"
-                              data-bs-target={`#exampleModal4{id}`}
-                            >
-                              <i className="fa fa-trash text-danger"></i>
-                              &nbsp;&nbsp; Hapus Data Pasien
-                            </button>
-                            <DeleteModal
-                              userId={id}
-                              handleDelete={handleDelete}
-                            />
+                                <i className="fas fa-file-medical text-primary"></i>
+                                &nbsp;&nbsp; Cek Data Satu Sehat
+                              </button>
+                            </div>
+                            <div className="col-md-2 col-12 d-flex flex-column justify-content-end text-center" id="mg-btm3">
+                              <button
+                                type="button"
+                                className="btn btn-outline-success btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
+                              >
+                                <Link
+                                  to={`/radiografer-edit-data-pasien/${id}`}
+                                >
+                                  <i className="fa fa-pencil text-success "></i>
+                                  &nbsp;&nbsp; Edit Data Pasien
+                                </Link>
+                              </button>
+                            </div>
+                            <div className="col-md-2 col-12 d-flex flex-column justify-content-end text-center" id="mg-btm3">
+                              <button
+                                type="button"
+                                className="btn btn-outline-danger btn-sm mb-0 pt-1 pb-1 ps-2 pe-2 text-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target={`#exampleModal4{id}`}
+                              >
+                                <i className="fa fa-trash text-danger"></i>
+                                &nbsp;&nbsp; Hapus Data Pasien
+                              </button>
+                              <DeleteModal
+                                userId={id}
+                                handleDelete={handleDelete}
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -292,8 +294,8 @@ const ViewDataPasien = () => {
 
                                   <div className="form-group">
                                     <label
-                                        htmlFor="example-text-input"
-                                        className="form-control-label"
+                                      htmlFor="example-text-input"
+                                      className="form-control-label"
                                     >
                                       NIK (Nomor Induk Kewarganegaraan)
                                     </label>
@@ -303,31 +305,31 @@ const ViewDataPasien = () => {
 
 
                                     {satuSehatResponse === "loading" && (
-                                        <AlertMessage
-                                            message="Proses pengecekan ke satu sehat"
-                                            status="loading"
-                                            progress={satuSehatResponseProgress}
-                                        />
+                                      <AlertMessage
+                                        message="Proses pengecekan ke satu sehat"
+                                        status="loading"
+                                        progress={satuSehatResponseProgress}
+                                      />
                                     )}
                                     {satuSehatResponse === "success" && (
-                                        <AlertMessage
-                                            message="NIK telah terdaftar di satu sehat"
-                                            status="success"
-                                        />
+                                      <AlertMessage
+                                        message="NIK telah terdaftar di satu sehat"
+                                        status="success"
+                                      />
                                     )}
                                     {satuSehatResponse === "error" && (
-                                        <AlertMessage
-                                            message="NIK tidak terdaftar di satu sehat"
-                                            status="error"
-                                        />
+                                      <AlertMessage
+                                        message="NIK tidak terdaftar di satu sehat"
+                                        status="error"
+                                      />
                                     )}
 
                                   </div>
 
                                   <div className="row">
                                     <label
-                                        htmlFor="example-text-input"
-                                        className="form-control-label"
+                                      htmlFor="example-text-input"
+                                      className="form-control-label"
                                     >
                                       Jenis Kelamin
                                     </label>
