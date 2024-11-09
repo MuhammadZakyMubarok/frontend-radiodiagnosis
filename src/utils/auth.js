@@ -41,9 +41,12 @@ const WithAuthorization = (allowedRoles) => {
           window.location.href = "/patient-dashboard";
         } else {
           window.location.href = "/login-user";
+        }
       }
     }
   }
+
+  return null;
 };
 
 export default WithAuthorization;
