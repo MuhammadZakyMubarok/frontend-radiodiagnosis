@@ -18,7 +18,7 @@ const RadiografiPanoramikDokter = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [inputText, setInputText] = useState("");
   const [statusSearch, setStatusSearch] = useState(false);
-  const [verified, setVerified] = useState("");
+  const [verified, setVerified] = useState("false");
   const [loggedInDoctor, setLoggedInDoctor] = useState(null);
 
   const handleChange = (event) => {
