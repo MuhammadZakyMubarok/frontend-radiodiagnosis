@@ -17,7 +17,6 @@ const UploadGambarPanoramik = () => {
   const [patientId, setPatientId] = useState("Patient-");
   const [patient, setPatient] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
-  const [subject, setSubject] = useState(""); // New state for subject (keluhan pasien)
   const [error, setError] = useState(null);
   const history = useNavigate();
   const token = sessionStorage.getItem("token");
@@ -90,8 +89,7 @@ const UploadGambarPanoramik = () => {
     const formData = new FormData();
     formData.append("panoramikPicture", selectedFile);
     formData.append("radiographerId", data.radiographic_id);
-    formData.append("subject", subject); // Adding subject to formData
-
+    
     axios
       .post(`${baseURL}/radiographics/patients/${patientId}`, formData, {
         headers: {
@@ -204,16 +202,7 @@ const UploadGambarPanoramik = () => {
                               ))}
                             </select>
                           </div>
-                          <div className="col-12 col-md-6 mt-3 mt-md-0 mb-2">
-                            <p className="text-xs text-secondary mb-2">Keluhan Pasien</p>
-                            <textarea
-                              className="form-control"
-                              rows="4"
-                              placeholder="Tuliskan keluhan pasien..."
-                              value={subject}
-                              onChange={(e) => setSubject(e.target.value)}
-                            ></textarea>
-                          </div>
+
                         </div>
 
                       </div>
