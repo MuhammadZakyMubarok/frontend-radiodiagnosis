@@ -260,7 +260,8 @@ const DataPasien = () => {
                         <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center">
                           <a
                             className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl w-100"
-                            href="/radiografer-add-data-pasien" id="btn-add"
+                            href="/regis-patient" id="btn-add" 
+                            // setelah regis auto kembali ke halaman data pasien karna masih di auth radiographer, cuman mesti di refresh biar data baru nya muncul
                           >
                             <i className="fas fa-plus"></i>&nbsp;&nbsp; Tambah Data
                           </a>
@@ -281,17 +282,17 @@ const DataPasien = () => {
                               <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
                                 Radiografer
                               </th>
-                              <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-0 pe-0">
+                              <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-0 pe-0 text-center">
                                 Tanggal Periksa
                               </th>
-                              <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
-                                Status
+                              <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center">
+                                Status Radiografik
+                              </th>
+                              <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center">
+                                Status Akun
                               </th>
                               <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 pe-0 text-center">
                                 Aksi
-                              </th>
-                              <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
-                                Acc Akun
                               </th>
                               {/* <!-- <th className="text-secondary opacity-7"></th> --> */}
                             </tr>
@@ -315,45 +316,45 @@ const DataPasien = () => {
                                   </p>
                                 </td>
                                 <td className="align-middle text-start ps-0">
-                                  <span className="text-secondary text-xs font-weight-bold">
+                                  <p className="text-secondary text-xs font-weight-bold text-center">
                                     {moment(
                                       item.updated_at ?? item.created_at
                                     ).format("D-MM-YYYY")}
-                                  </span>
+                                  </p>
                                 </td>
-                                <td className="align-middle text-start text-sm">
-                                  <span
-                                    className={`badge border-radius-xl badge-sm bg-gradient-${
+                                <td className="align-middle text-start text-sm text-center">
+                                  <p
+                                    className={`text-xs text-secondary font-weight-bold mb-0 ${
                                       item.panoramik_check_date === null
-                                        ? "warning"
-                                        : "success"
+                                        ? "text-info"
+                                        : "text-secondary"
                                     }`}
                                   >
                                     {item.panoramik_check_date === null
-                                      ? "Proses"
+                                      ? "Dalam Proses"
                                       : "Selesai"}
-                                  </span>
+                                  </p>
+                                </td>
+                                <td className="align-middle text-start text-sm text-center">
+                                  <p
+                                    className={`text-xs text-secondary font-weight-bold mb-0 ${
+                                      item.status_user === 1
+                                        ? "text-success"
+                                        : "text-warning"
+                                    }`}
+                                  >
+                                    {item.status_user === 1 ? "Telah Disetujui" : "Belum Disetujui"}
+                                  </p>
+
                                 </td>
                                 <td className="align-middle text-start text-sm pe-0 text-center">
                                   <Link
                                     to={`/radiografer-view-data-pasien/${item.id}`}
                                   >
-                                    <span className="badge text-secondary badge-sm bg-gradient-white border border-gray">
+                                    <p className="badge text-secondary badge-sm bg-gradient-white border border-gray">
                                       Lihat Detail
-                                    </span>
+                                    </p>
                                   </Link>
-                                </td>
-                                <td className="align-middle text-start text-sm pe-0 text-center">
-                                  <span
-                                    onClick={() => handleSpanClick(item)}
-                                    data-bs-toggle="modal"
-                                    data-bs-target={`#confirmModal${item.id}`}
-                                    className={`badge cursor-pointer border-radius-xl badge-sm bg-gradient-${item.status_user === 0 ? "warning" : "success"
-                                      }`}
-                                  >
-                                    {item.status_user === 0 ? "Acc" : "Selesai"}
-                                  </span>
-
                                 </td>
 
                               </tr>
@@ -361,6 +362,7 @@ const DataPasien = () => {
                           </tbody>
                         </table>
                         {/* Render ConfirmModal jika selectedPatient ada */}
+                        {selectedPatient}
                         {isModalOpen && selectedPatient && (
                           <ConfirmModal
                             patientId={selectedPatient.id}

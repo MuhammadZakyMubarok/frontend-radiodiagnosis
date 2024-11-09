@@ -8,7 +8,7 @@ const SidebarFooterAdmin = () => {
 
   return (
     <div>
-      <div className="sidenav-footer mx-3 pt-7">
+      <div className="sidenav-footer mx-3 pt-6">
         <div className="card card-plain shadow-none" id="sidenavCard">
           <img
             className="w-50 mx-auto"
