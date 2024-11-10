@@ -279,9 +279,6 @@ const DataPasien = () => {
                               <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
                                 Nama Pasien
                               </th>
-                              <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
-                                Radiografer
-                              </th>
                               <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-0 pe-0 text-center">
                                 Tanggal Periksa
                               </th>
@@ -308,11 +305,6 @@ const DataPasien = () => {
                                 <td className="align-middle text-start text-sm ps-2">
                                   <p className="text-xs text-secondary mb-0">
                                     {item.fullname}
-                                  </p>
-                                </td>
-                                <td className="align-middle text-start text-sm ps-2">
-                                  <p className="text-xs text-secondary mb-0">
-                                    {item.radiographer}
                                   </p>
                                 </td>
                                 <td className="align-middle text-start ps-0">

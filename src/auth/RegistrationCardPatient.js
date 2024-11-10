@@ -21,6 +21,7 @@ const RegistrationCardPatient = () => {
         born_location: "", // Menambahkan born_location
         born_date: "", // Menambahkan born_date
         referral_origin: "",
+        age: "",
         status_user: 1,
     });
 
@@ -37,7 +38,7 @@ const RegistrationCardPatient = () => {
 
         try {
             const response = await axios.post(`${baseURL}/patients/register`, data);
-            navigate("/login-patient"); // Arahkan ke halaman login-Patient setelah pendaftaran berhasil
+            navigate("/"); // Arahkan ke halaman login setelah pendaftaran berhasil
         } catch (error) {
             const errorMessage = error.response?.data?.message || "Pendaftaran gagal";
             setError(errorMessage); // Tampilkan pesan error yang diterima dari backend
@@ -89,6 +90,7 @@ const RegistrationCardPatient = () => {
                                                             type="text"
                                                             placeholder="Masukkan NIK"
                                                             value={data.id_number}
+                                                            id="id_number"
                                                             name="id_number"
                                                             onChange={handleChange}
                                                         />
@@ -164,6 +166,19 @@ const RegistrationCardPatient = () => {
                                                     </div>
                                                 </div>
                                                 <div className="mb-3">
+                                                    <label htmlFor="province" className="form-label">Provinsi</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control form-control-lg"
+                                                        id="province"
+                                                        placeholder="Provinsi"
+                                                        name="province"
+                                                        value={data.province}
+                                                        onChange={handleChange}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="mb-3">
                                                     <label htmlFor="city" className="form-label">Kota</label>
                                                     <input
                                                         type="text"
@@ -177,14 +192,14 @@ const RegistrationCardPatient = () => {
                                                     />
                                                 </div>
                                                 <div className="mb-3">
-                                                    <label htmlFor="province" className="form-label">Provinsi</label>
+                                                    <label htmlFor="age" className="form-label">Umur</label>
                                                     <input
                                                         type="text"
                                                         className="form-control form-control-lg"
-                                                        id="province"
-                                                        placeholder="Provinsi"
-                                                        name="province"
-                                                        value={data.province}
+                                                        id="age"
+                                                        placeholder="Umur"
+                                                        name="age"
+                                                        value={data.age}
                                                         onChange={handleChange}
                                                         required
                                                     />
@@ -266,6 +281,9 @@ const RegistrationCardPatient = () => {
                                                         defaultValue={data.referral_origin}
                                                         onChange={handleChange}
                                                     >
+                                                        <option value="">
+                                                            Pilih Asal Rujukan
+                                                        </option>
                                                         <option value="Radiologi">
                                                             Radiologi
                                                         </option>
