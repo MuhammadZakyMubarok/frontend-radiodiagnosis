@@ -497,21 +497,6 @@ const ViewDataPasien = () => {
                                     {data.referral_origin}
                                   </p>
                                 </div>
-                                <hr className="horizontal dark" />
-                                <p className=" text-sm text-uppercase">
-                                  Data Radiografer
-                                </p>
-                                <div className="form-group">
-                                  <label
-                                    htmlFor="exampleFormControlSelect1"
-                                    className="form-control-label"
-                                  >
-                                    Pilih Radiografer
-                                  </label>
-                                  <p className="form-control" type="text">
-                                    {data.radiographer}
-                                  </p>
-                                </div>
                               </div>
                             </div>
                           </div>
