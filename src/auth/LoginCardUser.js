@@ -24,12 +24,12 @@ const LoginCardUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Attempting login...");
-    
+
     try {
       const response = await axios.post(`${baseURL}/authentications`, data);
       const { data: responseData } = response.data;
       sessionStorage.setItem("token", responseData.accessToken);
-      
+
       if (responseData.role === "radiographer") {
         window.location.href = "/radiografer-data-pasien";
       } else if (responseData.role === "doctor") {
@@ -37,7 +37,7 @@ const LoginCardUser = () => {
       } else if (responseData.role === "patient") {
         if (responseData.statusUser === 1) {
           setVerif(false);
-          window.location.href = "/patient-dashboard";
+          window.location.href = "/patient-result-diagnosis";
         } else {
           console.log('Akun belum verif');
           setVerif(true);  // Show the "unverified" alert

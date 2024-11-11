@@ -32,14 +32,14 @@ const SidebarPatient = () => {
             id="sidenav-collapse-main"
           >
             <ul className="navbar-nav">
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <NavLink activeClassName="active" className="nav-link" to="/patient-dashboard">
                   <div className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
                     <img src="../assets/img/App/data_pasien.png" />
                   </div>
                   <span className="nav-link-text ms-1">Dashboard</span>
                 </NavLink>
-              </li>
+              </li> */}
               <li className="nav-item">
                 <NavLink activeClassName="active" className="nav-link" to="/patient-result-diagnosis">
                   <div className="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -66,7 +66,7 @@ const SidebarPatient = () => {
               </li>
             </ul>
           </div>
-          <SidebarFooterUser/>
+          <SidebarFooterUser />
 
         </aside>
         {/* <!-- end sidebar --> */}

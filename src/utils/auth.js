@@ -38,7 +38,7 @@ const WithAuthorization = (allowedRoles) => {
         window.location.href = "/radiografer-data-pasien";
       } else if (data.role === "patient") {
         if (data.statusUser === 1) {
-          window.location.href = "/patient-dashboard";
+          window.location.href = "/patient-result-diagnosis";
         } else {
           window.location.href = "/login-user";
         }
