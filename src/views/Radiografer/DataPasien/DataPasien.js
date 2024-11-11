@@ -1,7 +1,7 @@
 import axios from "axios";
 import moment from "moment/moment";
 import { React, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import HeaderUser from "../../../component/Header/HeaderUser";
 import SidebarRadiografer from "../../../component/Sidebar/SidebarRadiografer";
 import { baseURL } from "../../../routes/Config";
@@ -15,6 +15,7 @@ import "../../Responsive/responsive.css";
 
 const DataPasien = () => {
   const auth = WithAuthorization(["radiographer"]);
+  const location = useLocation();
 
   const [data, setData] = useState([]);
   const [searchData, setSearchData] = useState([]);
@@ -54,7 +55,7 @@ const DataPasien = () => {
       .catch((error) => {
         console.log(error);
       });
-  }, [currentPage, inputText]);
+  }, [currentPage, inputText, location.key]);
 
   const toggleStatusUser = async (patientId, statusUser) => {
     try {
@@ -258,13 +259,10 @@ const DataPasien = () => {
                           </div>
                         </div>
                         <div className="col-md-2 col-12 d-flex flex-column justify-content-center text-center">
-                          <a
-                            className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl w-100"
-                            href="/regis-patient" id="btn-add" 
-                            // setelah regis auto kembali ke halaman data pasien karna masih di auth radiographer, cuman mesti di refresh biar data baru nya muncul
-                          >
-                            <i className="fas fa-plus"></i>&nbsp;&nbsp; Tambah Data
-                          </a>
+                        <Link to="/regis-patient" className="btn bg-gradient-primary btn-sm mb-0 border-radius-xl w-100" id="btn-add">
+                          <i className="fas fa-plus"></i>&nbsp;&nbsp; Tambah Data
+                        </Link>
+
                         </div>
                       </div>
                     </div>
