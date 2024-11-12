@@ -10,7 +10,7 @@ import SidebarPatient from "../../component/Sidebar/SidebarPatient";
 import WithAuthorization from "../../utils/auth";
 // import PaginationsHistory from "../../../component/Pagination/PaginationsHistory";
 import Report from "../Dokter/CatatanPasien/Report";
-import ReactToPdf from "react-to-pdf";
+// import ReactToPdf from "react-to-pdf";
 // import "../../Responsive/responsive.css";
 
 const DetailResultDataDiagnosis = () => {
