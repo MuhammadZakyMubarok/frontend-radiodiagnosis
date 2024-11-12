@@ -222,22 +222,6 @@ const ProfilePatient = () => {
                                   >
                                     Perempuan
                                   </label>
-                                  <div className="form-group">
-                                    <label
-                                      htmlFor="role"
-                                      className="form-control-label"
-                                    >
-                                      Profesi
-                                    </label>
-                                    <input
-                                      className="form-control"
-                                      type="text"
-                                      placeholder="Masukkan profesi anda"
-                                      value={data.role || ""}
-                                      name="role"
-                                      disabled
-                                    />
-                                  </div>
                                 </div>
                               </div>
 

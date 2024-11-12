@@ -2,7 +2,7 @@ import axios from "axios";
 import moment from "moment";
 import JsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { React, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
@@ -14,6 +14,7 @@ import "../../Responsive/responsive.css";
 
 const DetailCatatanPasien = () => {
   const auth = WithAuthorization(["doctor"]);
+  const printRef = useRef();
 
   const [data, setData] = useState({});
   const [system, setSystem] = useState([]);
@@ -300,80 +301,12 @@ const DetailCatatanPasien = () => {
                                                   </p>
                                                 </div>
                                               </div>
-                                              {/* <p>{data.catatan_pasien ?? "-"}</p> */}
-                                              {/* {data.diagnoses?.map(
-                                                (diagnose) => {
-                                                  if (
-                                                    diagnose?.system_diagnosis ||
-                                                    diagnose?.manual_diagnosis
-                                                  ) {
-                                                    return (
-                                                      <div className="row">
-                                                        <div className="col-2">
-                                                          <ul className="ps-3">
-                                                            <li className="text-xs">
-                                                              Gigi #
-                                                              {
-                                                                diagnose?.tooth_number
-                                                              }
-                                                            </li>
-                                                          </ul>
-                                                        </div>
-                                                        <div className="col-10 ps-0">
-                                                          {diagnose.verificator_diagnosis ? (
-                                                            <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
-                                                              {diagnose.verificator_diagnosis ===
-                                                                "dan lain-lain"
-                                                                ? diagnose.verificator_note +
-                                                                (diagnose.manual_diagnosis
-                                                                  ? ", " +
-                                                                  diagnose.manual_diagnosis
-                                                                  : "")
-                                                                : diagnose.verificator_diagnosis
-                                                                  ? diagnose.verificator_diagnosis +
-                                                                  (diagnose.manual_diagnosis
-                                                                    ? ", " +
-                                                                    diagnose.manual_diagnosis
-                                                                    : "")
-                                                                  : diagnose.manual_diagnosis}
-                                                            </p>
-                                                          ) : (
-                                                            <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
-                                                              {diagnose.system_diagnosis
-                                                                ? diagnose.system_diagnosis +
-                                                                (diagnose.manual_diagnosis
-                                                                  ? ", " +
-                                                                  diagnose.manual_diagnosis
-                                                                  : "")
-                                                                : diagnose.manual_diagnosis}
-                                                            </p>
-                                                          )}
-                                                          <hr
-                                                            style={{
-                                                              height: "1px",
-                                                              borderWidth:
-                                                                "0 px",
-                                                              color: "gray",
-                                                              backgroundColor:
-                                                                "gray",
-                                                              marginBottom:
-                                                                "0 px",
-                                                              marginTop: "0 px",
-                                                            }}
-                                                          />
-                                                        </div>
-                                                      </div>
-                                                    );
-                                                  }
-                                                }
-                                              )} */}
                                             </div>
                                           </div>
                                         </div>
                                         <div id="report" style={{ display: "none" }}>
                                           <Report />
                                         </div>
-
                                       </div>
                                     </div >
                                   </div >

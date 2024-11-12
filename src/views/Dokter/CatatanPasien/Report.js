@@ -3,10 +3,10 @@ import axios from "axios";
 import moment from "moment";
 import { baseURL } from "../../../routes/Config";
 import { useParams, Link } from "react-router-dom";
-import WithAuthorization from "../../../utils/auth";
+// import WithAuthorization from "../../../utils/auth";
 
 const Report = () => {
-  const auth = WithAuthorization(["doctor"]);
+  // const auth = WithAuthorization(["doctor"]);
 
   const [data, setData] = useState({});
   const [system, setSystem] = useState([]);
@@ -198,7 +198,12 @@ const Report = () => {
                           </p>
                         </div>
                       </div>
-                    ) : null
+                    ) :
+                      <div style={{ display: 'flex', marginBottom: '0.5rem', paddingLeft: '2rem' }}>
+                        <p style={{ fontSize: '0.75rem', color: '#000', fontWeight: 'bold', marginBottom: '0', paddingBottom: '0.5rem' }}>
+                          -
+                        </p>
+                      </div>
                   )}
                 </div>
 
@@ -209,7 +214,7 @@ const Report = () => {
                   </p>
                   <div style={{ display: 'flex', marginBottom: '0.5rem', paddingLeft: '2rem' }}>
                     <p style={{ fontSize: '0.75rem', color: '#000', fontWeight: 'bold', marginBottom: '0', paddingBottom: '0.5rem' }}>
-                      {data.catatan_pasien}
+                      {data.catatan_pasien ?? "-"}
                     </p>
                   </div>
                 </div>
