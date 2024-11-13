@@ -63,6 +63,29 @@ const Report = () => {
       });
   }, [id]);
 
+  const toBase64 = async (url) => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+  
+  useEffect(() => {
+    const fetchImageBase64 = async () => {
+      const base64Image = await toBase64(`${baseURL + data.panoramik_picture}`);
+      setData({ ...data, panoramik_picture_base64: base64Image });
+    };
+  
+    if (data.panoramik_picture) {
+      fetchImageBase64();
+    }
+  }, [data.panoramik_picture]);
+  
+
   return (
     <div id="report">
       <h6 className="ms-11 mt-2">Radiodiagnosis Report</h6>
@@ -88,19 +111,23 @@ const Report = () => {
                   <p style={{ fontSize: '0.75rem', color: '#6c757d', fontWeight: 'bold' }}>
                     Gambar Panoramik Gigi
                   </p>
+                  
                   <img
                     style={{
-                      maxWidth: '50%', /* Membatasi lebar gambar agar tidak melebihi lebar kontainer */
-                      height: 'auto',    /* Menjaga rasio aspek gambar */
-                      objectFit: 'contain', /* Memastikan gambar di-fit dengan proporsional di dalam kontainer tanpa terpotong */
+                      width: '500px', // atau ukuran yang sesuai
+                      height: 'auto', // menjaga rasio aspek gambar
+                      objectFit: 'contain', // memastikan gambar fit dengan proporsional di dalam kontainer tanpa terpotong
                       paddingLeft: '0',
                       paddingBottom: '1rem',
-                      borderRadius: '0.375rem', /* border-radius-xl untuk gambar */
+                      borderRadius: '0.375rem',
                       alignContent: "center",
                     }}
-                    src={`${baseURL + data.panoramik_picture}`}
+                    src={data.panoramik_picture_base64}
                     alt="Panoramik Gigi"
                   />
+
+                  {/* <img src={data.panoramik_picture_base64} alt="Panoramik Gigi" /> */}
+
                 </div>
 
                 {/* Bagian Nomor Rekam Medis */}
