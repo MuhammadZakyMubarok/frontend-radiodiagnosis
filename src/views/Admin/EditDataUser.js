@@ -6,10 +6,12 @@ import SidebarAdmin from "../../component/Sidebar/SidebarAdmin";
 import { baseURL } from "../../routes/Config";
 import WithAuthorization from "../../utils/auth";
 import "../Responsive/responsive.css";
+import { ListOfCity } from "../../component/Dropdown/ListOfCity";
 
 
 export const EditDataUser = () => {
   const auth = WithAuthorization(["admin"]);
+  const [cityOptions, setCityOptions] = useState([]);
 
   const [data, setData] = useState({
     fullname: "",
@@ -27,6 +29,15 @@ export const EditDataUser = () => {
   const { id } = useParams();
   const token = sessionStorage.getItem("token");
 
+  const provinceMap = {
+    "Jawa Timur": "jatim",
+    "Jawa Barat": "jabar",
+    "Jawa Tengah": "jateng",
+    "Yogyakarta": "yogya",
+    "Jakarta": "dki",
+    "Banten": "banten",
+  };
+
   // get data user use axios
   useEffect(() => {
     axios
@@ -38,7 +49,18 @@ export const EditDataUser = () => {
       })
       .then((response) => {
         if (response.data.data) {
-          setData(response.data.data);
+          const userData = response.data.data;
+          setData(userData);
+
+          // Set city options based on the user's province
+          const provinceKey = provinceMap[userData.province];
+          setCityOptions(ListOfCity[provinceKey] || []); // Update city options
+
+          // Set the selected city
+          setData((prevData) => ({
+            ...prevData,
+            city: userData.city, // Set the city from the database
+          }));
         }
       })
       .catch((error) => {
@@ -53,6 +75,28 @@ export const EditDataUser = () => {
     });
   };
 
+  const handleCityChange = (e) => {
+    const selectedCity = e.target.value;
+    setData({
+      ...data,
+      city: selectedCity, // Simpan kota yang dipilih ke dalam state data
+    });
+  };
+
+  const handleProvinceChange = (e) => {
+    const selectedProvince = e.target.value;
+    const provinceKey = provinceMap[selectedProvince]; // Dapatkan kunci berdasarkan nama provinsi
+    console.log("Selected Province Change:", selectedProvince); // Debugging
+    console.log("Province Key Change:", provinceKey); // Debugging
+    setData({
+      ...data,
+      province: selectedProvince, // Simpan nama provinsi
+      city: '', // Reset kota saat provinsi berubah
+    });
+    setCityOptions(ListOfCity[provinceKey] || []); // Update city options
+    console.log("City Options After Change:", ListOfCity[provinceKey]); // Debugging
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     await axios
@@ -145,7 +189,7 @@ export const EditDataUser = () => {
                                     </label>
                                     <input
                                       className="form-control"
-                                      type="text"
+                                      type="number"
                                       placeholder="Masukkan NIP"
                                       value={data.nip}
                                       name="nip"
@@ -178,7 +222,7 @@ export const EditDataUser = () => {
                                     </label>
                                     <input
                                       className="form-control"
-                                      type="text"
+                                      type="number"
                                       placeholder="Masukkan nomor telepon anda"
                                       value={data.phone_number}
                                       name="phone_number"
@@ -273,7 +317,6 @@ export const EditDataUser = () => {
                                 <div className="col-md-4">
                                   <div className="form-group">
                                     <label
-                                      htmlFor="exampleFormControlSelect1"
                                       className="form-control-label"
                                     >
                                       Provinsi
@@ -282,25 +325,16 @@ export const EditDataUser = () => {
                                       name="province"
                                       className="form-select"
                                       id="province"
-                                      value={data.province}
-                                      onChange={handleChange}
+                                      value={data.province} // Gunakan value dari state data
+                                      onChange={handleProvinceChange}
                                     >
-                                      <option>Provinsi</option>
-                                      <option value="Sulawesi Selatan">
-                                        Sulawesi Selatan
-                                      </option>
-                                      <option value="Jawa Timur">
-                                        Jawa Timur
-                                      </option>
-                                      <option value="Jawa Tengah">
-                                        Jawa Tengah
-                                      </option>
-                                      <option value="DKI Jakarta">
-                                        DKI Jakarta
-                                      </option>
-                                      <option value="Jawa Barat">
-                                        Jawa Barat
-                                      </option>
+                                      <option value="">Pilih Provinsi</option>
+                                      <option value="Jawa Timur">Jawa Timur</option>
+                                      <option value="Jawa Barat">Jawa Barat</option>
+                                      <option value="Jawa Tengah">Jawa Tengah</option>
+                                      <option value="Yogyakarta">Yogyakarta</option>
+                                      <option value="Jakarta">Jakarta</option>
+                                      <option value="Banten">Banten</option>
                                     </select>
                                   </div>
                                 </div>
@@ -317,15 +351,16 @@ export const EditDataUser = () => {
                                       name="city"
                                       className="form-select"
                                       id="city"
-                                      value={data.city}
-                                      onChange={handleChange}
+                                      value={data.city} // Gunakan value dari state data
+                                      onChange={handleCityChange}
+                                      disabled={!data.province} // Nonaktifkan jika provinsi tidak dipilih
                                     >
-                                      <option>Kota</option>
-                                      <option value="Makassar">Makassar</option>
-                                      <option value="Surabaya">Surabaya</option>
-                                      <option value="Semarang">Semarang</option>
-                                      <option value="Jakarta">Jakarta</option>
-                                      <option value="Banten">Banten</option>
+                                      <option value="">Pilih Kota</option>
+                                      {cityOptions.map((cityObj, index) => (
+                                        <option key={index} value={cityObj.city}>
+                                          {cityObj.city}
+                                        </option>
+                                      ))}
                                     </select>
                                   </div>
                                 </div>
@@ -340,7 +375,7 @@ export const EditDataUser = () => {
                                     </label>
                                     <input
                                       className="form-control"
-                                      type="text"
+                                      type="number"
                                       placeholder="Kode pos"
                                       value={data.postal_code}
                                       name="postal_code"
@@ -375,3 +410,5 @@ export const EditDataUser = () => {
     return <div></div>
   }
 };
+
+export default EditDataUser;

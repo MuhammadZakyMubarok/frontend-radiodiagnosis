@@ -6,11 +6,14 @@ import { baseURL } from "../../routes/Config";
 import WithAuthorization from "../../utils/auth";
 import RegistrasiConfirm from "../../component/Modal/RegistrasiConfirm";
 import "../Responsive/responsive.css";
+import { ListOfCity } from "../../component/Dropdown/ListOfCity";
 
 const AddDataUser = () => {
   const auth = WithAuthorization(["admin"]);
 
+  const [cityOptions, setCityOptions] = useState([]);
   const [password, setPassword] = useState("0");
+
   const [data, setData] = useState({
     fullname: "",
     nip: "",
@@ -23,6 +26,16 @@ const AddDataUser = () => {
     city: "",
     post_code: "",
   });
+
+  const provinceMap = {
+    "Jawa Timur": "jatim",
+    "Jawa Barat": "jabar",
+    "Jawa Tengah": "jateng",
+    "Yogyakarta": "yogya",
+    "Jakarta": "dki",
+    "Banten": "banten",
+  };
+
   const [province, setProvince] = useState([]);
   const [city, setCity] = useState([]);
 
@@ -41,42 +54,26 @@ const AddDataUser = () => {
       setProvince(response.data);
     });
 
-  const handleProvinceChange = (e) => {
-    e.preventDefault();
-
-    axios
-      .get(
-        `https://muh-arga.github.io/api-wilayah-indonesia/api/province/${e.target.value}.json`
-      )
-      .then((response) => {
-        setData({
-          ...data,
-          province: response.data.name,
-        });
-      });
-
-    axios
-      .get(
-        `https://muh-arga.github.io/api-wilayah-indonesia/api/regencies/${e.target.value}.json`
-      )
-      .then((response) => {
-        setCity(response.data);
-      });
+  const handleCityChange = (e) => {
+    const selectedCity = e.target.value;
+    setData({
+      ...data,
+      city: selectedCity, // Simpan kota yang dipilih ke dalam state data
+    });
   };
 
-  const handleCityChange = (e) => {
-    e.preventDefault();
-
-    axios
-      .get(
-        `https://muh-arga.github.io/api-wilayah-indonesia/api/regency/${e.target.value}.json`
-      )
-      .then((response) => {
-        setData({
-          ...data,
-          city: response.data.name,
-        });
-      });
+  const handleProvinceChange = (e) => {
+    const selectedProvince = e.target.value;
+    const provinceKey = provinceMap[selectedProvince]; // Dapatkan kunci berdasarkan nama provinsi
+    console.log("Selected Province Change:", selectedProvince); // Debugging
+    console.log("Province Key Change:", provinceKey); // Debugging
+    setData({
+      ...data,
+      province: selectedProvince, // Simpan nama provinsi
+      city: '', // Reset kota saat provinsi berubah
+    });
+    setCityOptions(ListOfCity[provinceKey] || []); // Update city options
+    console.log("City Options After Change:", ListOfCity[provinceKey]); // Debugging
   };
 
   const handleSubmit = async (e) => {
@@ -327,15 +324,16 @@ const AddDataUser = () => {
                                       name="province"
                                       className="form-select"
                                       id="province"
-                                      defaultValue={data.province}
+                                      value={data.province} // Gunakan value dari state data
                                       onChange={handleProvinceChange}
                                     >
-                                      <option>Provinsi</option>
-                                      {province.map((province) => (
-                                        <option value={province.id}>
-                                          {province.name}
-                                        </option>
-                                      ))}
+                                      <option value="">Pilih Provinsi</option>
+                                      <option value="Jawa Timur">Jawa Timur</option>
+                                      <option value="Jawa Barat">Jawa Barat</option>
+                                      <option value="Jawa Tengah">Jawa Tengah</option>
+                                      <option value="Yogyakarta">Yogyakarta</option>
+                                      <option value="Jakarta">Jakarta</option>
+                                      <option value="Banten">Banten</option>
                                     </select>
                                   </div>
                                 </div>
@@ -352,13 +350,14 @@ const AddDataUser = () => {
                                       name="city"
                                       className="form-select"
                                       id="city"
-                                      defaultValue={data.city}
+                                      value={data.city} // Gunakan value dari state data
                                       onChange={handleCityChange}
+                                      disabled={!data.province} // Nonaktifkan jika provinsi tidak dipilih
                                     >
-                                      <option>Kota</option>
-                                      {city.map((city) => (
-                                        <option value={city.id}>
-                                          {city.name}
+                                      <option value="">Pilih Kota</option>
+                                      {cityOptions.map((cityObj, index) => (
+                                        <option key={index} value={cityObj.city}>
+                                          {cityObj.city}
                                         </option>
                                       ))}
                                     </select>

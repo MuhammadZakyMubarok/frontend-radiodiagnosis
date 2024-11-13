@@ -1,11 +1,15 @@
 import axios from "axios";
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import { baseURL } from "../routes/Config";
 import { useNavigate } from "react-router-dom";
+import { ListOfCity } from "../component/Dropdown/ListOfCity";
 
 const RegistrationCardPatient = () => {
     const navigate = useNavigate();
     const [error, setError] = useState(null);
+    const [cityOptions, setCityOptions] = useState([]);
+    const [maxDate, setMaxDate] = useState("");
+
     const [data, setData] = useState({
         fullname: "",
         email: "",
@@ -24,6 +28,48 @@ const RegistrationCardPatient = () => {
         age: "",
         status_user: 1,
     });
+
+    const provinceMap = {
+        "Jawa Timur": "jatim",
+        "Jawa Barat": "jabar",
+        "Jawa Tengah": "jateng",
+        "Yogyakarta": "yogya",
+        "Jakarta": "dki",
+        "Banten": "banten",
+    };
+
+    useEffect(() => {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Januari adalah 0!
+        const yyyy = today.getFullYear();
+
+        // Format tanggal menjadi YYYY-MM-DD
+        setMaxDate(`${yyyy}-${mm}-${dd}`);
+    }, []);
+
+
+    const handleCityChange = (e) => {
+        const selectedCity = e.target.value;
+        setData({
+            ...data,
+            city: selectedCity, // Simpan kota yang dipilih ke dalam state data
+        });
+    };
+
+    const handleProvinceChange = (e) => {
+        const selectedProvince = e.target.value;
+        const provinceKey = provinceMap[selectedProvince]; // Dapatkan kunci berdasarkan nama provinsi
+        console.log("Selected Province Change:", selectedProvince); // Debugging
+        console.log("Province Key Change:", provinceKey); // Debugging
+        setData({
+            ...data,
+            province: selectedProvince, // Simpan nama provinsi
+            city: '', // Reset kota saat provinsi berubah
+        });
+        setCityOptions(ListOfCity[provinceKey] || []); // Update city options
+        console.log("City Options After Change:", ListOfCity[provinceKey]); // Debugging
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -87,7 +133,7 @@ const RegistrationCardPatient = () => {
                                                         </label>
                                                         <input
                                                             class="form-control"
-                                                            type="text"
+                                                            type="number"
                                                             placeholder="Masukkan NIK"
                                                             value={data.id_number}
                                                             id="id_number"
@@ -113,7 +159,7 @@ const RegistrationCardPatient = () => {
                                                     <div className="col-md-6 mb-3">
                                                         <label htmlFor="phone_number" className="form-label">No. Telp</label>
                                                         <input
-                                                            type="text"
+                                                            type="number"
                                                             className="form-control form-control-lg"
                                                             id="phone_number"
                                                             placeholder="Nomor Telepon"
@@ -154,7 +200,7 @@ const RegistrationCardPatient = () => {
                                                     <div className="col-md-6 mb-3">
                                                         <label htmlFor="postal_code" className="form-label">Kode Pos</label>
                                                         <input
-                                                            type="text"
+                                                            type="number"
                                                             className="form-control form-control-lg"
                                                             id="postal_code"
                                                             placeholder="Kode Pos"
@@ -165,36 +211,48 @@ const RegistrationCardPatient = () => {
                                                         />
                                                     </div>
                                                 </div>
-                                                <div className="mb-3">
-                                                    <label htmlFor="province" className="form-label">Provinsi</label>
-                                                    <input
-                                                        type="text"
-                                                        className="form-control form-control-lg"
-                                                        id="province"
-                                                        placeholder="Provinsi"
-                                                        name="province"
-                                                        value={data.province}
-                                                        onChange={handleChange}
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label htmlFor="city" className="form-label">Kota</label>
-                                                    <input
-                                                        type="text"
-                                                        className="form-control form-control-lg"
-                                                        id="city"
-                                                        placeholder="Kota"
-                                                        name="city"
-                                                        value={data.city}
-                                                        onChange={handleChange}
-                                                        required
-                                                    />
+                                                <div className="row-12 d-lg-flex d-md-none justify-content-around">
+                                                    <div className="col-md-6 mb-3 me-2">
+                                                        <label htmlFor="province" className="form-label">Provinsi</label>
+                                                        <select
+                                                            name="province"
+                                                            className="form-select"
+                                                            id="province"
+                                                            value={data.province} // Gunakan value dari state data
+                                                            onChange={handleProvinceChange}
+                                                        >
+                                                            <option value="">Pilih Provinsi</option>
+                                                            <option value="Jawa Timur">Jawa Timur</option>
+                                                            <option value="Jawa Barat">Jawa Barat</option>
+                                                            <option value="Jawa Tengah">Jawa Tengah</option>
+                                                            <option value="Yogyakarta">Yogyakarta</option>
+                                                            <option value="Jakarta">Jakarta</option>
+                                                            <option value="Banten">Banten</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="col-md-6 mb-3">
+                                                        <label htmlFor="city" className="form-label">Kota</label>
+                                                        <select
+                                                            name="city"
+                                                            className="form-select"
+                                                            id="city"
+                                                            value={data.city} // Gunakan value dari state data
+                                                            onChange={handleCityChange}
+                                                            disabled={!data.province} // Nonaktifkan jika provinsi tidak dipilih
+                                                        >
+                                                            <option value="">Pilih Kota</option>
+                                                            {cityOptions.map((cityObj, index) => (
+                                                                <option key={index} value={cityObj.city}>
+                                                                    {cityObj.city}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
                                                 </div>
                                                 <div className="mb-3">
                                                     <label htmlFor="age" className="form-label">Umur</label>
                                                     <input
-                                                        type="text"
+                                                        type="number"
                                                         className="form-control form-control-lg"
                                                         id="age"
                                                         placeholder="Umur"
@@ -227,6 +285,7 @@ const RegistrationCardPatient = () => {
                                                             name="born_date"
                                                             value={data.born_date}
                                                             onChange={handleChange}
+                                                            max={maxDate}
                                                             required
                                                         />
                                                     </div>

@@ -1,14 +1,38 @@
 import axios from "axios";
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import { baseURL } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 import "../../Responsive/responsive.css";
+import { ListOfCity } from "../../../component/Dropdown/ListOfCity";
 
 const ViewProfil = ({ auth, token }) => {
   const isAuth = WithAuthorization(["doctor"]);
 
   const [data, setData] = useState(auth);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [cityOptions, setCityOptions] = useState([]);
+
+  const provinceMap = {
+    "Jawa Timur": "jatim",
+    "Jawa Barat": "jabar",
+    "Jawa Tengah": "jateng",
+    "Yogyakarta": "yogya",
+    "Jakarta": "dki",
+    "Banten": "banten",
+  };
+
+  useEffect(() => {
+    // Cek apakah province yang dipilih valid
+    const provinceKey = provinceMap[data.province];
+    console.log("Selected Province:", data.province);
+    console.log("Province Key:", provinceKey);
+    
+    if (provinceKey) {
+      setCityOptions(ListOfCity[provinceKey] || []);
+    } else {
+      setCityOptions([]); // Reset city options jika provinsi tidak valid
+    }
+  }, [data.province]);
 
   const handleChange = (e) => {
     setData({
@@ -129,7 +153,7 @@ const ViewProfil = ({ auth, token }) => {
                         </label>
                         <input
                           className="form-control"
-                          type="text"
+                          type="number"
                           placeholder="Masukkan nomor telepon anda"
                           value={data.phone_number}
                           name="phone_number"
@@ -220,13 +244,10 @@ const ViewProfil = ({ auth, token }) => {
                           value={data.province}
                           onChange={handleChange}
                         >
-                          <option value="">Provinsi</option>
-                          <option value="Sulawesi Selatan">
-                            Sulawesi Selatan
-                          </option>
+                          <option value="">Pilih Provinsi</option>
                           <option value="Jawa Timur">Jawa Timur</option>
                           <option value="Jawa Tengah">Jawa Tengah</option>
-                          <option value="DKI Jakarta">DKI Jakarta</option>
+                          <option value="Jakarta">DKI Jakarta</option>
                           <option value="Jawa Barat">Jawa Barat</option>
                         </select>
                       </div>
@@ -245,11 +266,15 @@ const ViewProfil = ({ auth, token }) => {
                           onChange={handleChange}
                         >
                           <option value="">Kota</option>
-                          <option value="Makassasr">Makassar</option>
-                          <option value="Surabaya">Surabaya</option>
-                          <option value="Semarang">Semarang</option>
-                          <option value="Jakarta">Jakarta</option>
-                          <option value="Banten">Banten</option>
+                          {cityOptions.length > 0 ? (
+                            cityOptions.map((option, index) => (
+                              <option key={ index} value={option.city}>
+                                {option.city}
+                              </option>
+                            ))
+                          ) : (
+                            <option value="" disabled>Tidak ada kota yang tersedia</option>
+                          )}
                         </select>
                       </div>
                     </div>
@@ -264,7 +289,7 @@ const ViewProfil = ({ auth, token }) => {
                         </label>
                         <input
                           className="form-control"
-                          type="text"
+                          type="number"
                           placeholder="Kode pos"
                           value={data.postal_code}
                           name="postal_code"

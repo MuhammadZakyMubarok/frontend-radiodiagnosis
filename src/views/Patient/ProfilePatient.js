@@ -4,14 +4,25 @@ import HeaderDataUser from "../../component/Header/HeaderDataUser";
 import SidebarPatient from "../../component/Sidebar/SidebarPatient";
 import WithAuthorization from "../../utils/auth";
 import { baseURL } from "../../routes/Config";
+import { ListOfCity } from "../../component/Dropdown/ListOfCity";
 
 const ProfilePatient = () => {
   const isAuth = WithAuthorization(["patient"]);
 
   const [data, setData] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
+  const [cityOptions, setCityOptions] = useState([]);
 
   const token = sessionStorage.getItem("token");
+
+  const provinceMap = {
+    "Jawa Timur": "jatim",
+    "Jawa Barat": "jabar",
+    "Jawa Tengah": "jateng",
+    "Yogyakarta": "yogya",
+    "Jakarta": "dki",
+    "Banten": "banten",
+  };
 
   useEffect(() => {
     axios
@@ -27,6 +38,19 @@ const ProfilePatient = () => {
         console.log(error);
       });
   }, [token]);
+
+  useEffect(() => {
+    // Cek apakah province yang dipilih valid
+    const provinceKey = provinceMap[data.province];
+    console.log("Selected Province:", data.province);
+    console.log("Province Key:", provinceKey);
+    
+    if (provinceKey) {
+      setCityOptions(ListOfCity[provinceKey] || []);
+    } else {
+      setCityOptions([]); // Reset city options jika provinsi tidak valid
+    }
+  }, [data.province]);
 
   const handleChange = (e) => {
     setData({
@@ -172,7 +196,7 @@ const ProfilePatient = () => {
                                     </label>
                                     <input
                                       className="form-control"
-                                      type="text"
+                                      type="number"
                                       placeholder="Masukkan nomor telepon anda"
                                       value={data.phone_number || ""}
                                       name="phone_number"
@@ -222,6 +246,22 @@ const ProfilePatient = () => {
                                   >
                                     Perempuan
                                   </label>
+                                  <div className="form-group">
+                                    <label
+                                      htmlFor="role"
+                                      className="form-control-label"
+                                    >
+                                      Profesi
+                                    </label>
+                                    <input
+                                      className="form-control"
+                                      type="text"
+                                      placeholder="Masukkan profesi anda"
+                                      value={data.role || ""}
+                                      name="role"
+                                      disabled
+                                    />
+                                  </div>
                                 </div>
                               </div>
 
@@ -255,25 +295,14 @@ const ProfilePatient = () => {
                                       className="form-select"
                                       id="province"
                                       name="province"
-                                      value={data.province || ""}
+                                      value={data.province}
                                       onChange={handleChange}
                                     >
-                                      <option value="">Provinsi</option>
-                                      <option value="Sulawesi Selatan">
-                                        Sulawesi Selatan
-                                      </option>
-                                      <option value="Jawa Timur">
-                                        Jawa Timur
-                                      </option>
-                                      <option value="Jawa Tengah">
-                                        Jawa Tengah
-                                      </option>
-                                      <option value="DKI Jakarta">
-                                        DKI Jakarta
-                                      </option>
-                                      <option value="Jawa Barat">
-                                        Jawa Barat
-                                      </option>
+                                      <option value="">Pilih Provinsi</option>
+                                      <option value="Jawa Timur">Jawa Timur</option>
+                                      <option value="Jawa Tengah">Jawa Tengah</option>
+                                      <option value="Jakarta">DKI Jakarta</option>
+                                      <option value="Jawa Barat">Jawa Barat</option>
                                     </select>
                                   </div>
                                 </div>
@@ -290,15 +319,19 @@ const ProfilePatient = () => {
                                       className="form-select"
                                       id="city"
                                       name="city"
-                                      value={data.city || ""}
+                                      value={data.city}
                                       onChange={handleChange}
                                     >
                                       <option value="">Kota</option>
-                                      <option value="Makassar">Makassar</option>
-                                      <option value="Surabaya">Surabaya</option>
-                                      <option value="Semarang">Semarang</option>
-                                      <option value="Jakarta">Jakarta</option>
-                                      <option value="Banten">Banten</option>
+                                      {cityOptions.length > 0 ? (
+                                        cityOptions.map((option, index) => (
+                                          <option key={index} value={option.city}>
+                                            {option.city}
+                                          </option>
+                                        ))
+                                      ) : (
+                                        <option value="" disabled>Tidak ada kota yang tersedia</option>
+                                      )}
                                     </select>
                                   </div>
                                 </div>
@@ -313,7 +346,7 @@ const ProfilePatient = () => {
                                     </label>
                                     <input
                                       className="form-control"
-                                      type="text"
+                                      type="number"
                                       placeholder="Kode pos"
                                       value={data.postal_code || ""}
                                       name="postal_code"
