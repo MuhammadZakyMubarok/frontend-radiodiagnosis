@@ -62,6 +62,8 @@ const ViewDataPasien = () => {
   const navigate = useNavigate();
   const token = sessionStorage.getItem("token");
 
+  const [loggedInRadiographer, setLoggedInRadiographer] = useState(null);
+
   // Logic progress bar biar bisa jalan
   useEffect(() => {
     let interval;
@@ -104,6 +106,19 @@ const ViewDataPasien = () => {
       modalElement?.removeEventListener("hidden.bs.modal", handleModalClose);
     };
   }, [data.id]);
+
+  // 
+  useEffect(() => {
+    axios.get(`${baseURL}/users/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then(response => {
+      setLoggedInRadiographer(response.data.data);
+    }).catch(error => {
+      console.log(error);
+    });
+  }, []);
   
   const handleClick = (id) => {
     setSelectedId(id);
@@ -132,7 +147,9 @@ const ViewDataPasien = () => {
   const handleApprove = (e) => {
     e.preventDefault();
     axios
-      .post(`${baseURL}/patients/status/${id}/1`, {}, {
+      .post(`${baseURL}/patients/status/${id}/1`, {
+        radiographerId: loggedInRadiographer.id,
+      }, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
