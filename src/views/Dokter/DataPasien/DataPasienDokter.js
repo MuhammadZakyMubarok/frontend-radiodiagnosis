@@ -253,7 +253,7 @@ const DataPasienDokter = () => {
                                 </td>
                                 <td className="align-middle text-start text-sm ps-2">
                                   <p className="text-xs text-secondary mb-0">
-                                    {item.radiographer}
+                                    {item.radiographer || "N/A"}
                                   </p>
                                 </td>
                                 <td className="align-middle text-start ps-0">
