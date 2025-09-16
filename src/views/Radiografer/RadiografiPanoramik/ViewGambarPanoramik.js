@@ -41,6 +41,7 @@ const ViewGambarPanoramik = () => {
       numbers.push(diagnose?.tooth_number);
     });
     setTeethNumber(numbers);
+    console.log('data', data)
   }, [data]);
 
   const handleDelete = (e) => {
@@ -202,8 +203,7 @@ const ViewGambarPanoramik = () => {
 
                                       <img
                                         className="img-fluid border-radius-xl p-2"
-                                        src={`${baseURL + data.panoramik_picture
-                                          }`}
+                                        src={`${baseURL + data.panoramik_picture}`}
                                       />
                                     </div>
                                   </div>

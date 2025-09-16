@@ -19,7 +19,7 @@ const Paginations = ({ currentPage, totalPages, onPageChange }) => {
               disabled={currentPage === 1}
             >
               <span aria-hidden="true">&laquo;</span>
-              <span className="sr-only">Previous</span>
+              {/*<span className="sr-only">Previous</span>*/}
             </a>
           </li>
           {pageNumbers.map((number) => (
@@ -42,7 +42,7 @@ const Paginations = ({ currentPage, totalPages, onPageChange }) => {
               disabled={currentPage === totalPages}
             >
               <span aria-hidden="true">&raquo;</span>
-              <span className="sr-only">Next</span>
+              {/*<span className="sr-only">Next</span>*/}
             </a>
           </li>
         </ul>

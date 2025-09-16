@@ -30,6 +30,7 @@ const LoginCardUser = () => {
       const { data: responseData } = response.data;
       sessionStorage.setItem("token", responseData.accessToken);
 
+      console.log('Response data : ',responseData)
       if (responseData.role === "radiographer") {
         window.location.href = "/radiografer-data-pasien";
       } else if (responseData.role === "doctor") {

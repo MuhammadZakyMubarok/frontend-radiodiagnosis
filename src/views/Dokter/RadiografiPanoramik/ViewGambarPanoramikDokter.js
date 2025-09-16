@@ -110,6 +110,8 @@ const ViewGambarPanoramikDokter = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    console.log(id)
+    console.log(data)
     const fileResponse = await axios.get(
       `${baseURL + data.panoramik_picture}`,
       { responseType: "blob" }
@@ -342,7 +344,7 @@ const ViewGambarPanoramikDokter = () => {
                                         <div className="modal-content">
                                           <div className="modal-body text-center">
                                             <div className="spinner-border text-primary">
-                                              <span className="sr-only">Loading...</span>
+                                              {/*<span className="sr-only">Loading...</span>*/}
                                             </div>
                                             <h4 className="mt-3">Loading...</h4>
                                           </div>

@@ -32,6 +32,7 @@ const ProfilePatient = () => {
         },
       })
       .then((response) => {
+        console.log('profile data:', response.data)
         setData(response.data.data);
       })
       .catch((error) => {
