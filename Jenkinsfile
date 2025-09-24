@@ -1,37 +1,86 @@
 pipeline {
   agent {
-     docker {
-        image 'node:24-alpine'
-        args '-u root:root'
-     }
+    kubernetes {
+      yaml """
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          labels:
+            jenkins-job: frontend-build
+        spec:
+          serviceAccountName: default
+          containers:
+          - name: node
+            image: node:24-alpine
+            command:
+            - cat
+            tty: true
+            volumeMounts:
+            - name: workspace
+              mountPath: /home/jenkins/agent
+          - name: kaniko
+            image: gcr.io/kaniko-project/executor:latest
+            command:
+            - cat
+            tty: true
+            volumeMounts:
+            - name: kaniko-secret
+              mountPath: /kaniko/.docker
+            - name: workspace
+              mountPath: /workspace
+          volumes:
+          - name: kaniko-secret
+            secret:
+              secretName: regcred
+          - name: workspace
+            emptyDir: {}
+        """
+    }
   }
+
   environment {
     REGISTRY = 'docker.io/ardianhermawan17'
     IMAGE = "${env.REGISTRY}/frontend-radiodiagnosis"
     KUBECONFIG_CRED = 'kubeconfig-jenkins'
-    DOCKER_CRED = 'docker-ardian-read-write'
     K8S_NAMESPACE = 'radiodiagnosis'
   }
+
   stages {
-    stage('Checkout') { steps { checkout scm } }
-    stage('Install & build') {
+    stage('Checkout') {
       steps {
-        sh 'npm ci'
-        sh 'npm run build'
-      }
-    }
-    stage('Build & push image to docker') {
-      steps {
-        script {
-          docker.withRegistry("https://${env.REGISTRY}", "${DOCKER_CRED}") {
-            def img = docker.build("${IMAGE}:${env.BUILD_NUMBER}")
-            img.push()
-            sh "docker tag ${IMAGE}:${env.BUILD_NUMBER} ${IMAGE}:latest || true"
-            docker.image("${IMAGE}:${env.BUILD_NUMBER}").push('latest')
-          }
+        container('node') {
+          checkout scm
         }
       }
     }
+
+    stage('Install & build') {
+      steps {
+        container('node') {
+          sh 'npm ci'
+          sh 'npm run build'
+        }
+      }
+    }
+
+    stage('Build & push image') {
+      steps {
+        container('node') {
+          sh 'rm -rf /workspace/* || true'
+          sh 'cp -R $WORKSPACE/* /workspace'
+        }
+        container('kaniko') {
+          sh '''
+            /kaniko/executor \
+              --dockerfile=/workspace/Dockerfile \
+              --context=/workspace \
+              --destination=${IMAGE}:${BUILD_NUMBER} \
+              --destination=${IMAGE}:latest
+          '''
+        }
+      }
+    }
+
     stage('Deploy to kubernetes') {
       steps {
         withCredentials([file(credentialsId: "${KUBECONFIG_CRED}", variable: 'KUBECONFIG_FILE')]) {
@@ -44,6 +93,7 @@ pipeline {
       }
     }
   }
+
   post {
     success { echo "Build & deploy finished." }
     failure { echo "Pipeline failed." }
