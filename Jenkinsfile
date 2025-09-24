@@ -31,7 +31,7 @@ pipeline {
           volumes:
           - name: kaniko-secret
             secret:
-              secretName: regcred
+              secretName: docker-regcred
           - name: workspace
             emptyDir: {}
         """
