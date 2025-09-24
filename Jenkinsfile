@@ -39,8 +39,8 @@ pipeline {
     KUBECONFIG_CRED = 'kubeconfig-jenkins'
     DOCKER_CRED = 'docker-ardian-read-write'
     K8S_NAMESPACE = 'radiodiagnosis'
-    CLIENT_ID = credentials('bitbucket-client-id')
-    CLIENT_SECRET = credentials('bitbucket-client-secret')
+    CLIENT_ID = 'uKvQMdoWlOyF4irX5Svvm6gU9NKoU3er29JsARLoJXZYgARO'
+    CLIENT_SECRET = '2KNWAXaRj4t9zAt1RFUR4zUpphLjlpZS5ZmAzwihj336bJca2ydsDqIosAWjXa9f'
   }
   stages {
     stage('Checkout') {
