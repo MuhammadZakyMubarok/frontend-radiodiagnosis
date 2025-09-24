@@ -1,5 +1,10 @@
 pipeline {
-  agent any
+  agent {
+     docker {
+        image 'node:24-alpine'
+        args '-u root:root'
+     }
+  }
   environment {
     REGISTRY = 'docker.io/ardianhermawan17'
     IMAGE = "${env.REGISTRY}/frontend-radiodiagnosis"
