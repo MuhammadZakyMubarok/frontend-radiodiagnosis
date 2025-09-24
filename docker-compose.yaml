@@ -1,0 +1,15 @@
+name: 'frontend-radiodiagnosis-v1'
+
+services:
+  frontend:
+    container_name: frontend-react
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    env_file:
+      - .env
+    ports:
+      - "${PRODUCTION_PORT}:${PRODUCTION_PORT}"
+#    volumes:
+#      - .:/app
