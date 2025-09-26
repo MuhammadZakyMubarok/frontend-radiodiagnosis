@@ -10,18 +10,32 @@ pipeline {
                 - name: jnlp
                   image: jenkins/inbound-agent:4.11.2-4
                   args: ['\${computer.jnlpmac}', '\${computer.name}']
-                - name: kaniko
-                  image: gcr.io/kaniko-project/executor:latest
+                - name: buildkit
+                  image: moby/buildkit:v0.18.2-rootless
                   command:
-                    - cat
+                    - /bin/sh
+                    - -c
+                    - sleep 999999
                   tty: true
                   volumeMounts:
                     - name: docker-config
-                      mountPath: /kaniko/.docker
+                      mountPath: /root/.docker
+                - name: nodejs
+                  image: node:24-alpine
+                  command:
+                    - /bin/sh
+                    - -c
+                    - sleep 999999
+                  tty: true
+                  volumeMounts:
+                    - name: workspace
+                      mountPath: /workspace
                 volumes:
                   - name: docker-config
                     secret:
                       secretName: docker-config
+                  - name: workspace
+                    emptyDir: {}
               """
       }
   }
@@ -49,7 +63,7 @@ pipeline {
             export REACT_APP_CLIENT_ID=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_ID}' | base64 -d)
             export REACT_APP_CLIENT_SECRET=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_SECRET}' | base64 -d)
 
-            # Save to a file for sourcing in next step (since env vars don't persist across sh blocks)
+            # Save to a file for sourcing in next step
             echo "REACT_APP_CLIENT_ID=\$REACT_APP_CLIENT_ID" > /tmp/secrets.env
             echo "REACT_APP_CLIENT_SECRET=\$REACT_APP_CLIENT_SECRET" >> /tmp/secrets.env
           '''
@@ -57,23 +71,38 @@ pipeline {
       }
     }
 
-    stage('Build & Push Image with Kaniko') {
+    stage('Build React App') {
       steps {
-        container('kaniko') {
+        container('nodejs') {
           sh '''
-            # Source the secrets
+            npm ci
+            npm run build
+            cp -r build /workspace/
+          '''
+        }
+      }
+    }
+
+    stage('Build & Push Image with BuildKit') {
+      steps {
+        container('buildkit') {
+          sh '''
             set -a
             source /tmp/secrets.env
             set +a
 
-            /kaniko/executor \
-              --dockerfile="${WORKSPACE}/Dockerfile" \
-              --context="${WORKSPACE}" \
-              --destination="${IMAGE}:${BUILD_ID}" \
-              --destination="${IMAGE}:latest" \
-              --build-arg=REACT_APP_CLIENT_ID="${REACT_APP_CLIENT_ID}" \
-              --build-arg=REACT_APP_CLIENT_SECRET="${REACT_APP_CLIENT_SECRET}" \
-              --verbosity=debug
+            # Debug: check buildctl
+            buildctl-daemonless.sh --version || echo "Buildctl not found"
+
+            # Run buildctl
+            buildctl-daemonless.sh build \
+              --frontend dockerfile.v0 \
+              --local context=/workspace \
+              --local dockerfile=${WORKSPACE} \
+              --output type=image,name=${IMAGE}:${BUILD_ID},push=true \
+              --output type=image,name=${IMAGE}:latest,push=true \
+              --build-arg REACT_APP_CLIENT_ID=${REACT_APP_CLIENT_ID} \
+              --build-arg REACT_APP_CLIENT_SECRET=${REACT_APP_CLIENT_SECRET}
           '''
         }
       }
