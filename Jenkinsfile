@@ -49,45 +49,49 @@ pipeline {
 
     stage('Load Secrets from Kubernetes') {
       steps {
-        withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-          sh '''
-            # Fetch and decode secrets
-            export REACT_APP_CLIENT_ID=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_ID}' | base64 -d)
-            export REACT_APP_CLIENT_SECRET=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_SECRET}' | base64 -d)
+        container('kubectl') {
+         withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+                   sh '''
+                     # Fetch and decode secrets
+                     export REACT_APP_CLIENT_ID=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_ID}' | base64 -d)
+                     export REACT_APP_CLIENT_SECRET=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_SECRET}' | base64 -d)
 
-            # Save to a file for sourcing in next step
-            echo "REACT_APP_CLIENT_ID=\$REACT_APP_CLIENT_ID" > /tmp/secrets.env
-            echo "REACT_APP_CLIENT_SECRET=\$REACT_APP_CLIENT_SECRET" >> /tmp/secrets.env
-          '''
+                     # Save to a file for sourcing in next step
+                     echo "REACT_APP_CLIENT_ID=\$REACT_APP_CLIENT_ID" > /tmp/secrets.env
+                     echo "REACT_APP_CLIENT_SECRET=\$REACT_APP_CLIENT_SECRET" >> /tmp/secrets.env
+                   '''
+                   }
         }
       }
     }
 
     stage('Setup Docker Config Secret') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'docker-ardian-read-write',
-                                          usernameVariable: 'DOCKER_USER',
-                                          passwordVariable: 'DOCKER_PASS')]) {
-          withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-            sh '''
-              set -e
+        container('kubectl') {
+          withCredentials([usernamePassword(credentialsId: 'docker-ardian-read-write',
+                                                    usernameVariable: 'DOCKER_USER',
+                                                    passwordVariable: 'DOCKER_PASS')]) {
+                    withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+                      sh '''
+                        set -e
 
-              AUTH=$(echo -n "$DOCKER_USER:$DOCKER_PASS" | base64 | tr -d '\\n')
+                        AUTH=$(echo -n "$DOCKER_USER:$DOCKER_PASS" | base64 | tr -d '\\n')
 
-              cat > config.json <<EOF
-              {
-                "auths": {
-                  "https://index.docker.io/v1/": {
-                    "auth": "$AUTH"
-                  }
-                }
-              }
-              EOF
+                        cat > config.json <<EOF
+                        {
+                          "auths": {
+                            "https://index.docker.io/v1/": {
+                              "auth": "$AUTH"
+                            }
+                          }
+                        }
+                        EOF
 
-              kubectl -n jenkins delete secret docker-config --ignore-not-found
-              kubectl -n jenkins create secret generic docker-config \
-                --from-file=config.json=./config.json
-            '''
+                        kubectl -n jenkins delete secret docker-config --ignore-not-found
+                        kubectl -n jenkins create secret generic docker-config \
+                          --from-file=config.json=./config.json
+                      '''
+                    }
           }
         }
       }
@@ -123,19 +127,23 @@ pipeline {
 
     stage('Deploy to RKE2') {
       steps {
-        withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-          sh 'kubectl apply -f config/k8s/frontend-radiodiagnosis-deploy-k8s.yaml'
+        container('kubectl') {
+          withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+                    sh 'kubectl apply -f config/k8s/frontend-radiodiagnosis-deploy-k8s.yaml'
+          }
         }
       }
     }
 
     stage('Verify Deployment') {
       steps {
-        withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-          sh '''
-            kubectl rollout status deployment/frontend-radiodiagnosis -n ${K8S_NAMESPACE} --timeout=300s
-            kubectl get pods -n ${K8S_NAMESPACE} -l app=frontend-radiodiagnosis
-          '''
+        container('kubectl') {
+          withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+                    sh '''
+                      kubectl rollout status deployment/frontend-radiodiagnosis -n ${K8S_NAMESPACE} --timeout=300s
+                      kubectl get pods -n ${K8S_NAMESPACE} -l app=frontend-radiodiagnosis
+                    '''
+          }
         }
       }
     }
