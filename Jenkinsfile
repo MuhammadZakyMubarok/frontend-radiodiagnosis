@@ -1,46 +1,29 @@
 pipeline {
   agent {
-    kubernetes {
-      yaml '''
-        apiVersion: v1
-        kind: Pod
-        spec:
-          containers:
-          - name: kaniko
-            image: gcr.io/kaniko-project/executor:latest
-            command:
-            - cat
-           # - -c
-            - |
-              cat <<EOF > /kaniko/.docker/config.json
-              {
-                "auths": {
-                  "https://index.docker.io/v1/": {
-                    "auth": "' + "${DOCKER_HUB_AUTH}" + '"
-                  }
-                }
-              }
-              EOF
-              sleep 9999999
-            tty: true
-            volumeMounts:
-              - name: kaniko-secret
-                secret:
-                  secretName: docker-regcred
-                mountPath: /kaniko/.docker
-          - name: jnlp
-            image: jenkins/inbound-agent:3341.v0766d82b_dec0-1
-            resources:
-              requests:
-                cpu: "500m"
-                memory: "512Mi"
-              limits:
-                cpu: "1"
-                memory: "2Gi"
-          volumes:
-            - name: kaniko-secret
-              emptyDir: {}
-        '''
+      kubernetes {
+        defaultContainer 'jnlp'
+        yaml """
+              apiVersion: v1
+              kind: Pod
+              spec:
+                containers:
+                - name: jnlp
+                  image: jenkins/inbound-agent:4.11.2-4
+                  args: ['\${computer.jnlpmac}', '\${computer.name}']
+                - name: kaniko
+                  image: gcr.io/kaniko-project/executor:latest
+                  command:
+                    - cat
+                  tty: true
+                  volumeMounts:
+                    - name: docker-config
+                      mountPath: /kaniko/.docker
+                volumes:
+                  - name: docker-config
+                    secret:
+                      secretName: docker-config
+              """
+      }
     }
   }
 
