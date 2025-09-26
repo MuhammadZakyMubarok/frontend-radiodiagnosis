@@ -24,7 +24,6 @@ pipeline {
                       secretName: docker-config
               """
       }
-    }
   }
 
   environment {
