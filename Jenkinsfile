@@ -10,7 +10,7 @@ pipeline {
             - name: jnlp
               image: jenkins/inbound-agent:latest
             - name: buildkit
-              image: moby/buildkit:v0.18.2-rootless
+              image: moby/buildkit:v0.18.2
               securityContext:
                 privileged: true
               command: ["/bin/sh","-c","sleep 999999"]
@@ -60,24 +60,24 @@ pipeline {
 //     }
 
     stage('Build & Push Image with BuildKit') {
-          steps {
-            container('buildkit') {
-              sh '''
-                   ls -la ${WORKSPACE}
+      steps {
+        container('buildkit') {
+          sh '''
+            ls -la ${WORKSPACE}
 
-                   buildctl-daemonless.sh build \
-                     --frontend dockerfile.v0 \
-                     --local context=${WORKSPACE} \
-                     --local dockerfile=${WORKSPACE} \
-                     --output type=image,name=${IMAGE}:${BUILD_ID},push=true \
-                     --output type=image,name=${IMAGE}:latest,push=true \
-                     --build-arg REACT_APP_CLIENT_ID=${REACT_APP_CLIENT_ID} \
-                     --build-arg REACT_APP_CLIENT_SECRET=${REACT_APP_CLIENT_SECRET} \
-                     --build-arg CI=false
-              '''
-            }
-          }
+            buildctl-daemonless.sh build \
+              --frontend dockerfile.v0 \
+              --local context=${WORKSPACE} \
+              --local dockerfile=${WORKSPACE} \
+              --output type=image,name=${IMAGE}:${BUILD_ID},push=true \
+              --output type=image,name=${IMAGE}:latest,push=true \
+              --opt build-arg:REACT_APP_CLIENT_ID=${REACT_APP_CLIENT_ID} \
+              --opt build-arg:REACT_APP_CLIENT_SECRET=${REACT_APP_CLIENT_SECRET} \
+              --opt build-arg:CI=false
+          '''
         }
+      }
+    }
 
     stage('Update Kubernetes Manifests') {
       steps {
