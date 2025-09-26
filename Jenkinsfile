@@ -9,8 +9,8 @@ pipeline {
           - name: kaniko
             image: gcr.io/kaniko-project/executor:latest
             command:
-            - /busybox/sh
-            - -c
+            - cat
+           # - -c
             - |
               cat <<EOF > /kaniko/.docker/config.json
               {
@@ -25,6 +25,8 @@ pipeline {
             tty: true
             volumeMounts:
               - name: kaniko-secret
+                secret:
+                  secretName: docker-regcred
                 mountPath: /kaniko/.docker
           - name: jnlp
             image: jenkins/inbound-agent:3341.v0766d82b_dec0-1
