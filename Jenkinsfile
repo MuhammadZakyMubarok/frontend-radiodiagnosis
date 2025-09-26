@@ -61,10 +61,6 @@ pipeline {
           steps {
             container('buildkit') {
               sh '''
-                   set -a
-                   source ${WORKSPACE}/secrets.env
-                   set +a
-
                    ls -la ${WORKSPACE}
 
                    buildctl-daemonless.sh build \
