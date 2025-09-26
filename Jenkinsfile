@@ -41,22 +41,6 @@ pipeline {
       }
     }
 
-//     stage('Load Secrets from Kubernetes') {
-//       steps {
-//         withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-//           sh '''
-//             # Fetch and decode secrets
-//             export REACT_APP_CLIENT_ID=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_ID}' | base64 -d)
-//             export REACT_APP_CLIENT_SECRET=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_SECRET}' | base64 -d)
-//
-//             # Save to a file for sourcing in next step
-//             echo "REACT_APP_CLIENT_ID=\$REACT_APP_CLIENT_ID" > /tmp/secrets.env
-//             echo "REACT_APP_CLIENT_SECRET=\$REACT_APP_CLIENT_SECRET" >> /tmp/secrets.env
-//           '''
-//         }
-//       }
-//     }
-
     stage('Build & Push Image with BuildKit') {
           steps {
             container('buildkit') {
