@@ -148,9 +148,7 @@ pipeline {
     }
     always {
       echo 'Pipeline execution completed.'
-      node {
-        cleanWs()
-      }
+      cleanWs()
     }
   }
 }
