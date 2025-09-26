@@ -8,7 +8,7 @@ pipeline {
               spec:
                 containers:
                 - name: jnlp
-                  image: jenkins/inbound-agent:4.11.2-4
+                  image: jenkins/inbound-agent:latest
                  # args: ['\${computer.jnlpmac}', '\${computer.name}']
                 - name: buildkit
                   image: moby/buildkit:v0.18.2-rootless
