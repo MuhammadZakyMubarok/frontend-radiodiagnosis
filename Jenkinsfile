@@ -9,13 +9,16 @@ pipeline {
                 containers:
                 - name: jnlp
                   image: jenkins/inbound-agent:4.11.2-4
-                  args: ['\${computer.jnlpmac}', '\${computer.name}']
+                 # args: ['\${computer.jnlpmac}', '\${computer.name}']
                 - name: buildkit
                   image: moby/buildkit:v0.18.2-rootless
+                  securityContext:
+                    privileged: true
                   command:
                     - /bin/sh
                     - -c
                     - sleep 999999
+                    - buildkitd
                   tty: true
                   volumeMounts:
                     - name: docker-config
@@ -145,7 +148,9 @@ pipeline {
     }
     always {
       echo 'Pipeline execution completed.'
-      cleanWs()
+      node {
+        cleanWs()
+      }
     }
   }
 }
