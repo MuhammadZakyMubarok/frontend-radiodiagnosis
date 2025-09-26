@@ -19,8 +19,8 @@ pipeline {
                 - name: docker-config
                   mountPath: /root/.docker
             - name: kubectl
-              image: bitnami/kubectl:latest
-              command: ["/bin/sh","-c","sleep 999999"]
+              image: lachlanevenson/k8s-kubectl:v1.30.0
+              command: ["sleep","999999"]
               tty: true
             volumes:
               - name: docker-config
