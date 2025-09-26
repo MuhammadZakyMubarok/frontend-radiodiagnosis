@@ -1,47 +1,28 @@
 pipeline {
-  agent {
+   agent {
       kubernetes {
         defaultContainer 'jnlp'
         yaml """
-              apiVersion: v1
-              kind: Pod
-              spec:
-                containers:
-                - name: jnlp
-                  image: jenkins/inbound-agent:latest
-                 # args: ['\${computer.jnlpmac}', '\${computer.name}']
-                - name: buildkit
-                  image: moby/buildkit:v0.18.2-rootless
-                  securityContext:
-                    privileged: true
-                  command:
-                    - /bin/sh
-                    - -c
-                    - sleep 999999
-                    - buildkitd
-                  tty: true
-                  volumeMounts:
-                    - name: docker-config
-                      mountPath: /root/.docker
-                - name: nodejs
-                  image: node:24-alpine
-                  command:
-                    - /bin/sh
-                    - -c
-                    - sleep 999999
-                  tty: true
-                  volumeMounts:
-                    - name: workspace
-                      mountPath: /workspace
-                volumes:
-                  - name: docker-config
-                    secret:
-                      secretName: docker-config
-                  - name: workspace
-                    emptyDir: {}
-              """
+          apiVersion: v1
+          kind: Pod
+          spec:
+            containers:
+            - name: jnlp
+              image: jenkins/inbound-agent:latest
+            - name: buildkit
+              image: moby/buildkit:v0.18.2-rootless
+              command: ["/bin/sh","-c","sleep 999999"]
+              tty: true
+              volumeMounts:
+                - name: docker-config
+                  mountPath: /root/.docker
+            volumes:
+              - name: docker-config
+                secret:
+                  secretName: docker-config
+          """
       }
-  }
+    }
 
   environment {
     REGISTRY        = 'docker.io/ardianhermawan17'
@@ -76,42 +57,31 @@ pipeline {
 //       }
 //     }
 
-    stage('Build React App') {
-      steps {
-        container('nodejs') {
-          sh '''
-            npm ci
-            npm run build
-            cp -r build /workspace/
-          '''
-        }
-      }
-    }
-
     stage('Build & Push Image with BuildKit') {
-      steps {
-        container('buildkit') {
-          sh '''
-            set -a
-            source /tmp/secrets.env
-            set +a
+          steps {
+            container('buildkit') {
+              sh '''
+                set -a
+                source /tmp/secrets.env || true
+                set +a
 
-            # Debug: check buildctl
-            buildctl-daemonless.sh --version || echo "Buildctl not found"
+                echo "Workspace: ${WORKSPACE}"
+                ls -la ${WORKSPACE}
 
-            # Run buildctl
-            buildctl-daemonless.sh build \
-              --frontend dockerfile.v0 \
-              --local context=/workspace \
-              --local dockerfile=${WORKSPACE} \
-              --output type=image,name=${IMAGE}:${BUILD_ID},push=true \
-              --output type=image,name=${IMAGE}:latest,push=true \
-              --build-arg REACT_APP_CLIENT_ID=${REACT_APP_CLIENT_ID} \
-              --build-arg REACT_APP_CLIENT_SECRET=${REACT_APP_CLIENT_SECRET}
-          '''
+                # Build and push: let BuildKit run the Dockerfile end-to-end (multi-stage)
+                buildctl-daemonless.sh build \
+                  --frontend dockerfile.v0 \
+                  --local context=${WORKSPACE} \
+                  --local dockerfile=${WORKSPACE} \
+                  --output type=image,name=${IMAGE}:${BUILD_ID},push=true \
+                  --output type=image,name=${IMAGE}:latest,push=true \
+                  --build-arg REACT_APP_CLIENT_ID=${REACT_APP_CLIENT_ID} \
+                  --build-arg REACT_APP_CLIENT_SECRET=${REACT_APP_CLIENT_SECRET} \
+                  --build-arg CI=false
+              '''
+            }
+          }
         }
-      }
-    }
 
     stage('Update Kubernetes Manifests') {
       steps {

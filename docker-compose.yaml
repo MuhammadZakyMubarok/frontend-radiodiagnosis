@@ -5,7 +5,7 @@ services:
     container_name: frontend-react
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.old
       target: production
     env_file:
       - .env
