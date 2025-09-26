@@ -1,12 +1,47 @@
 pipeline {
-  agent any
+  agent {
+    kubernetes {
+      yaml '''
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: kaniko
+                image: gcr.io/kaniko-project/executor:latest
+                command:
+                - /busybox/sh
+                - -c
+                - |
+                  cat <<EOF > /kaniko/.docker/config.json
+                  {
+                    "auths": {
+                      "https://index.docker.io/v1/": {
+                        "auth": "' + "${DOCKER_HUB_AUTH}" + '"
+                      }
+                    }
+                  }
+                  EOF
+                  /kaniko/executor --no-push
+                tty: true
+              - name: jnlp
+                image: jenkins/inbound-agent:3341.v0766d82b_dec0-1
+                resources:
+                  requests:
+                    cpu: "500m"
+                    memory: "512Mi"
+                  limits:
+                    cpu: "1"
+                    memory: "2Gi"
+            '''
+    }
+  }
 
   environment {
-    REGISTRY       = 'docker.io/ardianhermawan17'
-    IMAGE          = "${env.REGISTRY}/frontend-radiodiagnosis"
-    DOCKER_HUB_CRED = 'docker-ardian-read-write'
+    REGISTRY        = 'docker.io/ardianhermawan17'
+    IMAGE           = "${env.REGISTRY}/frontend-radiodiagnosis"
     KUBECONFIG_CRED = 'kubeconfig-jenkins'
-    K8S_NAMESPACE  = 'radiodiagnosis'
+    K8S_NAMESPACE   = 'radiodiagnosis'
+    DOCKER_HUB_AUTH = credentials('docker-ardian-read-write')
   }
 
   stages {
@@ -16,14 +51,16 @@ pipeline {
       }
     }
 
-    stage('Build & Push Docker Image') {
+    stage('Build & Push Image with Kaniko') {
       steps {
-        script {
-          docker.withRegistry('https://docker.io', env.DOCKER_HUB_CRED) {
-            def img = docker.build("${env.IMAGE}:${env.BUILD_ID}")
-            img.push()
-            img.push('latest')
-          }
+        container('kaniko') {
+          sh '''
+            /kaniko/executor \
+              --dockerfile="${WORKSPACE}/Dockerfile" \
+              --context="${WORKSPACE}" \
+              --destination="${IMAGE}:${BUILD_ID}" \
+              --destination="${IMAGE}:latest"
+          '''
         }
       }
     }
