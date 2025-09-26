@@ -18,6 +18,10 @@ pipeline {
               volumeMounts:
                 - name: docker-config
                   mountPath: /root/.docker
+            - name: kubectl
+              image: bitnami/kubectl:latest
+              command: ["/bin/sh","-c","sleep 999999"]
+              tty: true
             volumes:
               - name: docker-config
                 secret:
@@ -32,8 +36,8 @@ pipeline {
     KUBECONFIG_CRED = 'kubeconfig-jenkins'
     K8S_NAMESPACE   = 'radiodiagnosis'
     DOCKER_HUB_AUTH = credentials('docker-ardian-read-write')
-    REACT_APP_CLIENT_ID='uKvQMdoWlOyF4irX5Svvm6gU9NKoU3er29JsARLoJXZYgARO'
-    REACT_APP_CLIENT_SECRET='2KNWAXaRj4t9zAt1RFUR4zUpphLjlpZS5ZmAzwihj336bJca2ydsDqIosAWjXa9f'
+    REACT_APP_CLIENT_ID=''
+    REACT_APP_CLIENT_SECRET=''
   }
 
   stages {
@@ -43,21 +47,51 @@ pipeline {
       }
     }
 
-//     stage('Load Secrets from Kubernetes') {
-//       steps {
-//         withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-//           sh '''
-//             # Fetch and decode secrets
-//             export REACT_APP_CLIENT_ID=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_ID}' | base64 -d)
-//             export REACT_APP_CLIENT_SECRET=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_SECRET}' | base64 -d)
-//
-//             # Save to a file for sourcing in next step
-//             echo "REACT_APP_CLIENT_ID=\$REACT_APP_CLIENT_ID" > /tmp/secrets.env
-//             echo "REACT_APP_CLIENT_SECRET=\$REACT_APP_CLIENT_SECRET" >> /tmp/secrets.env
-//           '''
-//         }
-//       }
-//     }
+    stage('Load Secrets from Kubernetes') {
+      steps {
+        withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+          sh '''
+            # Fetch and decode secrets
+            export REACT_APP_CLIENT_ID=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_ID}' | base64 -d)
+            export REACT_APP_CLIENT_SECRET=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_SECRET}' | base64 -d)
+
+            # Save to a file for sourcing in next step
+            echo "REACT_APP_CLIENT_ID=\$REACT_APP_CLIENT_ID" > /tmp/secrets.env
+            echo "REACT_APP_CLIENT_SECRET=\$REACT_APP_CLIENT_SECRET" >> /tmp/secrets.env
+          '''
+        }
+      }
+    }
+
+    stage('Setup Docker Config Secret') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'docker-ardian-read-write',
+                                          usernameVariable: 'DOCKER_USER',
+                                          passwordVariable: 'DOCKER_PASS')]) {
+          withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+            sh '''
+              set -e
+
+              AUTH=$(echo -n "$DOCKER_USER:$DOCKER_PASS" | base64 | tr -d '\\n')
+
+              cat > config.json <<EOF
+              {
+                "auths": {
+                  "https://index.docker.io/v1/": {
+                    "auth": "$AUTH"
+                  }
+                }
+              }
+              EOF
+
+              kubectl -n jenkins delete secret docker-config --ignore-not-found
+              kubectl -n jenkins create secret generic docker-config \
+                --from-file=config.json=./config.json
+            '''
+          }
+        }
+      }
+    }
 
     stage('Build & Push Image with BuildKit') {
       steps {
