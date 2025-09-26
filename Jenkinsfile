@@ -4,6 +4,7 @@ pipeline {
   environment {
     REGISTRY       = 'docker.io/ardianhermawan17'
     IMAGE          = "${env.REGISTRY}/frontend-radiodiagnosis"
+    DOCKER_HUB_CRED = 'docker-ardian-read-write'
     KUBECONFIG_CRED = 'kubeconfig-jenkins'
     K8S_NAMESPACE  = 'radiodiagnosis'
   }
@@ -18,7 +19,7 @@ pipeline {
     stage('Build & Push Docker Image') {
       steps {
         script {
-          docker.withRegistry('https://docker.io', 'docker-hub-creds') {
+          docker.withRegistry('https://docker.io', env.DOCKER_HUB_CRED) {
             def img = docker.build("${env.IMAGE}:${env.BUILD_ID}")
             img.push()
             img.push('latest')
