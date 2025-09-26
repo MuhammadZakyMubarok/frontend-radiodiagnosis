@@ -11,6 +11,8 @@ pipeline {
               image: jenkins/inbound-agent:latest
             - name: buildkit
               image: moby/buildkit:v0.18.2-rootless
+              securityContext:
+                privileged: true
               command: ["/bin/sh","-c","sleep 999999"]
               tty: true
               volumeMounts:
