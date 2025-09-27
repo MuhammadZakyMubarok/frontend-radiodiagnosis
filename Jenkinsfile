@@ -137,7 +137,17 @@ pipeline {
       steps {
         container('kubectl') {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-            sh 'kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml'
+            sh '''
+              set -euo pipefail
+              echo "Applying manifests..."
+              # apply manifests and save resource names (like deployment.apps/frontend)
+              kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml -o name > ${WORKSPACE}/applied.txt
+              # optionally also apply ingress (if separate file)
+              # kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/ingress-frontend-radiodiagnosis-k8s.yaml >> ${WORKSPACE}/applied.txt || true
+
+              echo "Applied resources:"
+              cat ${WORKSPACE}/applied.txt || true
+            '''
           }
         }
       }
@@ -147,7 +157,7 @@ pipeline {
 //       steps {
 //       container('kubectl') {
 //         withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-//             sh 'kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/ingress-frontend-radiodiagnosis-k8s.yaml'
+//             sh 'kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/ingress-frontend-radiodiagnosis-k8s.yaml >> ${WORKSPACE}/applied.txt || true'
 //           }
 //         }
 //       }
@@ -157,11 +167,14 @@ pipeline {
       steps {
         container('kubectl') {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-            sh '''
-              kubectl rollout status deployment/frontend-radiodiagnosis -n ${K8S_NAMESPACE} --timeout=300s
-              kubectl get pods -n ${K8S_NAMESPACE} -l app=frontend
-            '''
-          }
+                  sh '''
+                    set -euo pipefail
+                    echo "Waiting for rollout..."
+                    kubectl -n ${K8S_NAMESPACE} rollout status deployment/frontend-radiodiagnosis --timeout=300s
+                    echo "Listing pods:"
+                    kubectl -n ${K8S_NAMESPACE} get pods -l app=frontend -o wide
+                  '''
+                }
         }
       }
     }
@@ -176,11 +189,39 @@ pipeline {
       container('kubectl') {
         withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
           sh '''
-            # rollback kalo error
-            kubectl -n ${K8S_NAMESPACE} rollout undo deployment/frontend-radiodiagnosis || true
+            set -euo pipefail
+            APPLIED_FILE=${WORKSPACE}/applied.txt
 
-            # check status
-            kubectl -n ${K8S_NAMESPACE} rollout status deployment/frontend-radiodiagnosis --timeout=2m || echo "Rollback may have failed"
+            if [ -f "$APPLIED_FILE" ]; then
+              echo "Applied resources were:"
+              cat "$APPLIED_FILE"
+              echo
+
+              # Try to rollback deployments first (safe operation)
+              while read -r res; do
+                # ignore empty lines
+                [ -z "$res" ] && continue
+                kind=$(echo "$res" | cut -d'/' -f1)    # e.g. deployment.apps
+                name=$(echo "$res" | cut -d'/' -f2)    # e.g. frontend
+
+                echo "Handling resource: $res (kind=$kind name=$name)"
+
+                if echo "$kind" | grep -q 'deployment'; then
+                  echo " -> Attempting rollout undo for $res"
+                  kubectl -n ${K8S_NAMESPACE} rollout undo "$res" || echo "rollback failed for $res (ignored)"
+                else
+                  echo " -> Deleting $res (if created by this run)"
+                  kubectl -n ${K8S_NAMESPACE} delete "$res" --ignore-not-found || echo "delete failed for $res (ignored)"
+                fi
+              done < "$APPLIED_FILE"
+
+              echo "Rollback/cleanup done (attempted)."
+            else
+              echo "No applied resource list found at $APPLIED_FILE; skipping cleanup."
+            fi
+
+            # optional: check deployment status after undo
+            kubectl -n ${K8S_NAMESPACE} get deployments -o wide || true
           '''
         }
       }
