@@ -22,10 +22,18 @@ pipeline {
               image: bitnami/kubectl:1.30
               command: ["sleep","infinity"]
               tty: true
+              securityContext:
+                runAsUser: 0
+                runAsGroup: 0
+              volumeMounts:
+                  - name: workspace-volume
+                    mountPath: /home/jenkins/agent
             volumes:
               - name: docker-config
                 secret:
                   secretName: docker-config
+              - name: workspace-volume
+                  emptyDir: {}
           """
       }
     }
