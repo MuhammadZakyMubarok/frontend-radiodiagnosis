@@ -26,8 +26,8 @@ pipeline {
                 runAsUser: 0
                 runAsGroup: 0
               volumeMounts:
-                  - name: workspace-volume
-                    mountPath: /home/jenkins/agent
+                - name: workspace-volume
+                  mountPath: /home/jenkins/agent
             volumes:
               - name: docker-config
                 secret:
