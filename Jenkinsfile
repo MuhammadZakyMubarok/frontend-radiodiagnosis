@@ -59,16 +59,16 @@ pipeline {
       steps {
         container('kubectl') {
          withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-                   sh '''
-                     # Fetch and decode secrets
-                     export REACT_APP_CLIENT_ID=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_ID}' | base64 -d)
-                     export REACT_APP_CLIENT_SECRET=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_SECRET}' | base64 -d)
+           sh '''
+             # Ambil secret dari kubernetes (cluster)
+             export REACT_APP_CLIENT_ID=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_ID}' | base64 -d)
+             export REACT_APP_CLIENT_SECRET=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_SECRET}' | base64 -d)
 
-                     # Save to a file for sourcing in next step
-                     echo "REACT_APP_CLIENT_ID=\$REACT_APP_CLIENT_ID" > /tmp/secrets.env
-                     echo "REACT_APP_CLIENT_SECRET=\$REACT_APP_CLIENT_SECRET" >> /tmp/secrets.env
-                   '''
-                   }
+             # Save file
+             echo "REACT_APP_CLIENT_ID=\$REACT_APP_CLIENT_ID" > /tmp/secrets.env
+             echo "REACT_APP_CLIENT_SECRET=\$REACT_APP_CLIENT_SECRET" >> /tmp/secrets.env
+           '''
+           }
         }
       }
     }
@@ -77,29 +77,29 @@ pipeline {
       steps {
         container('kubectl') {
           withCredentials([usernamePassword(credentialsId: 'docker-ardian-read-write',
-                                                    usernameVariable: 'DOCKER_USER',
-                                                    passwordVariable: 'DOCKER_PASS')]) {
-                    withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-                      sh '''
-                        set -e
+                                            usernameVariable: 'DOCKER_USER',
+                                            passwordVariable: 'DOCKER_PASS')]) {
+            withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+              sh '''
+                set -e
 
-                        AUTH=$(echo -n "$DOCKER_USER:$DOCKER_PASS" | base64 | tr -d '\\n')
+                AUTH=$(echo -n "$DOCKER_USER:$DOCKER_PASS" | base64 | tr -d '\\n')
 
-                        cat > config.json <<EOF
-                        {
-                          "auths": {
-                            "https://index.docker.io/v1/": {
-                              "auth": "$AUTH"
-                            }
-                          }
-                        }
-                        EOF
-
-                        kubectl -n jenkins delete secret docker-config --ignore-not-found
-                        kubectl -n jenkins create secret generic docker-config \
-                          --from-file=config.json=./config.json
-                      '''
+                cat > config.json <<EOF
+                {
+                  "auths": {
+                    "https://index.docker.io/v1/": {
+                      "auth": "$AUTH"
                     }
+                  }
+                }
+                EOF
+
+                kubectl -n jenkins delete secret docker-config --ignore-not-found
+                kubectl -n jenkins create secret generic docker-config \
+                  --from-file=config.json=./config.json
+              '''
+            }
           }
         }
       }
@@ -137,8 +137,16 @@ pipeline {
       steps {
         container('kubectl') {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-                    sh 'kubectl apply -f config/k8s/frontend-radiodiagnosis-deploy-k8s.yaml'
+            sh 'kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml'
           }
+        }
+      }
+    }
+
+    stage('Apply Ingress') {
+      steps {
+        withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+          sh 'kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/ingress-frontend-radiodiagnosis-k8s.yaml'
         }
       }
     }
@@ -147,10 +155,10 @@ pipeline {
       steps {
         container('kubectl') {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-                    sh '''
-                      kubectl rollout status deployment/frontend-radiodiagnosis -n ${K8S_NAMESPACE} --timeout=300s
-                      kubectl get pods -n ${K8S_NAMESPACE} -l app=frontend-radiodiagnosis
-                    '''
+            sh '''
+              kubectl rollout status deployment/frontend-radiodiagnosis -n ${K8S_NAMESPACE} --timeout=300s
+              kubectl get pods -n ${K8S_NAMESPACE} -l app=frontend-radiodiagnosis
+            '''
           }
         }
       }
@@ -163,6 +171,17 @@ pipeline {
     }
     failure {
       echo 'Pipeline failed! Please check the logs for errors.'
+      container('kubectl') {
+        withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+          sh '''
+            # rollback kalo error
+            kubectl -n ${K8S_NAMESPACE} rollout undo deployment/frontend-radiodiagnosis || true
+
+            # check status
+            kubectl -n ${K8S_NAMESPACE} rollout status deployment/frontend-radiodiagnosis --timeout=2m || echo "Rollback may have failed"
+          '''
+        }
+      }
     }
     always {
       echo 'Pipeline execution completed.'
