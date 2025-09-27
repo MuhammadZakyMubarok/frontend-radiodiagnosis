@@ -128,7 +128,7 @@ pipeline {
     stage('Update Kubernetes Manifests') {
       steps {
         sh '''
-          sed -i "s|docker.io/ardianhermawan17/frontend-radiodiagnosis:latest|${IMAGE}:${BUILD_ID}|g" config/k8s/frontend-radiodiagnosis-deploy-k8s.yaml
+          sed -i "s|docker.io/ardianhermawan17/frontend-radiodiagnosis:latest|${IMAGE}:${BUILD_ID}|g" config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml
         '''
       }
     }
@@ -157,7 +157,7 @@ pipeline {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
             sh '''
               kubectl rollout status deployment/frontend-radiodiagnosis -n ${K8S_NAMESPACE} --timeout=300s
-              kubectl get pods -n ${K8S_NAMESPACE} -l app=frontend-radiodiagnosis
+              kubectl get pods -n ${K8S_NAMESPACE} -l app=frontend
             '''
           }
         }
