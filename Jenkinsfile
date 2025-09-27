@@ -140,8 +140,7 @@ pipeline {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
 
             sh """
-                  sed -i "s|BUILD_ID_PLACEHOLDER|${env.BUILD_ID}|g; \
-                         config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml
+                  sed -i "s|BUILD_ID_PLACEHOLDER|${env.BUILD_ID}|g" config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml
                 """
 
             sh 'kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml'
@@ -165,8 +164,7 @@ pipeline {
         container('kubectl') {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
             sh '''
-              # kubectl rollout status deployment/frontend-radiodiagnosis -n ${K8S_NAMESPACE} --timeout=300s
-              kubectl rollout status deployment/frontend -n ${K8S_NAMESPACE} --timeout=300s
+              kubectl rollout status deployment/frontend-radiodiagnosis -n ${K8S_NAMESPACE} --timeout=300s
               kubectl get pods -n ${K8S_NAMESPACE} -l app=${LABEL_APP}
             '''
           }
@@ -185,8 +183,7 @@ pipeline {
         withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
           sh '''
             # rollback kalo error
-            # kubectl -n ${K8S_NAMESPACE} rollout undo deployment/frontend-radiodiagnosis || true
-            kubectl -n ${K8S_NAMESPACE} rollout undo deployment/frontend || true
+            kubectl -n ${K8S_NAMESPACE} rollout undo deployment/frontend-radiodiagnosis || true
 
             # Delete manualy
             kubectl -n ${K8S_NAMESPACE} scale ${LABEL_APP} --replicas=0
@@ -195,8 +192,7 @@ pipeline {
 
 
             # check status
-            # kubectl -n ${K8S_NAMESPACE} rollout status deployment/frontend-radiodiagnosis --timeout=2m || echo "Rollback may have failed"
-            kubectl -n ${K8S_NAMESPACE} rollout status deployment/frontend --timeout=2m || echo "Rollback may have failed"
+            kubectl -n ${K8S_NAMESPACE} rollout status deployment/frontend-radiodiagnosis --timeout=2m || echo "Rollback may have failed"
           '''
         }
       }
