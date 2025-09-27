@@ -33,7 +33,7 @@ pipeline {
                 secret:
                   secretName: docker-config
               - name: workspace-volume
-                  emptyDir: {}
+                emptyDir: {}
           """
       }
     }
