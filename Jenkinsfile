@@ -45,6 +45,7 @@ pipeline {
     K8S_NAMESPACE   = 'radiodiagnosis'
     DOCKER_HUB_AUTH = credentials('docker-ardian-read-write')
     LABEL_APP       = 'frontend'
+    DEPLOYMENT_NAME = 'frontend'
     REACT_APP_CLIENT_ID=''
     REACT_APP_CLIENT_SECRET=''
   }
@@ -138,12 +139,19 @@ pipeline {
       steps {
         container('kubectl') {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+            sh '''
+              set -euo pipefail
+              # Replace BUILD_ID_PLACEHOLDER with quoted build id in template labels
+              sed -i "s|BUILD_ID_PLACEHOLDER|\"${BUILD_ID}\"|g" config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml
 
-            sh """
-                  sed -i "s|BUILD_ID_PLACEHOLDER|${env.BUILD_ID}|g" config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml
-                """
+              # Replace image latest with our new tag
+              sed -i "s|docker.io/ardianhermawan17/frontend-radiodiagnosis:latest|${IMAGE}:${BUILD_ID}|g" config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml
 
-            sh 'kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml'
+              # Apply and capture what was applied (name output)
+              kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml -o name > ${WORKSPACE}/applied.txt
+              echo "Applied:"
+              cat ${WORKSPACE}/applied.txt || true
+            '''
           }
         }
       }
@@ -164,38 +172,73 @@ pipeline {
         container('kubectl') {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
             sh '''
-              kubectl rollout status deployment/frontend-radiodiagnosis -n ${K8S_NAMESPACE} --timeout=300s
-              kubectl get pods -n ${K8S_NAMESPACE} -l app=${LABEL_APP}
+              set -euo pipefail
+              kubectl -n ${K8S_NAMESPACE} rollout status deployment/${DEPLOYMENT_NAME} --timeout=300s
+              kubectl -n ${K8S_NAMESPACE} get pods -l app=${LABEL_APP} -o wide
             '''
           }
         }
       }
     }
-  }
 
   post {
     success {
       echo 'Pipeline succeeded! Deployment completed.'
     }
+//     failure {
+//       echo 'Pipeline failed! Please check the logs for errors.'
+//       container('kubectl') {
+//         withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+//           sh '''
+//             # rollback kalo error
+//             kubectl -n ${K8S_NAMESPACE} rollout undo deployment/frontend-radiodiagnosis || true
+//
+//             # Delete manualy
+//             kubectl -n ${K8S_NAMESPACE} scale ${LABEL_APP} --replicas=0
+//             kubectl delete deployment -n ${K8S_NAMESPACE}
+//             kubectl delete service -n ${K8S_NAMESPACE}
+//
+//
+//             # check status
+//             kubectl -n ${K8S_NAMESPACE} rollout status deployment/frontend-radiodiagnosis --timeout=2m || echo "Rollback may have failed"
+//           '''
+//         }
+//       }
+//     }
     failure {
-      echo 'Pipeline failed! Please check the logs for errors.'
-      container('kubectl') {
-        withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-          sh '''
-            # rollback kalo error
-            kubectl -n ${K8S_NAMESPACE} rollout undo deployment/frontend-radiodiagnosis || true
+        echo 'Pipeline failed! Attempting safe rollback/cleanup...'
+        container('kubectl') {
+          withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+            sh '''
+              set -euo pipefail
+              APPLIED_FILE=${WORKSPACE}/applied.txt
 
-            # Delete manualy
-            kubectl -n ${K8S_NAMESPACE} scale ${LABEL_APP} --replicas=0
-            kubectl delete deployment -n ${K8S_NAMESPACE}
-            kubectl delete service -n ${K8S_NAMESPACE}
+              echo "Checking for existing deployment ${DEPLOYMENT_NAME}..."
+              if kubectl -n ${K8S_NAMESPACE} get deployment ${DEPLOYMENT_NAME} >/dev/null 2>&1; then
+                echo "Rolling back deployment ${DEPLOYMENT_NAME} (if previous revision exists)..."
+                kubectl -n ${K8S_NAMESPACE} rollout undo deployment/${DEPLOYMENT_NAME} || echo "rollout undo ok/ignored"
+              else
+                echo "Deployment ${DEPLOYMENT_NAME} does not exist (nothing to rollback)"
+              fi
 
+              # If we have applied.txt, delete only those exact resource names (safe)
+              if [ -f "$APPLIED_FILE" ]; then
+                echo "Deleting applied resources listed in $APPLIED_FILE"
+                while IFS= read -r r || [ -n "$r" ]; do
+                  [ -z "$r" ] && continue
+                  echo "Deleting resource: $r"
+                  # Delete the exact resource name (e.g. deployment.apps/frontend)
+                  kubectl -n ${K8S_NAMESPACE} delete "$r" --ignore-not-found || echo "delete $r failed (ignored)"
+                done < "$APPLIED_FILE"
+              else
+                echo "No applied.txt found; skipping exact-delete step."
+              fi
 
-            # check status
-            kubectl -n ${K8S_NAMESPACE} rollout status deployment/frontend-radiodiagnosis --timeout=2m || echo "Rollback may have failed"
-          '''
+              echo "Final check: deployments in namespace:"
+              kubectl -n ${K8S_NAMESPACE} get deployments -o wide || true
+            '''
+          }
         }
-      }
     }
     always {
       echo 'Pipeline execution completed.'

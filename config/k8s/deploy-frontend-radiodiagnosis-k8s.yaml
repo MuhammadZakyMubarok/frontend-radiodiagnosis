@@ -8,12 +8,11 @@ spec:
   selector:
     matchLabels:
       app: frontend
-      build-id: BUILD_ID_PLACEHOLDER
   template:
     metadata:
       labels:
         app: frontend
-        build-id: BUILD_ID_PLACEHOLDER
+        build-id: "BUILD_ID_PLACEHOLDER"
     spec:
       containers:
         - name: frontend
