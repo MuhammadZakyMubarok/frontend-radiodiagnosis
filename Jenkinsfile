@@ -157,15 +157,15 @@ pipeline {
       }
     }
 
-//     stage('Apply Ingress') {
-//       steps {
-//       container('kubectl') {
-//         withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-//             sh 'kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/ingress-frontend-radiodiagnosis-k8s.yaml'
-//           }
-//         }
-//       }
-//     }
+    stage('Apply Ingress') {
+      steps {
+      container('kubectl') {
+        withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
+            sh 'kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/ingress-frontend-radiodiagnosis-k8s.yaml'
+          }
+        }
+      }
+    }
 
     stage('Verify Deployment') {
       steps {
