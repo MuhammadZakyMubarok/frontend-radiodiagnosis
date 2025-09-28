@@ -36,7 +36,7 @@ pipeline {
                 emptyDir: {}
           """
       }
-    }
+   }
 
   environment {
     REGISTRY        = 'docker.io/ardianhermawan17'
@@ -180,6 +180,7 @@ pipeline {
         }
       }
     }
+  }
 
   post {
     success {
