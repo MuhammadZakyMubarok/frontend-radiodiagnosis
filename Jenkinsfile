@@ -172,7 +172,7 @@ pipeline {
         container('kubectl') {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
             sh '''
-              set -euo pipefail
+              set -eu
               kubectl -n ${K8S_NAMESPACE} rollout status deployment/${DEPLOYMENT_NAME} --timeout=300s
               kubectl -n ${K8S_NAMESPACE} get pods -l app=${LABEL_APP} -o wide
             '''
@@ -191,7 +191,7 @@ pipeline {
         container('kubectl') {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
             sh '''
-              set -euo pipefail
+              set -eu
               APPLIED_FILE=${WORKSPACE}/applied.txt
 
               echo "Checking for existing deployment ${DEPLOYMENT_NAME}..."
