@@ -185,26 +185,6 @@ pipeline {
     success {
       echo 'Pipeline succeeded! Deployment completed.'
     }
-//     failure {
-//       echo 'Pipeline failed! Please check the logs for errors.'
-//       container('kubectl') {
-//         withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
-//           sh '''
-//             # rollback kalo error
-//             kubectl -n ${K8S_NAMESPACE} rollout undo deployment/frontend-radiodiagnosis || true
-//
-//             # Delete manualy
-//             kubectl -n ${K8S_NAMESPACE} scale ${LABEL_APP} --replicas=0
-//             kubectl delete deployment -n ${K8S_NAMESPACE}
-//             kubectl delete service -n ${K8S_NAMESPACE}
-//
-//
-//             # check status
-//             kubectl -n ${K8S_NAMESPACE} rollout status deployment/frontend-radiodiagnosis --timeout=2m || echo "Rollback may have failed"
-//           '''
-//         }
-//       }
-//     }
     failure {
         echo 'Pipeline failed! Attempting safe rollback/cleanup...'
         container('kubectl') {
