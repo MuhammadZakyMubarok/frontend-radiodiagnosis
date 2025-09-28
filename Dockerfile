@@ -25,5 +25,5 @@ CMD ["npm", "start"]
 FROM nginx:alpine AS production
 COPY --from=build /app/build /usr/share/nginx/html
 COPY config/nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE ${PRODUCTION_PORT:-443}
+EXPOSE ${PRODUCTION_PORT:-80}
 CMD ["nginx", "-g", "daemon off;"]

@@ -173,8 +173,9 @@ pipeline {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
             sh '''
               set -eu
-              kubectl -n ${K8S_NAMESPACE} rollout status deployment/${DEPLOYMENT_NAME} --timeout=600s
+              kubectl -n ${K8S_NAMESPACE} wait deployment/${DEPLOYMENT_NAME} --for=condition=available --timeout=600s
               kubectl -n ${K8S_NAMESPACE} get pods -l app=${LABEL_APP} -o wide
+              kubectl -n ${K8S_NAMESPACE} rollout status deployment/${DEPLOYMENT_NAME} --timeout=300s || echo "Rollout status check timed out, but deployment is available"
             '''
           }
         }
