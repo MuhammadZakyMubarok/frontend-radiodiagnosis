@@ -140,14 +140,18 @@ pipeline {
         container('kubectl') {
           withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
             sh '''
-              bash -eo pipefail -c "
-                      sed -i \"s|BUILD_ID_PLACEHOLDER|\\\"${BUILD_ID}\\\"|g\" config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml
-                      sed -i \"s|docker.io/ardianhermawan17/frontend-radiodiagnosis:latest|${IMAGE}:${BUILD_ID}|g\" config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml
-                      kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml -o name > ${WORKSPACE}/applied.txt
-                      echo 'Applied:'
-                      cat ${WORKSPACE}/applied.txt || true
-                    "
-            '''
+                  set -eu
+                  # Replace BUILD_ID_PLACEHOLDER with build id in template labels
+                  sed -i "s|BUILD_ID_PLACEHOLDER|${BUILD_ID}|g" config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml
+
+                  # Replace image latest with our new tag
+                  sed -i "s|docker.io/ardianhermawan17/frontend-radiodiagnosis:latest|${IMAGE}:${BUILD_ID}|g" config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml
+
+                  # Apply and capture what was applied (name output)
+                  kubectl apply -n ${K8S_NAMESPACE} -f config/k8s/deploy-frontend-radiodiagnosis-k8s.yaml -o name > ${WORKSPACE}/applied.txt
+                  echo "Applied:"
+                  cat ${WORKSPACE}/applied.txt || true
+                '''
           }
         }
       }
