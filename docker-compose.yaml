@@ -5,8 +5,10 @@ services:
     container_name: frontend-react
     build:
       context: .
-      dockerfile: Dockerfile.old
+      dockerfile: Dockerfile
       target: production
+      args:
+        NODE_ENV: production
     env_file:
       - .env
     ports:

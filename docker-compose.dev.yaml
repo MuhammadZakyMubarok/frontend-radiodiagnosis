@@ -5,11 +5,15 @@ services:
     container_name: frontend-react
     build:
       context: .
-      dockerfile: Dockerfile.old
+      dockerfile: Dockerfile
       target: development
+      args:
+        NODE_ENV: development
     env_file:
       - .env
+    environment:
+      - HOST=0.0.0.0
     ports:
       - "${DEVELOPMENT_PORT}:${DEVELOPMENT_PORT}"
-    volumes:
-      - .:/app
+#    volumes:
+#      - .:/app

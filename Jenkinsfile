@@ -46,8 +46,6 @@ pipeline {
     DOCKER_HUB_AUTH = credentials('docker-ardian-read-write')
     LABEL_APP       = 'frontend'
     DEPLOYMENT_NAME = 'frontend'
-    REACT_APP_CLIENT_ID=''
-    REACT_APP_CLIENT_SECRET=''
   }
 
   stages {
@@ -62,13 +60,23 @@ pipeline {
         container('kubectl') {
          withKubeConfig([credentialsId: env.KUBECONFIG_CRED]) {
            sh '''
-             # Ambil secret dari kubernetes (cluster)
-             export REACT_APP_CLIENT_ID=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_ID}' | base64 -d)
-             export REACT_APP_CLIENT_SECRET=$(kubectl get secret frontend-radiodiagnosis-env -n ${K8S_NAMESPACE} -o jsonpath='{.data.REACT_APP_CLIENT_SECRET}' | base64 -d)
+              set -eu
+              SECRET_NAME=frontend-radiodiagnosis-env
+              OUT=/tmp/frontend.env
+              : > "$OUT"
 
-             # Save file
-             echo "REACT_APP_CLIENT_ID=\$REACT_APP_CLIENT_ID" > /tmp/secrets.env
-             echo "REACT_APP_CLIENT_SECRET=\$REACT_APP_CLIENT_SECRET" >> /tmp/secrets.env
+              # list ENV
+              keys="REACT_APP_CLIENT_ID REACT_APP_CLIENT_SECRET REACT_APP_BE_URL REACT_APP_DETECTION_URL"
+
+              for k in $keys; do
+                val=$(kubectl -n ${K8S_NAMESPACE} get secret "$SECRET_NAME" -o "jsonpath={.data.${k}}" 2>/dev/null || true)
+                if [ -n "$val" ]; then
+                  # decode and append
+                  echo "${k}=$(echo $val | base64 -d)" >> "$OUT"
+                fi
+              done
+
+              echo "Wrote frontend secret partial to $OUT (if any keys found)"
            '''
            }
         }
@@ -119,8 +127,6 @@ pipeline {
               --local dockerfile=${WORKSPACE} \
               --output type=image,name=${IMAGE}:${BUILD_ID},push=true \
               --output type=image,name=${IMAGE}:latest,push=true \
-              --opt build-arg:REACT_APP_CLIENT_ID=${REACT_APP_CLIENT_ID} \
-              --opt build-arg:REACT_APP_CLIENT_SECRET=${REACT_APP_CLIENT_SECRET} \
               --opt build-arg:CI=false
           '''
         }
