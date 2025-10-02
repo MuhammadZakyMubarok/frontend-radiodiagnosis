@@ -126,7 +126,11 @@ const ViewGambarPanoramikDokter = () => {
       console.log(`Uploading file to: ${apiUrl}/data`);
       await axios.delete(`${apiUrl}/data`);
       const response = await axios.post(`${apiUrl}/data`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+            "Content-Type": "multipart/form-data",
+            "ngrok-skip-browser-warning": "true",
+            "Accept": "application/json"
+        },
       });
       console.log(response.data);
       console.log("Berhasil Deteksi Panoramik");
