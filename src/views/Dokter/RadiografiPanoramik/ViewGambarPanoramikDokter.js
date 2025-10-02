@@ -146,7 +146,9 @@ const ViewGambarPanoramikDokter = () => {
   const deleteData = async () => {
     try {
       await axios.delete(`${apiUrl}/data`, {
-          "ngrok-skip-browser-warning": "true",
+          headers: {
+              "ngrok-skip-browser-warning": "true",
+          }
       });
     } catch (error) {
       console.error(error);
@@ -157,8 +159,10 @@ const ViewGambarPanoramikDokter = () => {
   const getAll = async () => {
     try {
       const response = await axios.get(`${apiUrl}/data`, {
-          "ngrok-skip-browser-warning": "true",
-          "Accept": "application/json"
+          headers: {
+              "ngrok-skip-browser-warning": "true",
+              "Accept": "application/json"
+          }
       });
       const fetchedData = response.data;
       console.log("isi dari fetchdata: ", fetchedData);
