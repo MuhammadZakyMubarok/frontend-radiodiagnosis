@@ -1978,7 +1978,7 @@ const ViewGambarPanoramikDokter = () => {
                                       {/* end Diagram Gigi */}
 
                                       <div className="card shadow-none mt-4 me-2 ms-2 border-0">
-                                        {lubang.length > 0 ? (
+                                        {Array.isArray(lubang) && lubang.length > 0 ? (
                                           <div className="card-body">
                                             <p className="text-xs">
                                               Diagnosa AI Gigi Hilang
