@@ -125,11 +125,13 @@ const ViewGambarPanoramikDokter = () => {
     try {
       console.log(`Uploading file to: ${apiUrl}/data`);
       await axios.delete(`${apiUrl}/data`, {
-          headers: { "ngrok-skip-browser-warning": "true" }
+          headers: {
+              // "ngrok-skip-browser-warning": "true"
+          }
       });
       const response = await axios.post(`${apiUrl}/data`, formData, {
         headers: {
-            "ngrok-skip-browser-warning": "true",
+            // "ngrok-skip-browser-warning": "true",
             "Accept": "application/json"
         },
       });
@@ -147,7 +149,7 @@ const ViewGambarPanoramikDokter = () => {
     try {
       await axios.delete(`${apiUrl}/data`, {
           headers: {
-              "ngrok-skip-browser-warning": "true",
+              // "ngrok-skip-browser-warning": "true",
           }
       });
     } catch (error) {
@@ -160,7 +162,7 @@ const ViewGambarPanoramikDokter = () => {
     try {
       const response = await axios.get(`${apiUrl}/data`, {
           headers: {
-              "ngrok-skip-browser-warning": "true",
+              // "ngrok-skip-browser-warning": "true",
               "Accept": "application/json"
           }
       });
