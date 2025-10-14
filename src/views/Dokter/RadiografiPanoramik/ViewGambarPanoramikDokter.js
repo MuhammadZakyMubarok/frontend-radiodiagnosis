@@ -1,12 +1,13 @@
 import axios from "axios";
-import { React, useState, useEffect, useRef } from "react";
+import {React, useEffect, useRef, useState} from "react";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import InterpretasiManual from "../../../component/Modal/InterpretasiManual";
-import VerifiedNo from "../../../component/Modal/VerifiedNo";
+import ConfirmDiagnosaModal from "../../../component/Modal/ConfirmDiagnosaModal";
+import VerifiedDiagnosaModal from "../../../component/Modal/VerifiedDiagnosaModal";
 import VerifiedYes from "../../../component/Modal/VerifiedYes";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
-import { baseURL, apiUrl } from "../../../routes/Config";
-import { useParams } from "react-router-dom";
+import {apiUrl, baseURL} from "../../../routes/Config";
+import {useParams} from "react-router-dom";
 import WithAuthorization from "../../../utils/auth";
 import VerifiedResult from "../../../component/Modal/VerifiedResult";
 import ButtonVerified from "../../../component/Button/ButtonVerified";
@@ -15,8 +16,23 @@ import StatusUnverified from "../../../component/Alerts/StatusUnverified";
 import StatusOngoing from "../../../component/Alerts/StatusOngoing";
 import StatusVerified from "../../../component/Alerts/StatusVerified";
 import FinalisasiData from "../../../component/Modal/FinalisasiData";
+// Material UI
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import {Alert, Button} from "@mui/material";
+import Box from '@mui/material/Box';
+import Snackbar from '@mui/material/Snackbar';
+// Css
 import "./styleOdontogram.css";
 import "../../Responsive/responsive.css";
+// Icon
+import DeleteIcon from '@mui/icons-material/Delete';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
+import DescriptionIcon from '@mui/icons-material/Description';
+// Helper
+import {insertInOrder, toNum} from "../../../utils/helper";
+
 
 const ViewGambarPanoramikDokter = () => {
   const auth = WithAuthorization(["doctor"]);
@@ -36,6 +52,8 @@ const ViewGambarPanoramikDokter = () => {
   const [odontogramUp, setOdontogramUp] = useState([]);
   const [odontogramDown, setOdontogramDown] = useState([]);
   const [lubang, setLubang] = useState([]);
+  const [problematicTeeth, setProblematicTeeth] = useState([]);
+  // data for problematicTeeth {toothId: int, isManual:bool, isVerified: bool, prediction: string, verificator_note: string (ini dibuat yang non-manual/AI)}
   const [isSquare, setIsSquare] = useState(false);
   const [overlay, setOverlay] = useState(false);
   const [showImages, setShowImages] = useState(false); // State to manage visibility
@@ -48,39 +66,25 @@ const ViewGambarPanoramikDokter = () => {
 
   const [activePopover, setActivePopover] = useState(null);
   const [activeCheckbox, setActiveCheckbox] = useState(null);
-  const containerRef = useRef(null);
+  const [openConfirmDiagnosaModal, setOpenConfirmDiagnosaModal] = useState(false)
+  const [isOpenVerifiedDiagnosaModal, setIsOpenVerifiedDiagnosaModal]= useState(false)
+  const [isOpenModalManualDiagnose, setIsModalManualDiagnose] = useState(false)
+  const [isOpenFinalisasiDataModal, setIsOpenFinalisasiDataModal] = useState(false)
+  const [selectedDiagnosa, setSelectedDiagnosa] = useState({ })
+  const [submitAlert, setSubmitAlert] = useState({
+      open: false,
+      message: "",
+      severity: "info" // "success" | "error" | "warning" | "info"
+  });
 
-  useEffect(() => {
-    axios
-      .get(`${baseURL}/radiographics/detail/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        setData(response.data.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const containerRef = useRef(null);
 
-    axios
-      .get(`${baseURL}/users/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        if (response.data.data) {
-          setDoctor(response.data.data);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
+    useEffect(() => {
+        loadAllData();
+    }, [id, token]);
 
-  useEffect(() => {
+
+    useEffect(() => {
     let numbers = [];
 
     data.diagnoses?.map((diagnose) => {
@@ -89,61 +93,238 @@ const ViewGambarPanoramikDokter = () => {
     setTeethNumber(numbers);
   }, [data]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setActiveCheckbox(null);
-        setActivePopover(null);
-      }
+    useEffect(() => {
+        console.log('problematicTeeth now:', problematicTeeth);
+    }, [problematicTeeth]);
+
+    useEffect(() => {
+        console.log('data now:', data);
+    }, [data]);
+
+    const mapServerDiagToProblematic = (diag) => {
+        const toothNumber = Number(diag?.tooth_number ?? diag?.toothId);
+        return {
+            toothId: Number.isFinite(toothNumber) ? toothNumber : null,
+            isManual: !!diag?.manual_diagnosis,
+            isVerified: !!(diag?.is_corerct === 1 || diag?.is_verified === 1),
+            prediction: diag?.manual_diagnosis ?? diag?.system_diagnosis ?? "Gigi Hilang",
+            verificator_note: diag?.verificator_note ?? null
+        };
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    const loadAllData = async () => {
+        try {
+            const [detailResp, detectionResp] = await Promise.all([
+                axios.get(`${baseURL}/radiographics/detail/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${apiUrl}/data`, { headers: { Accept: "application/json" } })
+            ]);
 
-  useEffect(() => {
-    getAll();
-  }, []);
+            const payload = detailResp?.data?.data ?? {};
+            setData(payload);
 
+            const serverDiagnoses = Array.isArray(payload.diagnoses) ? payload.diagnoses.map(mapServerDiagToProblematic).filter(d => d.toothId != null) : [];
 
+            const fetchedData = detectionResp?.data ?? {};
+            const preds = fetchedData?.predictions ?? {};
+            const rawMissing = Array.isArray(preds.missing_teeth) ? preds.missing_teeth : [];
+            const uniqueMissing = Array.from(new Set(rawMissing.map(n => Number(n)).filter(n => !Number.isNaN(n))));
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+            const serverIds = new Set(serverDiagnoses.map(d => d.toothId));
+            const missingProblems = uniqueMissing
+                .filter(n => !serverIds.has(n))
+                .map(n => ({
+                    toothId: n,
+                    isManual: false,
+                    isVerified: false,
+                    prediction: "Gigi Hilang",
+                    verificator_note: ""
+                }));
 
-    console.log(id)
-    console.log(data)
-    const fileResponse = await axios.get(
-      `${baseURL + data.panoramik_picture}`,
-      { responseType: "blob" }
-    );
-    let formData = new FormData();
-    formData.append('nama', data.fullname);
-    formData.append('rekam_medik', data.medic_number);
-    formData.append("file_gambar", fileResponse.data, "odontogram.jpg");
-    setOverlay(true);
+            const mergedProblems = [...serverDiagnoses, ...missingProblems];
 
-    try {
-      console.log(`Uploading file to: ${apiUrl}/data`);
-      await axios.delete(`${apiUrl}/data`, {
-          headers: {
-              // "ngrok-skip-browser-warning": "true"
-          }
-      });
-      const response = await axios.post(`${apiUrl}/data`, formData, {
-        headers: {
-            // "ngrok-skip-browser-warning": "true",
-            "Accept": "application/json"
-        },
-      });
-      console.log(response.data);
-      console.log("Berhasil Deteksi Panoramik");
-      getAll();
-    } catch (error) {
-      console.error(error);
-    }
-    setOverlay(false);
-    setComponentKey(componentKey + 1);
+            setProblematicTeeth(mergedProblems);
+
+            if (Array.isArray(preds.show_odontogram) && preds.show_odontogram.length > 0) {
+                const upperTeeth = preds.show_odontogram
+                    .filter((it) => customOrderUp.includes(Number(it.number)))
+                    .sort((a, b) => customOrderUp.indexOf(Number(a.number)) - customOrderUp.indexOf(Number(b.number)));
+                const lowerTeeth = preds.show_odontogram
+                    .filter((it) => customOrderDown.includes(Number(it.number)))
+                    .sort((a, b) => customOrderDown.indexOf(Number(a.number)) - customOrderDown.indexOf(Number(b.number)));
+
+                setOdontogramUp(upperTeeth);
+                setOdontogramDown(lowerTeeth);
+            } else {
+                setOdontogramUp([]);
+                setOdontogramDown([]);
+            }
+
+            setOdontogramImage(fetchedData);
+            setLubang(uniqueMissing);
+
+        } catch (err) {
+            console.error("loadAllData error:", err);
+            // fallbacks
+            setOdontogramUp([]);
+            setOdontogramDown([]);
+            setOdontogramImage({});
+            setLubang([]);
+            setProblematicTeeth([]);
+        } finally {
+            setComponentKey(k => k + 1);
+        }
+    };
+  const handleOpenConfirmDiagnosaModal = (tooth) => {
+      setSelectedDiagnosa(tooth)
+      setOpenConfirmDiagnosaModal(true)
   }
+  const handleCloseConfirmDiagnosaModal = () => {
+      setSelectedDiagnosa({})
+      setOpenConfirmDiagnosaModal(false)
+  }
+
+  const handleOpenManualDiagnosaModal = () => {
+      setSelectedDiagnosa({})
+      setIsModalManualDiagnose(true)
+  }
+
+  const handleCloseManualDiagnosaModal = () => {
+      setSelectedDiagnosa({})
+      setIsModalManualDiagnose(false)
+  }
+
+  const handleOpenVerifiedDiagnosaModal = (tooth) => {
+      setSelectedDiagnosa(tooth)
+      setIsOpenVerifiedDiagnosaModal(true)
+  }
+
+  const handleCloseVerifiedDiagnosaModal = () => {
+      setSelectedDiagnosa({})
+      setIsOpenVerifiedDiagnosaModal(false)
+  }
+
+
+    const handleOdontogramDiagnose = (tooth, isDelete = true) => {
+        if (!tooth) return;
+        const toothIdNum = toNum(tooth.toothId);
+        if (toothIdNum === null) return;
+
+        setProblematicTeeth(prev => {
+            const prevArr = Array.isArray(prev) ? [...prev] : [];
+
+            const idx = prevArr.findIndex(t => toNum(t.toothId) === toothIdNum);
+
+            if (isDelete) {
+                if (idx !== -1) {
+                    prevArr.splice(idx, 1);
+                }
+                return prevArr;
+            }
+
+            const newEntry = {
+                toothId: toothIdNum,
+                isManual: !!tooth.isManual,
+                isVerified: !!tooth.isVerified,
+                prediction: tooth.prediction ?? "",
+                verificator_note: tooth.verificator_note ?? ""
+            };
+
+            if (idx !== -1) {
+                prevArr[idx] = newEntry;
+            } else {
+                prevArr.push(newEntry);
+            }
+            return prevArr;
+        });
+
+        const toothNumber = toothIdNum;
+        const isOdontogramUp = customOrderUp.includes(toothNumber);
+
+        const updateSingleArray = (setter, orderArray) => {
+            setter(prev => {
+                const prevArr = Array.isArray(prev) ? [...prev] : [];
+
+                const idx = prevArr.findIndex(d => toNum(d.number) === toothNumber);
+                const found = idx !== -1 ? prevArr[idx] : null;
+
+                const newObj = {
+                    ...(found || { number: toothNumber }),
+                    accuracy: isDelete ? 0.99 : null,
+                    manualDiagnosis: tooth.prediction ?? (found?.manualDiagnosis ?? null)
+                };
+
+                if (idx !== -1) {
+                    prevArr[idx] = newObj;
+                    return prevArr;
+                }
+
+                return insertInOrder(prevArr, newObj, orderArray);
+            });
+        };
+
+        if (isOdontogramUp) {
+            updateSingleArray(setOdontogramUp, customOrderUp);
+        } else {
+            updateSingleArray(setOdontogramDown, customOrderDown);
+        }
+    };
+
+    const handleFinalisasiAttempt = () => {
+        const problems = Array.isArray(problematicTeeth) ? problematicTeeth : [];
+
+        const unverified = problems.filter(p => p?.isVerified !== true);
+
+        if (unverified.length > 0) {
+            const ids = unverified.map(u => u.toothId ?? u.number ?? "(no-id)").slice(0, 10).join(", ");
+            const more = unverified.length > 10 ? ` +${unverified.length - 10} more` : "";
+            setSubmitAlert({
+                open: true,
+                message: `Terdapat ${unverified.length} gigi yang belum diverifikasi: ${ids}${more}. Silakan verifikasi terlebih dahulu.`,
+                severity: "warning"
+            });
+            return;
+        }
+
+        setIsOpenFinalisasiDataModal(true);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        console.log(id)
+        console.log(data)
+        const fileResponse = await axios.get(
+          `${baseURL + data.panoramik_picture}`,
+          { responseType: "blob" }
+        );
+        let formData = new FormData();
+        formData.append('nama', data.fullname);
+        formData.append('rekam_medik', data.medic_number);
+        formData.append("file_gambar", fileResponse.data, "odontogram.jpg");
+        setOverlay(true);
+
+        try {
+          console.log(`Uploading file to: ${apiUrl}/data`);
+          await axios.delete(`${apiUrl}/data`, {
+              headers: {
+                  // "ngrok-skip-browser-warning": "true"
+              }
+          });
+          const response = await axios.post(`${apiUrl}/data`, formData, {
+            headers: {
+                // "ngrok-skip-browser-warning": "true",
+                "Accept": "application/json"
+            },
+          });
+          console.log(response.data);
+          console.log("Berhasil Deteksi Panoramik");
+          getAllFromDetectionAPI();
+        } catch (error) {
+          console.error(error);
+        }
+        setOverlay(false);
+        setComponentKey(componentKey + 1);
+      }
 
   const deleteData = async () => {
     try {
@@ -158,43 +339,88 @@ const ViewGambarPanoramikDokter = () => {
   };
 
 
-  const getAll = async () => {
-    try {
-      const response = await axios.get(`${apiUrl}/data`, {
-          headers: {
-              // "ngrok-skip-browser-warning": "true",
-              "Accept": "application/json"
-          }
-      });
-      const fetchedData = response.data;
-      console.log("isi dari fetchdata: ", fetchedData);
-      if (fetchedData.predictions?.all?.length > 0 || fetchedData.predictions?.all?.length != "") {
-        if (fetchedData.predictions?.show_odontogram?.length > 0) {
-          const upperTeeth = fetchedData.predictions.show_odontogram
-            .filter((item) => customOrderUp.includes(item.number))
-            .sort((a, b) => customOrderUp.indexOf(a.number) - customOrderUp.indexOf(b.number));
+    const getAllFromDetectionAPI = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/data`, {
+                headers: {
+                    // "ngrok-skip-browser-warning": "true",
+                    "Accept": "application/json"
+                }
+            });
+            const fetchedData = response.data;
+            console.log("isi dari fetchdata: ", fetchedData);
 
-          const lowerTeeth = fetchedData.predictions.show_odontogram
-            .filter((item) => customOrderDown.includes(item.number))
-            .sort((a, b) => customOrderDown.indexOf(a.number) - customOrderDown.indexOf(b.number));
+            const preds = fetchedData?.predictions ?? null;
 
-          setOdontogramUp(upperTeeth);
-          setOdontogramDown(lowerTeeth);
+            if (preds && Array.isArray(preds.all) && preds.all.length > 0) {
+                if (Array.isArray(preds.show_odontogram) && preds.show_odontogram.length > 0) {
+                    const upperTeeth = preds.show_odontogram
+                        .filter((item) => customOrderUp.includes(Number(item.number)))
+                        .sort((a, b) => customOrderUp.indexOf(Number(a.number)) - customOrderUp.indexOf(Number(b.number)));
+
+                    const lowerTeeth = preds.show_odontogram
+                        .filter((item) => customOrderDown.includes(Number(item.number)))
+                        .sort((a, b) => customOrderDown.indexOf(Number(a.number)) - customOrderDown.indexOf(Number(b.number)));
+
+                    setOdontogramUp(upperTeeth);
+                    setOdontogramDown(lowerTeeth);
+                    setOdontogramImage(fetchedData);
+                } else {
+                    setOdontogramUp([]);
+                    setOdontogramDown([]);
+                    setOdontogramImage(fetchedData);
+                }
+
+                const rawMissing = Array.isArray(preds.missing_teeth) ? preds.missing_teeth : [];
+                const uniqueMissing = Array.from(new Set(rawMissing.map(n => Number(n)).filter(n => !Number.isNaN(n))));
+
+                setLubang(uniqueMissing);
+
+                const newProblems = uniqueMissing.map(toothId => ({
+                    toothId: Number(toothId),
+                    isManual: false,
+                    isVerified: false,
+                    prediction: "",
+                    verificator_note: ""
+                }));
+
+                console.log('Setting problematicTeeth (newProblems):', newProblems);
+                setProblematicTeeth(newProblems);
+            } else {
+                // no predictions found
+                setOdontogramUp([]);
+                setOdontogramDown([]);
+                setOdontogramImage({});
+                setLubang([]);
+                setProblematicTeeth([]);
+            }
+        } catch (error) {
+            console.error(error);
+            setOdontogramUp([]);
+            setOdontogramDown([]);
+            setOdontogramImage({});
+            setLubang([]);
+            setProblematicTeeth([]);
+        } finally {
+            setComponentKey(k => k + 1);
         }
-        setOdontogramImage(fetchedData);
-        setLubang(fetchedData.predictions?.missing_teeth);
-      } else {
-        setOdontogramUp([]);
-        setOdontogramDown([]);
-        setOdontogramImage({});
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    setComponentKey(componentKey + 1);
-  };
+    };
 
-  const handleCheckboxClick = (number) => {
+
+    const handleOdontogramToothProblemValue = (tooth_number) => {
+        const toothNum = Number(tooth_number);
+        if (!Array.isArray(problematicTeeth) || problematicTeeth.length === 0) return "";
+        console.log('Problematich teeth number:'+ tooth_number, problematicTeeth)
+        const suspectedTooth = problematicTeeth.find(p => Number(p.toothId) === toothNum);
+        if (!suspectedTooth) return "";
+        if (suspectedTooth.isManual) return suspectedTooth.prediction ?? "";
+        const pred = suspectedTooth.prediction ?? "";
+        const note = suspectedTooth.verificator_note ?? "";
+        return note ? `${pred}, Note:${note}` : pred;
+    }
+
+
+    const handleCheckboxClick = (number) => {
     setActiveCheckbox((prev) => (prev === number ? null : number));
   };
   const togglePopover = (itemId) => {
@@ -346,7 +572,7 @@ const ViewGambarPanoramikDokter = () => {
                                         className="img-fluid border-radius-xl p-2"
                                         src={`${baseURL + data.panoramik_picture}`}
                                       />
-                                      <div className="d-flex">
+                                      <div className={data.status === 2 ? 'd-none': 'd-flex'}>
                                         <button
                                           type="button"
                                           className="btn btn-primary btn-sm ms-auto"
@@ -391,7 +617,7 @@ const ViewGambarPanoramikDokter = () => {
                                         <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
                                           <div className="card-body">
                                             <p className="text-xs p-2 mb-0">
-                                              Odontogram
+                                              Odontogram Ubah dulu su
                                             </p>
                                             <div className="row d-flex">
                                               {/* Gigi Atas - Upper Teeth */}
@@ -404,7 +630,7 @@ const ViewGambarPanoramikDokter = () => {
                                                     {odontogramUp.length > 0 ? (
                                                       odontogramUp.map((item, index) =>
                                                         item.accuracy != null ? (
-                                                          <div key={item.number} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                          <div key={'true-up-' + item.number + '-' + index } className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
                                                             <input
                                                               type="checkbox"
                                                               className="btn-check"
@@ -464,7 +690,7 @@ const ViewGambarPanoramikDokter = () => {
                                                             )}
                                                           </div>
                                                         ) : (
-                                                          <div key={index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                          <div key={'false-up-' + index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
                                                             <input
                                                               type="checkbox"
                                                               className="btn-check"
@@ -484,7 +710,7 @@ const ViewGambarPanoramikDokter = () => {
                                                               <div className="popover-content">
                                                                 <p>Nomor Gigi: {item.number}</p>
                                                                 <div className="mx-1">
-                                                                  Gigi Hilang
+                                                                    {handleOdontogramToothProblemValue(item.number)}
                                                                 </div>
 
                                                               </div>
@@ -494,7 +720,7 @@ const ViewGambarPanoramikDokter = () => {
                                                       )
                                                     ) : (
                                                       customOrderUp.map((item, index) => (
-                                                        <div key={index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                        <div key={'cus-up-' +index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
                                                           <input
                                                             type="checkbox"
                                                             className="btn-check"
@@ -504,7 +730,7 @@ const ViewGambarPanoramikDokter = () => {
                                                             onChange={() => handleCheckboxClick(item.number)}
                                                           />
                                                           <label
-                                                            className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
+                                                            className="btn btn-outline text-xs p-2 flex items-center justify-center"
                                                           >
                                                             {item}
                                                           </label>
@@ -850,7 +1076,7 @@ const ViewGambarPanoramikDokter = () => {
                                                     {odontogramDown.length > 0 ? (
                                                       odontogramDown.map((item, index) =>
                                                         item.accuracy != null ? (
-                                                          <div key={item.number} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                          <div key={'true-down-' + item.number + '-' + index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
                                                             <input
                                                               type="checkbox"
                                                               className="btn-check"
@@ -909,7 +1135,7 @@ const ViewGambarPanoramikDokter = () => {
                                                             )}
                                                           </div>
                                                         ) : (
-                                                          <div key={index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                          <div key={'false-down-' + index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
                                                             <input
                                                               type="checkbox"
                                                               className="btn-check"
@@ -928,7 +1154,7 @@ const ViewGambarPanoramikDokter = () => {
                                                               <div className="popover-content">
                                                                 <p>Nomor Gigi: {item.number}</p>
                                                                 <div className="mx-1" >
-                                                                  Gigi Hilang
+                                                                   {handleOdontogramToothProblemValue(item.number)}
                                                                 </div>
                                                               </div>
                                                             )}
@@ -937,7 +1163,7 @@ const ViewGambarPanoramikDokter = () => {
                                                       )
                                                     ) : (
                                                       customOrderDown.map((item, index) => (
-                                                        <div key={index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef} >
+                                                        <div key={'cus-down-' + index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef} >
                                                           <input
                                                             type="checkbox"
                                                             className="btn-check"
@@ -947,7 +1173,7 @@ const ViewGambarPanoramikDokter = () => {
                                                             onChange={() => handleCheckboxClick(item.number)}
                                                           />
                                                           <label
-                                                            className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
+                                                            className="btn btn-outline text-xs p-2 flex items-center justify-center"
                                                           >
                                                             {item}
                                                           </label>
@@ -964,7 +1190,6 @@ const ViewGambarPanoramikDokter = () => {
                                           </div>
                                         </div>
                                       )}
-
                                       {odontogramImage.gambar && (
                                         <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
                                           <div className="card-body">
@@ -978,17 +1203,23 @@ const ViewGambarPanoramikDokter = () => {
                                                         onClick={toggleImages}
                                                         style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                                                       >
-                                                        <p className="text-xs p-2 mb-0">
-                                                          Gambar Crop Gigi
-                                                        </p>
-                                                        <i className={`mt-3 mb-0 fas fa-chevron-${showImages ? 'up' : 'down'}`} /> {/* Arrow icon */}
+                                                          <Tooltip title="Lihat list crop gigi" placement="top" arrow>
+                                                              <Button fullWidth variant="outlined" endIcon={<ArrowCircleUpIcon
+                                                                  sx={{
+                                                                      transform: !showImages ? 'rotate(180deg)' : 'none',
+                                                                      transition: 'transform 0.2s',
+                                                                  }}
+                                                              />}>
+                                                                  Gambar Crop Gigi
+                                                              </Button>
+                                                          </Tooltip>
                                                       </div>
                                                       <div className={`card-body py-2 dropdown-body ${showImages ? 'show' : ''}`}>
                                                         {/* Odontogram Up */}
                                                         <div className="container-fluid d-flex mb-6 justify-content-center flex-wrap">
                                                           <div className="row no-gutters d-flex justify-content-center">
                                                             {odontogramUp.map((item) => (
-                                                              <div key={item.number} className="col-auto flex-item text-center">
+                                                              <div key={'crop-gigi-up-' + item.number} className="col-auto flex-item text-center">
                                                                 <div className="flex-column-container">
                                                                   {!item.isDuplicate && !item.isMissing ? (
                                                                     Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
@@ -996,7 +1227,7 @@ const ViewGambarPanoramikDokter = () => {
                                                                         <div className="carousel slide">
                                                                           <div className="carousel-inner">
                                                                             {item.urlImage.map((img, i) => (
-                                                                              <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                                                              <div key={'up-url-image-' + i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
                                                                                 <img
                                                                                   className="bg-white"
                                                                                   width="50"
@@ -1052,7 +1283,7 @@ const ViewGambarPanoramikDokter = () => {
                                                         <div className="container-fluid d-flex justify-content-center">
                                                           <div className="row no-gutters d-flex justify-content-center">
                                                             {odontogramDown.map((item) => (
-                                                              <div key={item.number} className="col-auto flex-item text-center">
+                                                              <div key={'crop-gigi-down-' + item.number} className="col-auto flex-item text-center">
                                                                 <div className="mb-2">{item.number}</div>
                                                                 {!item.isDuplicate && !item.isMissing ? (
                                                                   Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
@@ -1060,7 +1291,7 @@ const ViewGambarPanoramikDokter = () => {
                                                                       <div className="carousel slide">
                                                                         <div className="carousel-inner">
                                                                           {item.urlImage.map((img, i) => (
-                                                                            <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                                                            <div key={'down-url-img-' + i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
                                                                               <img
                                                                                 className="bg-white"
                                                                                 width="50"
@@ -1994,25 +2225,66 @@ const ViewGambarPanoramikDokter = () => {
                                       {/* end Diagram Gigi */}
 
                                       <div className="card shadow-none mt-4 me-2 ms-2 border-0">
-                                        {Array.isArray(lubang) && lubang.length > 0 ? (
+                                        {Array.isArray(problematicTeeth) && problematicTeeth.length > 0 ? (
                                           <div className="card-body">
                                             <p className="text-xs">
                                               Diagnosa AI Gigi Hilang
                                             </p>
-                                            {lubang.map((item, index) => (
-                                              <div className="row" key={index}>
+                                            {problematicTeeth.filter(probTooth => !probTooth.isManual).map((tooth, index) => (
+                                              <div className="row" key={'problematic-' + tooth.toothId}>
                                                 <div className="col-2 pt-2">
                                                   <ul className="ps-3">
                                                     <li className="text-xs">
-                                                      Gigi #{item}
+                                                      Gigi #{tooth.toothId}
                                                     </li>
                                                   </ul>
                                                 </div>
                                                 <div className="col-4 ps-0 pt-2">
                                                   <p className="text-xs text-dark font-weight-bold">
-                                                    Gigi Hilang
+                                                      {tooth.prediction}
                                                   </p>
                                                 </div>
+                                                  <div className="col ps-0 pt-2">
+                                                      <Box sx={{
+                                                          display: data.status === 2 ? 'none' : 'flex',
+                                                          justifyContent: 'end'
+                                                      }}>
+                                                          <Box sx={{
+                                                              display: tooth.isVerified ? 'block' : 'none'
+                                                          }}>
+                                                              <Tooltip title={tooth.verificator_note} placement="top" arrow>
+                                                                  <span>
+                                                                      <IconButton
+                                                                          size="small"
+                                                                          aria='Note AI '
+                                                                          disabled
+                                                                      >
+                                                                      <DescriptionIcon  color="warning"/>
+                                                                  </IconButton>
+                                                                  </span>
+                                                              </Tooltip>
+                                                          </Box>
+                                                          <Tooltip title={tooth.isVerified ? 'Sudah diverifikasi' : 'Verifikasi Deteksi'} placement="top" arrow>
+                                                              <span>
+                                                                  <IconButton
+                                                                      onClick={() => handleOpenVerifiedDiagnosaModal(tooth)}
+                                                                      size="small"
+                                                                      aria='Verif Button'
+                                                                      disabled={tooth.isVerified}
+                                                                  >
+                                                                      <VerifiedIcon  color={tooth.isVerified ? 'default' : 'primary'}/>
+                                                                  </IconButton>
+                                                              </span>
+                                                          </Tooltip>
+                                                          <Tooltip title="Hapus Deteksi" placement="top" arrow>
+                                                              <IconButton
+                                                                  onClick={() => handleOpenConfirmDiagnosaModal(tooth)}
+                                                                  size="small" aria='Delete Button'>
+                                                                  <DeleteIcon color="error"/>
+                                                              </IconButton>
+                                                          </Tooltip>
+                                                      </Box>
+                                                  </div>
                                                 <hr
                                                   style={{
                                                     height: "1px",
@@ -2030,11 +2302,27 @@ const ViewGambarPanoramikDokter = () => {
                                           <div></div>
                                         )}
 
+                                          <ConfirmDiagnosaModal
+                                              isOpen={openConfirmDiagnosaModal}
+                                              radiographicId={data.history_id}
+                                              tooth={selectedDiagnosa}
+                                              handleOdontogramDiagnose={handleOdontogramDiagnose}
+                                              handleClose={handleCloseConfirmDiagnosaModal} />
+
+                                          <VerifiedDiagnosaModal
+                                              isOpen={isOpenVerifiedDiagnosaModal}
+                                              radiographicId={data.history_id}
+                                              tooth={selectedDiagnosa}
+                                              handleOdontogramDiagnose={handleOdontogramDiagnose}
+                                              handleClose={handleCloseVerifiedDiagnosaModal} />
+
                                         <div className="card-body">
                                           <p className="text-xs">
                                             Diagnosa Gigi Hilang
                                           </p>
-                                          {data.diagnoses?.map((diagnose) => {
+                                          {/*{data.diagnoses?.map((diagnose) => {*/}
+                                            {console.log('diagnoose data', data)}
+                                          {/*{data.diagnoses?.map((diagnose) => {
                                             if (diagnose?.system_diagnosis) {
                                               return (
                                                 <div className="row">
@@ -2079,95 +2367,80 @@ const ViewGambarPanoramikDokter = () => {
                                                 </div>
                                               );
                                             }
-                                          })}
+                                          })}*/}
 
-                                          <div className="row">
+                                          <div className="row mb-4">
                                             <div className="col-12">
                                               {/* <p className="text-xxs text-secondary font-weight-bold">
                                                 Radiodiagnosis Verifikator
                                               </p> */}
-                                              {data.diagnoses?.map(
+                                              {problematicTeeth.filter(probTooth => probTooth.isManual).map(
                                                 (diagnose) => {
-                                                  if (
-                                                    diagnose?.system_diagnosis ||
-                                                    diagnose?.manual_diagnosis
-                                                  ) {
                                                     return (
-                                                      <div className="row">
-                                                        <div className="col-2">
-                                                          <ul className="ps-3">
-                                                            <li className="text-xs">
-                                                              Gigi #
-                                                              {
-                                                                diagnose?.tooth_number
-                                                              }
-                                                            </li>
-                                                          </ul>
+                                                        <div className="row">
+                                                            <div className="col-2">
+                                                                <ul className="ps-3">
+                                                                    <li className="text-xs">
+                                                                        Gigi #
+                                                                        {
+                                                                            diagnose.toothId
+                                                                        }
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                            <div className="col-4 ps-0">
+                                                                <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
+                                                                    {diagnose.prediction}
+                                                                </p>
+                                                            </div>
+                                                            <div className="col ps-0">
+                                                                <Box sx={{
+                                                                    display: data.status === 2 ? 'none' : 'flex',
+                                                                    justifyContent: 'end'
+                                                                }}>
+                                                                    <Tooltip title="Hapus Deteksi" placement="top" arrow>
+                                                                        <IconButton
+                                                                            onClick={() => handleOpenConfirmDiagnosaModal(diagnose)}
+                                                                            size="small" aria='Delete Button'>
+                                                                            <DeleteIcon color="error"/>
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                </Box>
+                                                            </div>
+                                                            <hr
+                                                                style={{
+                                                                    height: "1px",
+                                                                    borderWidth: "0px",
+                                                                    color: "gray",
+                                                                    backgroundColor: "gray",
+                                                                    marginBottom: "0px",
+                                                                    marginTop: "0px",
+                                                                }}
+                                                            />
                                                         </div>
-                                                        <div className="col-10 ps-0">
-                                                          {diagnose.verificator_diagnosis ? (
-                                                            <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
-                                                              {diagnose.verificator_diagnosis ===
-                                                                "dan lain-lain"
-                                                                ? diagnose.verificator_note +
-                                                                (diagnose.manual_diagnosis
-                                                                  ? ", " +
-                                                                  diagnose.manual_diagnosis
-                                                                  : "")
-                                                                : diagnose.verificator_diagnosis
-                                                                  ? diagnose.verificator_diagnosis +
-                                                                  (diagnose.manual_diagnosis
-                                                                    ? ", " +
-                                                                    diagnose.manual_diagnosis
-                                                                    : "")
-                                                                  : diagnose.manual_diagnosis}
-                                                            </p>
-                                                          ) : (
-                                                            <p className="text-xs text-dark font-weight-bold mb-0 pb-2">
-                                                              {diagnose.system_diagnosis
-                                                                ? diagnose.system_diagnosis +
-                                                                (diagnose.manual_diagnosis
-                                                                  ? ", " +
-                                                                  diagnose.manual_diagnosis
-                                                                  : "")
-                                                                : diagnose.manual_diagnosis}
-                                                            </p>
-                                                          )}
-                                                          <hr
-                                                            style={{
-                                                              height: "1px",
-                                                              borderWidth:
-                                                                "0 px",
-                                                              color: "gray",
-                                                              backgroundColor:
-                                                                "gray",
-                                                              marginBottom:
-                                                                "0 px",
-                                                              marginTop: "0 px",
-                                                            }}
-                                                          />
-                                                        </div>
-                                                      </div>
                                                     );
-                                                  }
                                                 }
                                               )}
                                             </div>
                                           </div>
-                                          <div className="d-grid">
+
+                                          <div className={data.status === 2 ? 'd-none': 'd-grid'}>
                                             <button
                                               className="btn btn-sm btn-primary mt-2 mb-4"
                                               type="button"
-                                              data-bs-toggle="modal"
-                                              data-bs-target="#exampleModal3"
-                                              disabled={
-                                                data.status === 2 ? true : false
-                                              }
+                                              onClick={() => handleOpenManualDiagnosaModal()}
                                             >
                                               Tambah Diagnosa
                                             </button>
                                             <InterpretasiManual
+                                              customOrderUp={customOrderUp}
+                                              customOrderDown={customOrderDown}
+                                              isOpenModalManualDiagnose={isOpenModalManualDiagnose}
                                               radiographicId={data.history_id}
+                                              tooth={selectedDiagnosa}
+                                              problematicTeeth={problematicTeeth}
+                                              handleOdontogramDiagnose={handleOdontogramDiagnose}
+                                              handleCloseManualDiagnosaModal={handleCloseManualDiagnosaModal}
                                             />
                                           </div>
                                           <p className="text-xs">
@@ -2181,10 +2454,10 @@ const ViewGambarPanoramikDokter = () => {
                                                   id="catatanpasien"
                                                   name="catatanpasien"
                                                   placeholder={
-                                                    data.status === 2 && data.catatan_pasien == null ? "Catatan Pasien" : ""
+                                                    data.status === 2 && catatanPasien == null ? "Catatan Pasien" : ""
                                                   }
                                                   rows="5"
-                                                  value={data.catatan_pasien == null ? catatanPasien : data.catatan_pasien}
+                                                  value={catatanPasien}
                                                   onChange={(e) => setCatatanPasien(e.target.value)}
                                                   disabled={
                                                     data.status === 2 ? true : false
@@ -2204,21 +2477,23 @@ const ViewGambarPanoramikDokter = () => {
                                               marginStart: "0px",
                                             }}
                                           />
-                                          <div className="d-grid">
+                                          <div className={data.status === 2 ? 'd-none': 'd-grid'}>
                                             <button
                                               className="btn btn-sm btn-success mt-4 mb-2"
+                                              onClick={handleFinalisasiAttempt}
                                               type="button"
-                                              data-bs-toggle="modal"
-                                              data-bs-target="#finalisasiModal"
-                                              disabled={
-                                                data.status === 2 ? true : false
-                                              }
                                             >
                                               Finalisasi Data
                                             </button>
                                             <FinalisasiData
-                                              radiographicId={data.history_id}
-                                              catatanPasien={catatanPasien}
+                                                open={isOpenFinalisasiDataModal}
+                                                onClose={() => setIsOpenFinalisasiDataModal(false)}
+                                                radiographicId={data.history_id}
+                                                catatanPasien={catatanPasien}
+                                                problematicTeeth={problematicTeeth}
+                                                onSuccess={() => {
+                                                    // getAll()
+                                                }}
                                             />
                                           </div>
                                         </div>
@@ -2238,6 +2513,20 @@ const ViewGambarPanoramikDokter = () => {
             </div>
           </main>
         </body>
+          <Snackbar
+              open={submitAlert.open}
+              autoHideDuration={6000}
+              onClose={() => setSubmitAlert(prev => ({ ...prev, open: false }))}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          >
+              <Alert
+                  onClose={() => setSubmitAlert(prev => ({ ...prev, open: false }))}
+                  severity={submitAlert.severity}
+                  sx={{ width: "100%" }}
+              >
+                  {submitAlert.message}
+              </Alert>
+          </Snackbar>
       </div >
     );
   } else {

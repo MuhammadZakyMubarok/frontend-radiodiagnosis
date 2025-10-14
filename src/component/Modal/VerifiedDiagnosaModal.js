@@ -1,72 +1,55 @@
-import axios from "axios";
-import React, { useEffect, useState, useCallback } from "react";
-import { baseURL } from "../../routes/Config";
 import {
-    Alert,
-    AlertTitle,
-    Box,
-    Button,
+    Alert, AlertTitle, Box,
+    Button, Collapse,
     Dialog,
     DialogActions,
     DialogContent,
+    DialogContentText,
     DialogTitle,
-    IconButton,
-    Snackbar,
-    TextField,
-    Typography,
-    Collapse,
-    useTheme,
-    useMediaQuery
+    IconButton, Snackbar, TextField,
+    Typography, useMediaQuery, useTheme
 } from "@mui/material";
+import * as React from "react";
+import {useCallback, useEffect, useState} from "react";
+import axios from "axios";
+import {baseURL} from "../../routes/Config";
 import {
+    CheckCircle as SuccessIcon,
     Close as CloseIcon,
     Error as ErrorIcon,
-    Warning as WarningIcon,
     Info as InfoIcon,
-    CheckCircle as SuccessIcon
+    Warning as WarningIcon
 } from "@mui/icons-material";
 
-const InterpretasiManual = ({
-                                isOpenModalManualDiagnose,
-                                handleCloseManualDiagnosaModal,
-                                radiographicId,
-                                tooth,
-                                problematicTeeth,
-                                handleOdontogramDiagnose,
-                                customOrderUp,
-                                customOrderDown
-}) => {
+const VerifiedDiagnosaModal = ({isOpen, handleClose, radiographicId, tooth, handleOdontogramDiagnose}) => {
+    const theme = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+
+    const [isLoading, setIsLoading] = useState(false);
+
     const [data, setData] = useState({
         toothNumber: "",
-        manualDiagnosis: "",
+        verificator_note: "",
     });
-
     const [error, setError] = useState({
         open: false,
         message: "",
         severity: "error", // error, warning, info, success
         title: ""
     });
-
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: "",
         severity: "error"
     });
-
     const [fieldErrors, setFieldErrors] = useState({
         toothNumber: "",
-        manualDiagnosis: ""
+        verificator_note: ""
     });
-
-    const [isLoading, setIsLoading] = useState(false);
-    const token = sessionStorage.getItem("token");
-    const theme = useTheme();
-    const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
     const clearError = useCallback(() => {
         setError(prev => ({ ...prev, open: false, message: "", title: "" }));
-        setFieldErrors({ toothNumber: "", manualDiagnosis: "" });
+        setFieldErrors({ toothNumber: "", verificator_note: "" });
     }, []);
 
     const showError = useCallback((message, title = "Error", severity = "error") => {
@@ -86,52 +69,33 @@ const InterpretasiManual = ({
         });
     }, []);
 
+    // Use Effect
     useEffect(() => {
-        if (tooth.toothId) {
-            setData({
-                toothNumber: tooth.toothId,
-                manualDiagnosis: tooth.prediction
-            });
-        } else {
-            setData({
-                toothNumber: "",
-                manualDiagnosis: "",
-            });
-        }
+        const toothNumber = tooth?.toothId ?? "";
+        const note = tooth?.verificator_note ?? "";
+
+        setData({
+            toothNumber: toothNumber === null ? "" : String(toothNumber),
+            verificator_note: note == null ? "" : String(note),
+        });
+
         clearError();
     }, [tooth, clearError]);
+
+    // Validated
 
     const validateField = useCallback((name, value) => {
         let error = "";
 
-        switch (name) {
-            case "toothNumber":
-                if (!value) {
-                    error = "Nomor gigi harus diisi";
-                } else {
-                    const num = parseInt(value, 10);
-                    if (isNaN(num)) {
-                        error = "Nomor gigi harus berupa angka";
-                    } else if (
-                        !customOrderUp.includes(num) &&
-                        !customOrderDown.includes(num)
-                    ) {
-                        error = "Nomor gigi harus antara " +
-                            "(gigi atas) 18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28 " +
-                            "atau (gigi bawah) 48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38";
-                    }
-                }
-                break;
-            case "manualDiagnosis":
-                if (!value.trim()) {
-                    error = "Diagnosa harus diisi";
-                } else if (value.trim().length < 3) {
-                    error = "Diagnosa minimal 3 karakter";
-                }
-                break;
-            default:
-                break;
-        }
+        // switch (name) {
+        //     case "verificator_note":
+        //         if (value.trim().length < 3) {
+        //             error = "Diagnosa prediction AI minimal 3 karakter";
+        //         }
+        //         break;
+        //     default:
+        //         break;
+        // }
 
         return error;
     }, []);
@@ -154,15 +118,9 @@ const InterpretasiManual = ({
         const newFieldErrors = {};
         let isValid = true;
 
-        const toothNumberError = validateField("toothNumber", data.toothNumber);
-        if (toothNumberError) {
-            newFieldErrors.toothNumber = toothNumberError;
-            isValid = false;
-        }
-
-        const manualDiagnosisError = validateField("manualDiagnosis", data.manualDiagnosis);
-        if (manualDiagnosisError) {
-            newFieldErrors.manualDiagnosis = manualDiagnosisError;
+        const verificatorNoteError = validateField("verificator_note", data.verificator_note);
+        if (verificatorNoteError) {
+            newFieldErrors.verificator_note = verificatorNoteError;
             isValid = false;
         }
 
@@ -179,36 +137,20 @@ const InterpretasiManual = ({
             return;
         }
 
-        const isToothIdDuplicated = problematicTeeth.find(
-            probTeeth => probTeeth.toothId === Number(data.toothNumber)
-        );
-
-        if (isToothIdDuplicated) {
-            showError(
-                "Terdeteksi duplikasi pada nomor gigi! Silahkan hapus gigi yang terduplikasi dahulu.",
-                "Duplikasi Data",
-                "warning"
-            );
-            return;
-        }
-
-        if (!token) {
-            showError("Token tidak ditemukan. Silakan login ulang.", "Autentikasi Gagal");
-            return;
-        }
 
         setIsLoading(true);
 
         try {
             handleOdontogramDiagnose({
                 toothId: data.toothNumber,
-                prediction: data.manualDiagnosis,
-                isManual: true,
+                prediction: tooth.prediction,
+                isManual: false,
                 isVerified: true,
-                verificator_note: ''
+                verificator_note: data.verificator_note
             }, false);
 
             showSnackbar("Data berhasil disimpan!", "success");
+
 
         } catch (err) {
             console.error("Error occurred:", err);
@@ -216,42 +158,7 @@ const InterpretasiManual = ({
             let errorMessage = "Terjadi kesalahan yang tidak diketahui";
             let errorTitle = "Error";
 
-            if (err.response) {
-                const status = err.response.status;
-                const responseData = err.response.data;
-
-                switch (status) {
-                    case 400:
-                        errorTitle = "Bad Request";
-                        errorMessage = responseData.message || "Data yang dikirim tidak valid";
-                        break;
-                    case 401:
-                        errorTitle = "Unauthorized";
-                        errorMessage = "Sesi Anda telah berakhir. Silakan login ulang.";
-                        break;
-                    case 403:
-                        errorTitle = "Forbidden";
-                        errorMessage = "Anda tidak memiliki izin untuk melakukan aksi ini.";
-                        break;
-                    case 404:
-                        errorTitle = "Not Found";
-                        errorMessage = "Data tidak ditemukan.";
-                        break;
-                    case 500:
-                        errorTitle = "Server Error";
-                        errorMessage = "Terjadi kesalahan pada server. Silakan coba lagi nanti.";
-                        break;
-                    default:
-                        errorTitle = `Error ${status}`;
-                        errorMessage = responseData.message || "Gagal mengirim data";
-                }
-
-                if (responseData.message && responseData.message.includes('syntax error')) {
-                    errorTitle = "Database Error";
-                    errorMessage = "Terjadi kesalahan pada database. Silakan hubungi administrator.";
-                }
-
-            } else if (err.request) {
+            if (err.request) {
                 errorTitle = "Network Error";
                 errorMessage = "Tidak ada respons dari server. Periksa koneksi internet Anda.";
             } else {
@@ -262,9 +169,9 @@ const InterpretasiManual = ({
             showError(errorMessage, errorTitle);
         } finally {
             setIsLoading(false);
-            handleCloseManualDiagnosaModal()
+            handleClose()
         }
-    }, [data, problematicTeeth, token, radiographicId, handleOdontogramDiagnose, clearError, showError, showSnackbar, validateForm]);
+    }, [data, radiographicId, handleOdontogramDiagnose, clearError, showError, showSnackbar, validateForm]);
 
     const getErrorIcon = (severity) => {
         switch (severity) {
@@ -280,20 +187,16 @@ const InterpretasiManual = ({
                 return <ErrorIcon />;
         }
     };
-
     return (
         <Box>
             <Dialog
-                open={isOpenModalManualDiagnose}
-                onClose={() => {
-                    clearError()
-                    handleCloseManualDiagnosaModal()
-                }}
+                open={isOpen}
+                onClose={handleClose}
                 fullScreen={fullScreen}
                 maxWidth="sm"
                 fullWidth
             >
-                <DialogTitle>
+                <DialogTitle variant="div">
                     <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
                         Interpretasi Manual
                     </Typography>
@@ -301,7 +204,7 @@ const InterpretasiManual = ({
                         aria-label="close"
                         onClick={() => {
                             clearError()
-                            handleCloseManualDiagnosaModal()
+                            handleClose()
                         }}
                         sx={{
                             position: 'absolute',
@@ -313,7 +216,6 @@ const InterpretasiManual = ({
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
-
                 <DialogContent>
                     <Collapse in={error.open}>
                         <Alert
@@ -347,30 +249,27 @@ const InterpretasiManual = ({
                                     id="toothNumber"
                                     name="toothNumber"
                                     placeholder="No. gigi"
-                                    value={data.toothNumber}
-                                    onChange={handleChange}
-                                    error={!!fieldErrors.toothNumber}
-                                    helperText={fieldErrors.toothNumber}
+                                    value={data.toothNumber ?? ""}
                                     size="small"
                                     type="number"
                                     inputProps={{ min: 1, max: 32 }}
-                                    disabled={isLoading}
+                                    disabled={true}
                                 />
                             </Box>
 
                             <Box sx={{ flex: 1 }}>
                                 <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                                    Tulis Diagnosa
+                                    Tulis Diagnosa pendamping (opsional)
                                 </Typography>
                                 <TextField
                                     fullWidth
-                                    id="manualDiagnosis"
-                                    name="manualDiagnosis"
+                                    id="verificator_note"
+                                    name="verificator_note"
                                     placeholder="Tulis nama penyakit"
-                                    value={data.manualDiagnosis}
+                                    value={data.verificator_note ?? ''}
                                     onChange={handleChange}
-                                    error={!!fieldErrors.manualDiagnosis}
-                                    helperText={fieldErrors.manualDiagnosis}
+                                    error={!!fieldErrors.verificator_note}
+                                    helperText={fieldErrors.verificator_note}
                                     size="small"
                                     disabled={isLoading}
                                 />
@@ -383,7 +282,7 @@ const InterpretasiManual = ({
                     <Button
                         onClick={() => {
                             clearError()
-                            handleCloseManualDiagnosaModal()
+                            handleClose()
                         }}
                         variant="outlined"
                         size="small"
@@ -398,7 +297,7 @@ const InterpretasiManual = ({
                         disabled={isLoading}
                         sx={{ minWidth: 80 }}
                     >
-                        {isLoading ? "Menyimpan..." : "Selesai"}
+                        {isLoading ? "Memverifikasi..." : "Verifikasi"}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -418,7 +317,7 @@ const InterpretasiManual = ({
                 </Alert>
             </Snackbar>
         </Box>
-    );
-};
+    )
+}
 
-export default InterpretasiManual;
+export default VerifiedDiagnosaModal

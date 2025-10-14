@@ -1,115 +1,211 @@
+import React, { useState } from "react";
 import axios from "axios";
-import { React, useState } from "react";
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    Typography,
+    CircularProgress,
+    Alert,
+    IconButton,
+    Box
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { baseURL } from "../../routes/Config";
-// import { useNavigate } from "react-router-dom";
 
-const FinalisasiData = ({ radiographicId, catatanPasien }) => {
-    // const navigate = useNavigate();
-    const [error, setError] = useState(""); // State untuk menampung pesan error
-    const token = sessionStorage.getItem("token");
+const FinalisasiData = ({
+                            open = false,
+                            onClose = () => {},
+                            onSuccess = null,
+                            radiographicId,
+                            catatanPasien,
+                            problematicTeeth = []
+                        }) => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const buildParsedData = () => {
+        if (!Array.isArray(problematicTeeth)) return [];
 
-        // Cek apakah token valid
+        return problematicTeeth
+            .filter(item => item && item.isVerified === true)
+            .map(item => {
+                const toothId = item.toothId ?? item.number ?? null;
+                if (item.isManual) {
+                    return {
+                        tooth_number: toothId,
+                        system_diagnosis: null,
+                        is_corerct: 1,
+                        verificator_note: item.verificator_note ?? "",
+                        manual_diagnosis: null
+                    };
+                } else {
+                    return {
+                        tooth_number: toothId,
+                        system_diagnosis: null,
+                        is_corerct: 1,
+                        verificator_note: null,
+                        manual_diagnosis: item.prediction ?? ""
+                    };
+                }
+            })
+            .filter(Boolean);
+    };
+
+    const handleConfirm = async () => {
+        setError("");
+        const token = sessionStorage.getItem("token");
         if (!token) {
             setError("Token tidak ditemukan. Silakan login ulang.");
             return;
         }
 
-        // Membuat request ke API
-        axios
-            .put(
-                `${baseURL}/radiographics/edit/${radiographicId}/catatan`,
-                catatanPasien,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
-            .then((res) => {
-                console.log('Data finalized successfully:', res.data);
-                window.location.href = "/dokter-radiografi-panoramik";
-            })
-            .catch((err) => {
-                console.error('Error finalizing data:', err);
-                setError("There was an error finalizing the data.");
-            });
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        };
 
-        axios
-            .put(
-                `${baseURL}/radiographics/edit/${radiographicId}/status`,
-                2,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
-            .then((res) => {
-                console.log('Status set successfully:', res.data);
-                window.location.href = "/dokter-radiografi-panoramik";
-            })
-            .catch((err) => {
-                console.error('Error setting status:', err);
-                setError("There was an error setting the status.");
-            });
+        const parsedData = buildParsedData();
 
+        setLoading(true);
+        try {
+            console.log('parsed data', parsedData)
+            console.log(parsedData)
+            console.log('catatan pasien', catatanPasien)
+            console.log('token', token)
+
+            if (parsedData.length > 0) {
+                await axios.post(
+                    `${baseURL}/diagnoses/${radiographicId}/bulks`,
+                    parsedData,
+                    { headers }
+                );
+            }
+
+            await Promise.all([
+                axios.put(
+                    `${baseURL}/radiographics/edit/${radiographicId}/catatan`,
+                    catatanPasien,
+                    { headers }
+                ),
+                axios.put(
+                    `${baseURL}/radiographics/edit/${radiographicId}/status`,
+                    2,
+                    { headers }
+                ),
+            ]);
+
+            if (typeof onSuccess === "function") {
+                try {
+                    onSuccess();
+                    console.log('udah success tapi function')
+                    window.location.href = "/dokter-radiografi-panoramik";
+                } catch (e) { /* ignore parent handler errors */ }
+            } else {
+                console.log('udah success')
+                window.location.href = "/dokter-radiografi-panoramik";
+            }
+
+            onClose();
+        } catch (err) {
+            console.error("Error finalizing data or setting status/bulks:", err);
+
+            const serverMessage =
+                err?.response?.data?.message ||
+                err?.message ||
+                "Terjadi kesalahan saat finalisasi data. Silakan coba lagi.";
+            setError(serverMessage);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <div>
-            <div
-                className="modal fade"
-                id="finalisasiModal"
-                tabIndex="-1"
-                // style={{ display: "block" }}
-                aria-labelledby="exampleModalLabel"
-                aria-hidden="true"
-            >
-                <div
-                    className="modal-dialog modal-dialog-centered"
-                    style={{ width: "30%" }}
+        <Dialog
+            open={open}
+            onClose={() => {
+                if (!loading) {
+                    setError("");
+                    onClose();
+                }
+            }}
+            aria-labelledby="finalisasi-dialog-title"
+            maxWidth="xs"
+            fullWidth
+            PaperProps={{ sx: { p: 0 } }}
+        >
+            <DialogTitle sx={{ m: 0, p: 2 }} variant="div">
+                <Typography variant="h6">Finalisasi Data</Typography>
+                <IconButton
+                    aria-label="close"
+                    onClick={() => {
+                        if (!loading) {
+                            setError("");
+                            onClose();
+                        }
+                    }}
+                    sx={{
+                        position: "absolute",
+                        right: 8,
+                        top: 8,
+                        color: (theme) => theme.palette.grey[500],
+                    }}
+                    size="large"
                 >
-                    <div className="modal-content">
-                        <div className="modal-body">
-                            <p className="ms-2 pt-0 mt-0 mb-0 font-weight-bold text-dark">
-                                Finalisasi Data
-                            </p>
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
 
-                            <div className="row mt-2">
-                                <div className="col-12">
-                                    <p className="text-secondary text-xs ms-2 mt-3 mb-2">
-                                        Apakah anda yakin ingin finalisasi data analisa ini?
-                                    </p>
-                                </div>
-                            </div>
+            <DialogContent dividers>
+                {error && (
+                    <Box mb={2}>
+                        <Alert severity="error">{error}</Alert>
+                    </Box>
+                )}
 
-                            <div className="ms-auto text-end mt-4">
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-danger btn-sm mb-0 p-1"
-                                    data-bs-dismiss="modal"
-                                >
-                                    Tidak
-                                </button>
-                                &nbsp;
-                                <button
-                                    type="button"
-                                    onClick={handleSubmit}
-                                    className="btn btn-outline-success btn-sm mb-0 pe-2 ps-2 pt-1 pb-1"
-                                >
-                                    Iya
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                <Typography color="text.secondary">
+                    Apakah anda yakin ingin finalisasi data analisa ini?
+                </Typography>
+
+                <Box mt={2}>
+                    <Typography variant="body2" color="text.secondary">
+                        {Array.isArray(problematicTeeth) && problematicTeeth.length > 0
+                            ? `${buildParsedData().length} entri akan dikirimkan ke server (hanya yang telah diverifikasi).`
+                            : "Tidak ada entri bermasalah untuk dikirimkan."}
+                    </Typography>
+                </Box>
+            </DialogContent>
+
+            <DialogActions sx={{ p: 2 }}>
+                <Button
+                    onClick={() => {
+                        if (!loading) {
+                            setError("");
+                            onClose();
+                        }
+                    }}
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    disabled={loading}
+                >
+                    Tidak
+                </Button>
+
+                <Button
+                    onClick={handleConfirm}
+                    variant="contained"
+                    color="success"
+                    size="small"
+                    disabled={loading}
+                    startIcon={loading ? <CircularProgress size={16} /> : null}
+                >
+                    {loading ? "Memproses..." : "Iya"}
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 
