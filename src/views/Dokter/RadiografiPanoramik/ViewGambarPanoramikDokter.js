@@ -156,11 +156,31 @@ const ViewGambarPanoramikDokter = () => {
             setProblematicTeeth(mergedProblems);
 
             console.log('load all data, preds', preds)
+            const normalizeProblem = (prob) => ({
+                toothId: Number(prob?.toothId ?? prob?.number ?? null),
+                number: Number(prob?.number ?? prob?.toothId ?? null),
+                isManual: !!prob?.isManual,
+                isVerified: !!prob?.isVerified,
+                prediction: prob?.prediction ?? null,
+                verificator_note: prob?.verificator_note ?? null,
+                accuracy: prob?.accuracy ?? null,
+                urlImage: prob?.urlImage ?? prob?.url_image ?? null,
+                urlImageSquare: prob?.urlImageSquare ?? null,
+                isDuplicate: prob?.isDuplicate ?? false,
+                isMissing: (prob?.prediction === "Gigi Hilang") || !!prob?.isMissing,
+                isProblematic: prob?.isProblematic ?? false
+            });
             if (Array.isArray(preds.show_odontogram) && preds.show_odontogram.length > 0) {
                 const upperTeeth = preds.show_odontogram
+                    .map((odonUp) => {
+                        return normalizeProblem({...odonUp, isProblematic: true});
+                    })
                     .filter((it) => customOrderUp.includes(Number(it.number)))
                     .sort((a, b) => customOrderUp.indexOf(Number(a.number)) - customOrderUp.indexOf(Number(b.number)));
                 const lowerTeeth = preds.show_odontogram
+                    .map((odonDown) => {
+                        return normalizeProblem({...odonDown, isProblematic: true});
+                    })
                     .filter((it) => customOrderDown.includes(Number(it.number)))
                     .sort((a, b) => customOrderDown.indexOf(Number(a.number)) - customOrderDown.indexOf(Number(b.number)));
 
@@ -170,21 +190,6 @@ const ViewGambarPanoramikDokter = () => {
                 console.log('Odontogram UP load all data now:', upperTeeth);
                 console.log('Odontogram DOWN load all data now:', lowerTeeth);
             } else {
-                const normalizeProblem = (prob) => ({
-                    toothId: Number(prob?.toothId ?? prob?.number ?? null),
-                    number: Number(prob?.number ?? prob?.toothId ?? null),
-                    isManual: !!prob?.isManual,
-                    isVerified: !!prob?.isVerified,
-                    prediction: prob?.prediction ?? null,
-                    verificator_note: prob?.verificator_note ?? null,
-                    accuracy: prob?.accuracy ?? null,
-                    urlImage: prob?.urlImage ?? prob?.url_image ?? null,
-                    urlImageSquare: prob?.urlImageSquare ?? null,
-                    isDuplicate: prob?.isDuplicate ?? false,
-                    isMissing: (prob?.prediction === "Gigi Hilang") || !!prob?.isMissing,
-                    isProblematic: prob?.isProblematic ?? false
-                });
-
                 const upperTeeth = customOrderUp
                     .map((custUp) => {
                         const found = mergedProblems.find((p) => Number(p.toothId) === custUp);
@@ -422,16 +427,38 @@ const ViewGambarPanoramikDokter = () => {
             const preds = fetchedData?.predictions ?? null;
 
             if (preds && Array.isArray(preds.all) && preds.all.length > 0) {
+                const normalizeProblem = (prob) => ({
+                    toothId: Number(prob?.toothId ?? prob?.number ?? null),
+                    number: Number(prob?.number ?? prob?.toothId ?? null),
+                    isManual: !!prob?.isManual,
+                    isVerified: !!prob?.isVerified,
+                    prediction: prob?.prediction ?? null,
+                    verificator_note: prob?.verificator_note ?? null,
+                    accuracy: prob?.accuracy ?? null,
+                    urlImage: prob?.urlImage ?? prob?.url_image ?? null,
+                    urlImageSquare: prob?.urlImageSquare ?? null,
+                    isDuplicate: prob?.isDuplicate ?? false,
+                    isMissing: (prob?.prediction === "Gigi Hilang") || !!prob?.isMissing,
+                    isProblematic: prob?.isProblematic ?? false
+                });
+
                 if (Array.isArray(preds.show_odontogram) && preds.show_odontogram.length > 0) {
                     const upperTeeth = preds.show_odontogram
+                        .map((odonUp) => {
+                            return normalizeProblem({...odonUp, isProblematic: true});
+                        })
                         .filter((item) => customOrderUp.includes(Number(item.number)))
                         .sort((a, b) => customOrderUp.indexOf(Number(a.number)) - customOrderUp.indexOf(Number(b.number)));
 
                     const lowerTeeth = preds.show_odontogram
+                        .map((odonDown) => {
+                            return normalizeProblem({...odonDown, isProblematic: true});
+                        })
                         .filter((item) => customOrderDown.includes(Number(item.number)))
                         .sort((a, b) => customOrderDown.indexOf(Number(a.number)) - customOrderDown.indexOf(Number(b.number)));
 
                     console.log('Odontogram UP getAllFromDetectionAPI data now:', upperTeeth);
+                    console.log('Odontogram DOWN getAllFromDetectionAPI data now:', lowerTeeth);
                     setOdontogramUp(upperTeeth);
                     setOdontogramDown(lowerTeeth);
                     setOdontogramImage(fetchedData);
@@ -451,12 +478,13 @@ const ViewGambarPanoramikDokter = () => {
                     isManual: false,
                     isVerified: false,
                     prediction: "Gigi Hilang",
-                    verificator_note: ""
+                    verificator_note: null
                 }));
 
                 console.log('Setting problematicTeeth (newProblems):', newProblems);
                 setProblematicTeeth(newProblems);
-            } else {
+            }
+            else {
                 // no predictions found
                 setOdontogramUp([]);
                 setOdontogramDown([]);
