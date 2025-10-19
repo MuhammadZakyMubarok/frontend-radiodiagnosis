@@ -88,6 +88,7 @@ const RadiografiPanoramikCardDokter = ({ data, baseURL, loggedInDoctor }) => {
             </div>
             <p className="text-xs text-secondary mt-4">Radiodiagnosis Sistem</p>
             <div className="d-flex flex-column">
+                {console.log('diagnoses data panoramik individu', data.diagnoses)}
               {data.diagnoses?.map((diagnose) => {
                 if (diagnose?.system_diagnosis) {
                   return (
@@ -107,6 +108,24 @@ const RadiografiPanoramikCardDokter = ({ data, baseURL, loggedInDoctor }) => {
                     </div>
                   );
                 }
+                  if (diagnose?.manual_diagnosis) {
+                      return (
+                          <div className="row">
+                              <div className="col-4">
+                                  <ul className="ps-3">
+                                      <li className="text-sm">
+                                          Gigi #{diagnose?.tooth_number}
+                                      </li>
+                                  </ul>
+                              </div>
+                              <div className="col-8 ps-0">
+                                  <p className="text-sm text-dark font-weight-bolder">
+                                      {diagnose?.manual_diagnosis}
+                                  </p>
+                              </div>
+                          </div>
+                      );
+                  }
               })}
             </div>
 

@@ -196,25 +196,27 @@ const VerifiedDiagnosaModal = ({isOpen, handleClose, radiographicId, tooth, hand
                 maxWidth="sm"
                 fullWidth
             >
-                <DialogTitle variant="div">
-                    <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                        Interpretasi Manual
-                    </Typography>
-                    <IconButton
-                        aria-label="close"
-                        onClick={() => {
-                            clearError()
-                            handleClose()
-                        }}
-                        sx={{
-                            position: 'absolute',
-                            right: 8,
-                            top: 8,
-                            color: (theme) => theme.palette.grey[500],
-                        }}
-                    >
-                        <CloseIcon />
-                    </IconButton>
+                <DialogTitle>
+                    <div>
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+                            Interpretasi Manual
+                        </Typography>
+                        <IconButton
+                            aria-label="close"
+                            onClick={() => {
+                                clearError()
+                                handleClose()
+                            }}
+                            sx={{
+                                position: 'absolute',
+                                right: 8,
+                                top: 8,
+                                color: (theme) => theme.palette.grey[500],
+                            }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </div>
                 </DialogTitle>
                 <DialogContent>
                     <Collapse in={error.open}>

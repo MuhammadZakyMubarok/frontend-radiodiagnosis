@@ -30,6 +30,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import DescriptionIcon from '@mui/icons-material/Description';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import PersonIcon from '@mui/icons-material/Person';
 // Helper
 import {insertInOrder, toNum} from "../../../utils/helper";
 
@@ -101,6 +103,10 @@ const ViewGambarPanoramikDokter = () => {
         console.log('data now:', data);
     }, [data]);
 
+    useEffect(() => {
+        console.log('Odontogram UP now:', odontogramUp);
+    }, [odontogramUp]);
+
     const mapServerDiagToProblematic = (diag) => {
         const toothNumber = Number(diag?.tooth_number ?? diag?.toothId);
         return {
@@ -114,13 +120,14 @@ const ViewGambarPanoramikDokter = () => {
 
     const loadAllData = async () => {
         try {
-            const [detailResp, detectionResp] = await Promise.all([
+            const [detailResp,  detectionResp] = await Promise.all([
                 axios.get(`${baseURL}/radiographics/detail/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
                 axios.get(`${apiUrl}/data`, { headers: { Accept: "application/json" } })
             ]);
 
             const payload = detailResp?.data?.data ?? {};
             setData(payload);
+            setCatatanPasien(payload.catatan_pasien)
 
             const serverDiagnoses = Array.isArray(payload.diagnoses) ? payload.diagnoses.map(mapServerDiagToProblematic).filter(d => d.toothId != null) : [];
 
@@ -137,13 +144,18 @@ const ViewGambarPanoramikDokter = () => {
                     isManual: false,
                     isVerified: false,
                     prediction: "Gigi Hilang",
-                    verificator_note: ""
+                    verificator_note: null
                 }));
+
+            console.log('load all data, serverIds', serverIds)
+            console.log('load all data, missingProblems', missingProblems)
 
             const mergedProblems = [...serverDiagnoses, ...missingProblems];
 
+            console.log('load all data, mergedProblems', mergedProblems)
             setProblematicTeeth(mergedProblems);
 
+            console.log('load all data, preds', preds)
             if (Array.isArray(preds.show_odontogram) && preds.show_odontogram.length > 0) {
                 const upperTeeth = preds.show_odontogram
                     .filter((it) => customOrderUp.includes(Number(it.number)))
@@ -154,9 +166,66 @@ const ViewGambarPanoramikDokter = () => {
 
                 setOdontogramUp(upperTeeth);
                 setOdontogramDown(lowerTeeth);
+
+                console.log('Odontogram UP load all data now:', upperTeeth);
+                console.log('Odontogram DOWN load all data now:', lowerTeeth);
             } else {
-                setOdontogramUp([]);
-                setOdontogramDown([]);
+                const normalizeProblem = (prob) => ({
+                    toothId: Number(prob?.toothId ?? prob?.number ?? null),
+                    number: Number(prob?.number ?? prob?.toothId ?? null),
+                    isManual: !!prob?.isManual,
+                    isVerified: !!prob?.isVerified,
+                    prediction: prob?.prediction ?? null,
+                    verificator_note: prob?.verificator_note ?? null,
+                    accuracy: prob?.accuracy ?? null,
+                    urlImage: prob?.urlImage ?? prob?.url_image ?? null,
+                    urlImageSquare: prob?.urlImageSquare ?? null,
+                    isDuplicate: prob?.isDuplicate ?? false,
+                    isMissing: (prob?.prediction === "Gigi Hilang") || !!prob?.isMissing,
+                    isProblematic: prob?.isProblematic ?? false
+                });
+
+                const upperTeeth = customOrderUp
+                    .map((custUp) => {
+                        const found = mergedProblems.find((p) => Number(p.toothId) === custUp);
+                        if (found) return normalizeProblem({...found, isProblematic: true});
+                        return normalizeProblem({
+                            toothId: custUp,
+                            number: custUp,
+                            isManual: false,
+                            isVerified: false,
+                            prediction: null,
+                            verificator_note: null,
+                            isProblematic: false
+                        });
+                    })
+                    .filter((it) => customOrderUp.includes(Number(it.number)))
+                    .sort((a, b) => customOrderUp.indexOf(Number(a.number)) - customOrderUp.indexOf(Number(b.number)));
+
+                const lowerTeeth = customOrderDown
+                    .map((custDown) => {
+                        const found = mergedProblems.find((p) => Number(p.toothId) === custDown);
+                        if (found) return normalizeProblem({...found, isProblematic: true});
+                        return normalizeProblem({
+                            toothId: custDown,
+                            number: custDown,
+                            isManual: false,
+                            isVerified: false,
+                            prediction: null,
+                            verificator_note: null,
+                            isProblematic: false
+                        });
+                    })
+                    .filter((it) => customOrderDown.includes(Number(it.number)))
+                    .sort((a, b) => customOrderDown.indexOf(Number(a.number)) - customOrderDown.indexOf(Number(b.number)));
+
+                setOdontogramUp(upperTeeth);
+                setOdontogramDown(lowerTeeth);
+
+                console.log('Odontogram UP load all data (fallback):', upperTeeth);
+                console.log('Odontogram DOWN load all data (fallback):', lowerTeeth);
+                // setOdontogramUp([]);
+                // setOdontogramDown([]);
             }
 
             setOdontogramImage(fetchedData);
@@ -362,6 +431,7 @@ const ViewGambarPanoramikDokter = () => {
                         .filter((item) => customOrderDown.includes(Number(item.number)))
                         .sort((a, b) => customOrderDown.indexOf(Number(a.number)) - customOrderDown.indexOf(Number(b.number)));
 
+                    console.log('Odontogram UP getAllFromDetectionAPI data now:', upperTeeth);
                     setOdontogramUp(upperTeeth);
                     setOdontogramDown(lowerTeeth);
                     setOdontogramImage(fetchedData);
@@ -380,7 +450,7 @@ const ViewGambarPanoramikDokter = () => {
                     toothId: Number(toothId),
                     isManual: false,
                     isVerified: false,
-                    prediction: "",
+                    prediction: "Gigi Hilang",
                     verificator_note: ""
                 }));
 
@@ -412,10 +482,13 @@ const ViewGambarPanoramikDokter = () => {
         if (!Array.isArray(problematicTeeth) || problematicTeeth.length === 0) return "";
         console.log('Problematich teeth number:'+ tooth_number, problematicTeeth)
         const suspectedTooth = problematicTeeth.find(p => Number(p.toothId) === toothNum);
+        console.log('suspected tooth ', suspectedTooth)
         if (!suspectedTooth) return "";
         if (suspectedTooth.isManual) return suspectedTooth.prediction ?? "";
         const pred = suspectedTooth.prediction ?? "";
         const note = suspectedTooth.verificator_note ?? "";
+        const finalNote = note ? `${pred}, Note:${note}` : pred;
+        console.log('final suspected tooth note + ', finalNote)
         return note ? `${pred}, Note:${note}` : pred;
     }
 
@@ -433,6 +506,17 @@ const ViewGambarPanoramikDokter = () => {
   const toggleImages = () => {
     setShowImages((prev) => !prev);
   };
+  const handleListDiagnoseTeeth = (is_auto_detection = false) => {
+      const isDiagnoseAlreadyVerified = data.status === 2;
+
+      if(isDiagnoseAlreadyVerified && !is_auto_detection)
+          return problematicTeeth
+      else if(!isDiagnoseAlreadyVerified && !is_auto_detection)
+          return problematicTeeth.filter(probTooth => probTooth.isManual)
+      else if(!isDiagnoseAlreadyVerified && is_auto_detection)
+          return problematicTeeth.filter(probTooth => !probTooth.isManual)
+      return []
+  }
 
   if (auth) {
     console.log("data :", data);
@@ -593,7 +677,7 @@ const ViewGambarPanoramikDokter = () => {
                                         </div>
                                       )}
 
-                                      {odontogramImage.gambar && (
+                                      {(odontogramImage.gambar && data.status !== 2) && ( // Hide kalo udah di verifikasi dokter
                                         <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
                                           <div className="card-body">
                                             <p className="text-xs p-2 mb-0">
@@ -617,7 +701,7 @@ const ViewGambarPanoramikDokter = () => {
                                         <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
                                           <div className="card-body">
                                             <p className="text-xs p-2 mb-0">
-                                              Odontogram Ubah dulu su
+                                              Odontogram Table
                                             </p>
                                             <div className="row d-flex">
                                               {/* Gigi Atas - Upper Teeth */}
@@ -628,95 +712,122 @@ const ViewGambarPanoramikDokter = () => {
                                                   </div>
                                                   <div className="col d-flex justify-content-center">
                                                     {odontogramUp.length > 0 ? (
-                                                      odontogramUp.map((item, index) =>
-                                                        item.accuracy != null ? (
-                                                          <div key={'true-up-' + item.number + '-' + index } className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
-                                                            <input
-                                                              type="checkbox"
-                                                              className="btn-check"
-                                                              id={`btncheck${item.number}`}
-                                                              autoComplete="off"
-                                                              checked={activeCheckbox === item.number || teethNumber.includes(item.number)}
-                                                              onChange={() => handleCheckboxClick(item.number)}
-                                                            />
-                                                            <label
-                                                              className="btn btn-outline-secondary text-xs p-2"
-                                                              htmlFor={`btncheck${item.number}`}
-                                                              onClick={() => togglePopover(item.number)}
-                                                            >
-                                                              {item.number}
-                                                            </label>
-                                                            {activePopover === item.number && activeCheckbox === item.number && (
-                                                              <div className="popover-content">
-                                                                <p>Nomor Gigi: {item.number}</p>
-                                                                {!item.isDuplicate ? (
-                                                                  // Render images for non-duplicate teeth
-                                                                  Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
-                                                                    <div className="carousel slide">
-                                                                      <div className="carousel-inner">
-                                                                        {item.urlImage.map((img, i) => (
-                                                                          <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
-                                                                            <img
-                                                                              className="bg-white"
-                                                                              width="50"
-                                                                              style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
-                                                                              src={isSquare ? item.urlImageSquare[i] : img}
-                                                                              alt={`carousel ${i}`}
-                                                                            />
-                                                                          </div>
-                                                                        ))}
-                                                                      </div>
-                                                                    </div>
-                                                                  ) : (
-                                                                    <img
-                                                                      className="bg-white mx-1 responsive-img"
-                                                                      width="50"
-                                                                      style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
-                                                                      src={isSquare ? item.urlImageSquare : item.urlImage}
-                                                                      alt="Odontogram"
-                                                                    />
-                                                                  )
-                                                                ) : (
-                                                                  // Render image for duplicates using index 1
-                                                                  <img
-                                                                    className="bg-white mx-1 responsive-img"
-                                                                    width="50"
-                                                                    style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
-                                                                    src={isSquare ? item.urlImageSquare[1] : item.urlImage[1]}
-                                                                    alt="Duplicate Image"
-                                                                  />
-                                                                )}
-                                                              </div>
-                                                            )}
-                                                          </div>
-                                                        ) : (
-                                                          <div key={'false-up-' + index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
-                                                            <input
-                                                              type="checkbox"
-                                                              className="btn-check"
-                                                              id={`btncheck${item.number}`}
-                                                              autoComplete="off"
-                                                              checked={activeCheckbox === item.number || teethNumber.includes(item.number)}
-                                                              onChange={() => handleCheckboxClick(item.number)}
-                                                            />
-                                                            <label
-                                                              className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
-                                                              htmlFor={`btncheck${item.number}`}
-                                                              onClick={() => togglePopover(item.number)}
-                                                            >
-                                                              {item.number}
-                                                            </label>
-                                                            {activePopover === item.number && activeCheckbox === item.number && (
-                                                              <div className="popover-content">
-                                                                <p>Nomor Gigi: {item.number}</p>
-                                                                <div className="mx-1">
-                                                                    {handleOdontogramToothProblemValue(item.number)}
-                                                                </div>
+                                                      odontogramUp.map((item, index) => {
 
-                                                              </div>
-                                                            )}
-                                                          </div>
-                                                        )
+                                                          const displayNumber = item.number ?? item.toothId;
+                                                          if(item.accuracy != null){
+                                                              return (
+                                                                  <div key={'true-up-' + displayNumber + '-' + index } className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                                      <input
+                                                                          type="checkbox"
+                                                                          className="btn-check"
+                                                                          id={`btncheck${displayNumber}`}
+                                                                          autoComplete="off"
+                                                                          checked={activeCheckbox === displayNumber || teethNumber.includes(displayNumber)}
+                                                                          onChange={() => handleCheckboxClick(displayNumber)}
+                                                                      />
+                                                                      <label
+                                                                          className="btn btn-outline-secondary text-xs p-2"
+                                                                          htmlFor={`btncheck${displayNumber}`}
+                                                                          onClick={() => togglePopover(displayNumber)}
+                                                                      >
+                                                                          {item.number}
+                                                                      </label>
+                                                                      {activePopover === displayNumber && activeCheckbox === displayNumber && (
+                                                                          <div className="popover-content">
+                                                                              <p>Nomor Gigi: {displayNumber}</p>
+                                                                              {!item.isDuplicate ? (
+                                                                                  // Render images for non-duplicate teeth
+                                                                                  Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
+                                                                                      <div className="carousel slide">
+                                                                                          <div className="carousel-inner">
+                                                                                              {item.urlImage.map((img, i) => (
+                                                                                                  <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                                                                                      <img
+                                                                                                          className="bg-white"
+                                                                                                          width="50"
+                                                                                                          style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                                                          src={isSquare ? item.urlImageSquare[i] : img}
+                                                                                                          alt={`carousel ${i}`}
+                                                                                                      />
+                                                                                                  </div>
+                                                                                              ))}
+                                                                                          </div>
+                                                                                      </div>
+                                                                                  ) : (
+                                                                                      <img
+                                                                                          className="bg-white mx-1 responsive-img"
+                                                                                          width="50"
+                                                                                          style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                                          src={isSquare ? item.urlImageSquare : item.urlImage}
+                                                                                          alt="Odontogram"
+                                                                                      />
+                                                                                  )
+                                                                              ) : (
+                                                                                  // Render image for duplicates using index 1
+                                                                                  <img
+                                                                                      className="bg-white mx-1 responsive-img"
+                                                                                      width="50"
+                                                                                      style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                                      src={isSquare ? item.urlImageSquare[1] : item.urlImage[1]}
+                                                                                      alt="Duplicate Image"
+                                                                                  />
+                                                                              )}
+                                                                          </div>
+                                                                      )}
+                                                                  </div>
+                                                              )
+                                                          }
+                                                          else if(item.accuracy === null && item.isProblematic){
+                                                              return (
+                                                                  <div key={'false-up-' + index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                                      <input
+                                                                          type="checkbox"
+                                                                          className="btn-check"
+                                                                          id={`btncheck${displayNumber}`}
+                                                                          autoComplete="off"
+                                                                          checked={activeCheckbox === displayNumber || teethNumber.includes(displayNumber)}
+                                                                          onChange={() => handleCheckboxClick(displayNumber)}
+                                                                      />
+                                                                      <label
+                                                                          className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
+                                                                          htmlFor={`btncheck${displayNumber}`}
+                                                                          onClick={() => togglePopover(displayNumber)}
+                                                                      >
+                                                                          {displayNumber}
+                                                                      </label>
+                                                                      {activePopover === displayNumber && activeCheckbox === displayNumber && (
+                                                                          <div className="popover-content">
+                                                                              <p>Nomor Gigi: {displayNumber}</p>
+                                                                              <div className="mx-1">
+                                                                                  {handleOdontogramToothProblemValue(displayNumber)}
+                                                                              </div>
+
+                                                                          </div>
+                                                                      )}
+                                                                  </div>
+                                                              )
+                                                          }
+                                                          else {
+                                                              return (
+                                                                  <div key={'cus-up-' +index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                                      <input
+                                                                          type="checkbox"
+                                                                          className="btn-check"
+                                                                          id={`btncheck${item}`}
+                                                                          autoComplete="off"
+                                                                          checked={activeCheckbox === displayNumber || teethNumber.includes(displayNumber)}
+                                                                          onChange={() => handleCheckboxClick(displayNumber)}
+                                                                      />
+                                                                      <label
+                                                                          className="btn btn-outline text-xs p-2 flex items-center justify-center"
+                                                                      >
+                                                                          {displayNumber}
+                                                                      </label>
+                                                                  </div>
+                                                              )
+                                                          }
+                                                      }
                                                       )
                                                     ) : (
                                                       customOrderUp.map((item, index) => (
@@ -1074,92 +1185,119 @@ const ViewGambarPanoramikDokter = () => {
                                                   </div>
                                                   <div className="col d-flex justify-content-center">
                                                     {odontogramDown.length > 0 ? (
-                                                      odontogramDown.map((item, index) =>
-                                                        item.accuracy != null ? (
-                                                          <div key={'true-down-' + item.number + '-' + index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
-                                                            <input
-                                                              type="checkbox"
-                                                              className="btn-check"
-                                                              id={`btncheck${item.number}`}
-                                                              autoComplete="off"
-                                                              checked={activeCheckbox === item.number || teethNumber.includes(item.number)}
-                                                              onChange={() => handleCheckboxClick(item.number)}
-                                                            />
-                                                            <label className="btn btn-outline-secondary text-xs p-2"
-                                                              htmlFor={`btncheck${item.number}`}
-                                                              onClick={() => togglePopover(item.number)}
-                                                            >
-                                                              {item.number}
-                                                            </label>
-                                                            {activePopover === item.number && activeCheckbox === item.number && (
-                                                              <div className="popover-content">
-                                                                <p>Nomor Gigi: {item.number}</p>
-                                                                {!item.isDuplicate ? (
-                                                                  // Render images for non-duplicate teeth
-                                                                  Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
-                                                                    <div className="carousel slide">
-                                                                      <div className="carousel-inner">
-                                                                        {item.urlImage.map((img, i) => (
-                                                                          <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
-                                                                            <img
-                                                                              className="bg-white"
-                                                                              width="50"
-                                                                              style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
-                                                                              src={isSquare ? item.urlImageSquare[i] : img}
-                                                                              alt={`carousel ${i}`}
-                                                                            />
+                                                      odontogramDown.map((item, index) => {
+
+                                                          const displayNumber = item.number ?? item.toothId;
+                                                          if(item.accuracy != null){
+                                                              return (
+                                                                  <div key={'true-down-' + displayNumber + '-' + index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                                      <input
+                                                                          type="checkbox"
+                                                                          className="btn-check"
+                                                                          id={`btncheck${displayNumber}`}
+                                                                          autoComplete="off"
+                                                                          checked={activeCheckbox === displayNumber || teethNumber.includes(displayNumber)}
+                                                                          onChange={() => handleCheckboxClick(displayNumber)}
+                                                                      />
+                                                                      <label className="btn btn-outline-secondary text-xs p-2"
+                                                                             htmlFor={`btncheck${displayNumber}`}
+                                                                             onClick={() => togglePopover(displayNumber)}
+                                                                      >
+                                                                          {displayNumber}
+                                                                      </label>
+                                                                      {activePopover === displayNumber && activeCheckbox === displayNumber && (
+                                                                          <div className="popover-content">
+                                                                              <p>Nomor Gigi: {displayNumber}</p>
+                                                                              {!item.isDuplicate ? (
+                                                                                  // Render images for non-duplicate teeth
+                                                                                  Array.isArray(item.urlImage) && item.urlImage.length > 1 ? (
+                                                                                      <div className="carousel slide">
+                                                                                          <div className="carousel-inner">
+                                                                                              {item.urlImage.map((img, i) => (
+                                                                                                  <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                                                                                      <img
+                                                                                                          className="bg-white"
+                                                                                                          width="50"
+                                                                                                          style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                                                          src={isSquare ? item.urlImageSquare[i] : img}
+                                                                                                          alt={`carousel ${i}`}
+                                                                                                      />
+                                                                                                  </div>
+                                                                                              ))}
+                                                                                          </div>
+                                                                                      </div>
+                                                                                  ) : (
+                                                                                      <img
+                                                                                          className="bg-white mx-1 responsive-img"
+                                                                                          width="50"
+                                                                                          style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                                          src={isSquare ? item.urlImageSquare : item.urlImage}
+                                                                                          alt="Odontogram"
+                                                                                      />
+                                                                                  )
+                                                                              ) : (
+                                                                                  // Render image for duplicates using index 1
+                                                                                  <img
+                                                                                      className="bg-white mx-1 responsive-img"
+                                                                                      width="50"
+                                                                                      style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
+                                                                                      src={isSquare ? item.urlImageSquare[1] : item.urlImage[1]}
+                                                                                      alt="Duplicate Image"
+                                                                                  />
+                                                                              )}
                                                                           </div>
-                                                                        ))}
-                                                                      </div>
-                                                                    </div>
-                                                                  ) : (
-                                                                    <img
-                                                                      className="bg-white mx-1 responsive-img"
-                                                                      width="50"
-                                                                      style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
-                                                                      src={isSquare ? item.urlImageSquare : item.urlImage}
-                                                                      alt="Odontogram"
-                                                                    />
-                                                                  )
-                                                                ) : (
-                                                                  // Render image for duplicates using index 1
-                                                                  <img
-                                                                    className="bg-white mx-1 responsive-img"
-                                                                    width="50"
-                                                                    style={{ maxHeight: '100px', aspectRatio: isSquare ? '1' : 'auto' }}
-                                                                    src={isSquare ? item.urlImageSquare[1] : item.urlImage[1]}
-                                                                    alt="Duplicate Image"
-                                                                  />
-                                                                )}
-                                                              </div>
-                                                            )}
-                                                          </div>
-                                                        ) : (
-                                                          <div key={'false-down-' + index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
-                                                            <input
-                                                              type="checkbox"
-                                                              className="btn-check"
-                                                              id={`btncheck${item.number}`}
-                                                              autoComplete="off"
-                                                              checked={activeCheckbox === item.number || teethNumber.includes(item.number)}
-                                                              onChange={() => handleCheckboxClick(item.number)}
-                                                            />
-                                                            <label className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
-                                                              htmlFor={`btncheck${item.number}`}
-                                                              onClick={() => togglePopover(item.number)}
-                                                            >
-                                                              {item.number}
-                                                            </label>
-                                                            {activePopover === item.number && activeCheckbox === item.number && (
-                                                              <div className="popover-content">
-                                                                <p>Nomor Gigi: {item.number}</p>
-                                                                <div className="mx-1" >
-                                                                   {handleOdontogramToothProblemValue(item.number)}
-                                                                </div>
-                                                              </div>
-                                                            )}
-                                                          </div>
-                                                        )
+                                                                      )}
+                                                                  </div>
+                                                              )
+                                                          }
+                                                          else if(item.accuracy === null && item.isProblematic) {
+                                                              return (
+                                                                  <div key={'false-down-' + index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                                      <input
+                                                                          type="checkbox"
+                                                                          className="btn-check"
+                                                                          id={`btncheck${displayNumber}`}
+                                                                          autoComplete="off"
+                                                                          checked={activeCheckbox === displayNumber || teethNumber.includes(displayNumber)}
+                                                                          onChange={() => handleCheckboxClick(displayNumber)}
+                                                                      />
+                                                                      <label className="btn btn-outline-danger text-xs p-2 flex items-center justify-center"
+                                                                             htmlFor={`btncheck${displayNumber}`}
+                                                                             onClick={() => togglePopover(displayNumber)}
+                                                                      >
+                                                                          {displayNumber}
+                                                                      </label>
+                                                                      {activePopover === displayNumber && activeCheckbox === displayNumber && (
+                                                                          <div className="popover-content">
+                                                                              <p>Nomor Gigi: {displayNumber}</p>
+                                                                              <div className="mx-1" >
+                                                                                  {handleOdontogramToothProblemValue(displayNumber)}
+                                                                              </div>
+                                                                          </div>
+                                                                      )}
+                                                                  </div>
+                                                              )
+                                                          }
+                                                          else {
+                                                              return (
+                                                                  <div key={'false-down-' + index} className="popover-container d-flex justify-content-center mt-1" ref={containerRef}>
+                                                                      <input
+                                                                          type="checkbox"
+                                                                          className="btn-check"
+                                                                          id={`btncheck${item}`}
+                                                                          autoComplete="off"
+                                                                          checked={activeCheckbox === displayNumber || teethNumber.includes(displayNumber)}
+                                                                          onChange={() => handleCheckboxClick(displayNumber)}
+                                                                      />
+                                                                      <label
+                                                                          className="btn btn-outline text-xs p-2 flex items-center justify-center"
+                                                                      >
+                                                                          {displayNumber}
+                                                                      </label>
+                                                                  </div>
+                                                              )
+                                                          }
+                                                      }
                                                       )
                                                     ) : (
                                                       customOrderDown.map((item, index) => (
@@ -1190,7 +1328,7 @@ const ViewGambarPanoramikDokter = () => {
                                           </div>
                                         </div>
                                       )}
-                                      {odontogramImage.gambar && (
+                                      {(odontogramImage?.gambar && data.status !== 2) && ( // Hide kalo udah di verifikasi dokter
                                         <div className="card shadow-none mt-2 me-2 ms-2 mb-4">
                                           <div className="card-body">
                                             <div className="text-center mt-3">
@@ -2228,9 +2366,9 @@ const ViewGambarPanoramikDokter = () => {
                                         {Array.isArray(problematicTeeth) && problematicTeeth.length > 0 ? (
                                           <div className="card-body">
                                             <p className="text-xs">
-                                              Diagnosa AI Gigi Hilang
+                                              Diagnosa AI (automatic Detection)
                                             </p>
-                                            {problematicTeeth.filter(probTooth => !probTooth.isManual).map((tooth, index) => (
+                                            {handleListDiagnoseTeeth(true).map((tooth, index) => (
                                               <div className="row" key={'problematic-' + tooth.toothId}>
                                                 <div className="col-2 pt-2">
                                                   <ul className="ps-3">
@@ -2318,7 +2456,7 @@ const ViewGambarPanoramikDokter = () => {
 
                                         <div className="card-body">
                                           <p className="text-xs">
-                                            Diagnosa Gigi Hilang
+                                            Diagnosa {data.status === 2 ? 'Terverifikasi' : 'Manual'}
                                           </p>
                                           {/*{data.diagnoses?.map((diagnose) => {*/}
                                             {console.log('diagnoose data', data)}
@@ -2374,7 +2512,7 @@ const ViewGambarPanoramikDokter = () => {
                                               {/* <p className="text-xxs text-secondary font-weight-bold">
                                                 Radiodiagnosis Verifikator
                                               </p> */}
-                                              {problematicTeeth.filter(probTooth => probTooth.isManual).map(
+                                              {handleListDiagnoseTeeth(false).map(
                                                 (diagnose) => {
                                                     return (
                                                         <div className="row">
@@ -2395,16 +2533,65 @@ const ViewGambarPanoramikDokter = () => {
                                                             </div>
                                                             <div className="col ps-0">
                                                                 <Box sx={{
-                                                                    display: data.status === 2 ? 'none' : 'flex',
+                                                                    display: 'flex',
                                                                     justifyContent: 'end'
                                                                 }}>
-                                                                    <Tooltip title="Hapus Deteksi" placement="top" arrow>
-                                                                        <IconButton
-                                                                            onClick={() => handleOpenConfirmDiagnosaModal(diagnose)}
-                                                                            size="small" aria='Delete Button'>
-                                                                            <DeleteIcon color="error"/>
-                                                                        </IconButton>
-                                                                    </Tooltip>
+                                                                    <Box sx={{
+                                                                        display: data.status === 2 && diagnose.verificator_note ? 'block' : 'none'
+                                                                    }}>
+                                                                        <Tooltip title={diagnose.verificator_note} placement="top" arrow>
+                                                                          <span>
+                                                                              <IconButton
+                                                                                  size="small"
+                                                                                  aria='Note AI '
+                                                                                  disabled
+                                                                              >
+                                                                                    <DescriptionIcon  color="warning"/>
+                                                                              </IconButton>
+                                                                          </span>
+                                                                        </Tooltip>
+                                                                    </Box>
+                                                                    <Box sx={{
+                                                                        display: data.status === 2 && !diagnose.isManual ? 'block' : 'none'
+                                                                    }}>
+                                                                        <Tooltip title="Hasil deteksi otomatis (sudah diverifikasi)" placement="top" arrow>
+                                                                          <span>
+                                                                              <IconButton
+                                                                                  size="small"
+                                                                                  aria='Hasil AI AI '
+                                                                                  disabled
+                                                                              >
+                                                                                    <SmartToyIcon  color="primary"/>
+                                                                              </IconButton>
+                                                                          </span>
+                                                                        </Tooltip>
+                                                                    </Box>
+                                                                    <Box sx={{
+                                                                        display: data.status === 2 && diagnose.isManual ? 'block' : 'none'
+                                                                    }}>
+                                                                        <Tooltip title="Hasil manual dokter" placement="top" arrow>
+                                                                          <span>
+                                                                              <IconButton
+                                                                                  size="small"
+                                                                                  aria='Manual '
+                                                                                  disabled
+                                                                              >
+                                                                                    <PersonIcon  color="primary"/>
+                                                                              </IconButton>
+                                                                          </span>
+                                                                        </Tooltip>
+                                                                    </Box>
+                                                                    <Box sx={{
+                                                                        display: data.status !== 2 ? 'block' : 'none'
+                                                                    }}>
+                                                                        <Tooltip title="Hapus Deteksi" placement="top" arrow>
+                                                                            <IconButton
+                                                                                onClick={() => handleOpenConfirmDiagnosaModal(diagnose)}
+                                                                                size="small" aria='Delete Button'>
+                                                                                <DeleteIcon color="error"/>
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    </Box>
                                                                 </Box>
                                                             </div>
                                                             <hr
@@ -2454,7 +2641,7 @@ const ViewGambarPanoramikDokter = () => {
                                                   id="catatanpasien"
                                                   name="catatanpasien"
                                                   placeholder={
-                                                    data.status === 2 && catatanPasien == null ? "Catatan Pasien" : ""
+                                                    data.status === 2 && catatanPasien  ? catatanPasien : "Catatan Pasien"
                                                   }
                                                   rows="5"
                                                   value={catatanPasien}

@@ -38,16 +38,16 @@ const FinalisasiData = ({
                         tooth_number: toothId,
                         system_diagnosis: null,
                         is_corerct: 1,
-                        verificator_note: item.verificator_note ?? "",
-                        manual_diagnosis: null
+                        verificator_note: null,
+                        manual_diagnosis: item.prediction
                     };
                 } else {
                     return {
                         tooth_number: toothId,
-                        system_diagnosis: null,
+                        system_diagnosis: item.prediction ?? "",
                         is_corerct: 1,
-                        verificator_note: null,
-                        manual_diagnosis: item.prediction ?? ""
+                        verificator_note: item.verificator_note ?? "",
+                        manual_diagnosis: null
                     };
                 }
             })
@@ -136,26 +136,28 @@ const FinalisasiData = ({
             fullWidth
             PaperProps={{ sx: { p: 0 } }}
         >
-            <DialogTitle sx={{ m: 0, p: 2 }} variant="div">
-                <Typography variant="h6">Finalisasi Data</Typography>
-                <IconButton
-                    aria-label="close"
-                    onClick={() => {
-                        if (!loading) {
-                            setError("");
-                            onClose();
-                        }
-                    }}
-                    sx={{
-                        position: "absolute",
-                        right: 8,
-                        top: 8,
-                        color: (theme) => theme.palette.grey[500],
-                    }}
-                    size="large"
-                >
-                    <CloseIcon />
-                </IconButton>
+            <DialogTitle sx={{ m: 0, p: 2 }}>
+                <div>
+                    <Typography variant="h6">Finalisasi Data</Typography>
+                    <IconButton
+                        aria-label="close"
+                        onClick={() => {
+                            if (!loading) {
+                                setError("");
+                                onClose();
+                            }
+                        }}
+                        sx={{
+                            position: "absolute",
+                            right: 8,
+                            top: 8,
+                            color: (theme) => theme.palette.grey[500],
+                        }}
+                        size="large"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </div>
             </DialogTitle>
 
             <DialogContent dividers>
