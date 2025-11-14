@@ -2,7 +2,7 @@ import axios from "axios";
 import { React, useState, useEffect, useRef } from "react";
 import HeaderDataUser from "../../../component/Header/HeaderDataUser";
 import SidebarDokter from "../../../component/Sidebar/SidebarDokter";
-import { baseURL, apiUrl } from "../../../routes/Config";
+import { baseURL, apiUrl, apiSegmentasi } from "../../../routes/Config";
 import WithAuthorization from "../../../utils/auth";
 // import OdontogramModal from "../../../component/Modal/OdontogramModal";
 // import "./styleOdontogram.css";
@@ -16,6 +16,10 @@ const OdontogramPasien = () => {
   const [selectedPatientId, setSelectedPatientId] = useState("");
   const [selectedPatient, setSelectedPatient] = useState(null);
   const token = sessionStorage.getItem("token");
+
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [slideIndex, setSlideIndex] = useState(0);
 
   // get data from detection
   const [componentKey, setComponentKey] = useState(0);
@@ -140,6 +144,38 @@ const OdontogramPasien = () => {
     setComponentKey(componentKey + 1);
   }
 
+
+  const handleSegmentasi = async () => {
+  if (!selectedPatient?.panoramik_picture) {
+    alert("Tidak ada file panoramik");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const imageResponse = await axios.get(
+      baseURL + selectedPatient.panoramik_picture,
+      { responseType: "blob" }
+    );
+
+    const formData = new FormData();
+    formData.append("image", imageResponse.data, "panoramik.jpg");
+
+    const res = await axios.post(`${apiSegmentasi}/detect`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    setResult("data:image/jpeg;base64," + res.data.result_image);
+  } catch (err) {
+    console.error(err);
+    alert("Deteksi Gagal");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   // const deleteData = async () => {
   //   try {
   //     await axios.delete(`${apiUrl}/data`);
@@ -257,10 +293,18 @@ const OdontogramPasien = () => {
                             <div>
                               <button
                                 type="button"
-                                className="btn btn-primary btn-sm ms-auto"
+                                className="btn btn-primary btn-sm ms-auto me-2"
                                 onClick={handleSubmit}
                               >
                                 Deteksi Odontogram
+                              </button>
+
+                              <button
+                                type="button"
+                                className="btn btn-success btn-sm ms-auto"
+                                onClick={handleSegmentasi}
+                              >
+                                Deteksi Kelainan
                               </button>
                             </div>
                           </div>
@@ -309,6 +353,80 @@ const OdontogramPasien = () => {
                                           style={{ maxWidth: "75%", maxHeight: "75%", objectFit: "contain" }} // Ensures the image fits within its container
                                         />
                                       </div>
+
+                                      <div className="mt-4 flex justify-center">
+                                      <div className="w-full max-w-xl overflow-hidden rounded-lg border shadow relative">
+                                        <div
+                                          className="flex transition-transform duration-500 ease-in-out"
+                                          style={{
+                                            transform: `translateX(-${slideIndex * 100}%)`,
+                                          }}
+                                        >
+                                          <div className="w-full flex-shrink-0 p-2 bg-white">
+                                            <img
+                                              src={data.gambar}
+                                              alt="Hasil Deteksi 1"
+                                              className="w-full object-contain transition-opacity duration-500"
+                                              style={{ opacity: slideIndex === 0 ? 1 : 0.3 }}
+                                            />
+                                          </div>
+
+                                          {result && (
+                                            <div className="w-full flex-shrink-0 p-2 bg-white">
+                                              <img
+                                                src={result}
+                                                alt="Hasil Deteksi 2"
+                                                className="w-full object-contain transition-opacity duration-500"
+                                                style={{ opacity: slideIndex === 1 ? 1 : 0.3 }}
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        {result && (
+                                          <div className="absolute bottom-2 w-full flex justify-center gap-2">
+                                            <div
+                                              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                                                slideIndex === 0 ? "bg-blue-500 scale-110" : "bg-gray-300"
+                                              }`}
+                                            ></div>
+                                            <div
+                                              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                                                slideIndex === 1 ? "bg-blue-500 scale-110" : "bg-gray-300"
+                                              }`}
+                                            ></div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {result && (
+                                      <div className="flex justify-center gap-4 mt-3">
+                                        <button
+                                          onClick={() => setSlideIndex(0)}
+                                          className={`px-3 py-1 text-sm font-medium rounded border transition-all ${
+                                            slideIndex === 0
+                                              ? "bg-blue-500 text-white border-blue-500"
+                                              : "bg-transparent text-blue-500 border-blue-500"
+                                          }`}
+                                        >
+                                          Enumerasi
+                                        </button>
+
+                                        <button
+                                          onClick={() => setSlideIndex(1)}
+                                          className={`px-3 py-1 text-sm font-medium rounded border transition-all ${
+                                            slideIndex === 1
+                                              ? "bg-blue-500 text-white border-blue-500"
+                                              : "bg-transparent text-blue-500 border-blue-500"
+                                          }`}
+                                        >
+                                          Segmentasi
+                                        </button>
+                                      </div>
+                                    )}
+
+
 
                                       <div className="row d-flex">
                                         <h5 className="mt-3 px-5">Citra Odontogram</h5>
