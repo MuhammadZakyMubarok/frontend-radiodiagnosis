@@ -28,6 +28,7 @@ import UploadGambarPanoramik from "../views/Radiografer/RadiografiPanoramik/Uplo
 import UploadUlangGambarPanoramik from "../views/Radiografer/RadiografiPanoramik/UploadUlangGambarPanoramik";
 import ViewGambarPanoramik from "../views/Radiografer/RadiografiPanoramik/ViewGambarPanoramik";
 
+
 // Satu Sehat
 import ViewSatuSehatPatient  from "../views/SatuSehat/Patient/ViewSatuSehatPatient";
 

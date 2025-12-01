@@ -3,6 +3,7 @@ import axios from "axios";
 import { React, useState, useEffect } from "react";
 import { baseURL } from "../routes/Config";
 
+
 const WithAuthorization = (allowedRoles) => {
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);

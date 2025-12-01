@@ -2,6 +2,7 @@ export const baseURL = process.env.REACT_APP_BE_URL
 
 export const apiUrl = process.env.REACT_APP_DETECTION_URL
 
+export const apiSegmentasi = process.env.REACT_APP_SEGMENTATION_URL
 
 export const satuSehatBaseURL = `${baseURL}/satu-sehat`;
 export const satuSehatAuthURL = `${baseURL}/satu-sehat`;
