@@ -42,45 +42,26 @@ const DetailCatatanPasien = () => {
       });
   }, [id]);
 
-    const generatePDF = () => {
-        const reportElement = document.querySelector("#report");
+  const generatePDF = () => {
+    const reportElement = document.querySelector("#report");
 
-        // Pastikan elemen report terlihat sebelum menangkapnya
-        reportElement.style.display = "block";
+    // Make sure the report element is visible before capturing it
+    reportElement.style.display = "block";
 
-        html2canvas(reportElement).then((canvas) => {
-            const imgData = canvas.toDataURL("image/png");
-            const report = new JsPDF("portrait", "pt", "a4");
+    html2canvas(reportElement).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const report = new JsPDF("portrait", "pt", "a4");
 
-            const imgWidth = report.internal.pageSize.getWidth();
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const imgWidth = report.internal.pageSize.getWidth();
+      const imgHeight = canvas.height * imgWidth / canvas.width;
 
-            let position = 0; // Posisi awal
-            if (imgHeight > report.internal.pageSize.getHeight()) {
-                // Jika gambar lebih tinggi dari halaman, bagi ke halaman berikutnya
-                let remainingHeight = imgHeight;
+      report.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      report.save("report.pdf");
 
-                while (remainingHeight > 0) {
-                    report.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-                    remainingHeight -= report.internal.pageSize.getHeight();
-                    position -= report.internal.pageSize.getHeight();
-                    if (remainingHeight > 0) report.addPage();
-                }
-            } else {
-                report.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-            }
-
-            // Konversi ke Blob dan buat URL
-            const pdfBlob = report.output("blob");
-            const pdfBlobUrl = URL.createObjectURL(pdfBlob);
-
-            // Buka di tab baru
-            window.open(pdfBlobUrl, "_blank");
-
-            // Sembunyikan elemen setelah selesai
-            reportElement.style.display = "none";
-        });
-    };
+      // Hide the element again after generating the PDF
+      reportElement.style.display = "none";
+    });
+  };
 
   const mappingDiagnoses = (diagnoses) => {
     let systemDiagnosis = [];
