@@ -66,7 +66,7 @@ pipeline {
               : > "$OUT"
 
               # list ENV
-              keys="REACT_APP_CLIENT_ID REACT_APP_CLIENT_SECRET REACT_APP_BE_URL REACT_APP_DETECTION_URL"
+              keys="REACT_APP_CLIENT_ID REACT_APP_CLIENT_SECRET REACT_APP_BE_URL REACT_APP_DETECTION_URL REACT_APP_SEGMENTATION_URL"
 
               for k in $keys; do
                 val=$(kubectl -n ${K8S_NAMESPACE} get secret "$SECRET_NAME" -o "jsonpath={.data.${k}}" 2>/dev/null || true)
